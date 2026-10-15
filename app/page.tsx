@@ -1,12 +1,9 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import { FeatureIcon, type FeatureIconKind } from "@/components/home/feature-icon";
 import { FloatingSilhouettes } from "@/components/home/floating-silhouettes";
 import { MiniCard } from "@/components/home/mini-card";
 import { Reveal } from "@/components/home/reveal";
 import { GAMES, type Accent } from "@/lib/games";
-
-export const metadata: Metadata = { title: "Home" };
 
 const FEATURES: { icon: FeatureIconKind; title: string; desc: string; color: Accent }[] = [
   {
