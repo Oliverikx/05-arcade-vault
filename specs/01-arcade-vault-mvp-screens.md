@@ -1,6 +1,6 @@
 # SPEC 01 — Arcade Vault MVP: all screens (visual only)
 
-> **Status:** Approved
+> **Status:** Implemented
 > **Depends on:** None
 > **Date:** 2026-10-14
 > **Objective:** Port the five screens of `resources/templates/` (library, game detail, player, auth, hall of fame) to Next.js App Router in English, with mock data and no real games.
