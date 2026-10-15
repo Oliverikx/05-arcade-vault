@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Static design templates (browser-global JSX, not app code)
+    "resources/**",
   ]),
 ]);
 

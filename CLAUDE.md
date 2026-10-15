@@ -18,3 +18,11 @@ Arcade Vault: online videogames platform to play and compete for highest score. 
 ## Skills
 
 Use always /frontend-design to design the user interface.
+
+## MCPs
+
+### Playwright
+
+-Save .log files in .playwright-mcp/logs
+-Save .png files or other image files in .playwright-mcp/screenshots
+-Save .yml files in .playwright-mcp/accessibility
