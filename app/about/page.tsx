@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Reveal } from "@/components/home/reveal";
+import { ContactForm } from "@/components/about/contact-form";
 import {
   HighlightIcon,
   type HighlightKind,
@@ -72,6 +73,8 @@ export default function AboutPage() {
               </div>
             </div>
           </div>
+
+          <ContactForm />
         </div>
       </section>
     </div>
