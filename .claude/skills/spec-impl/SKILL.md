@@ -208,7 +208,35 @@ Once confirmed, follow these rules during the entire implementation:
 Next step: verify the spec's acceptance criteria one by one.
 If they all pass, update the spec's state to "Implemented" (or the equivalent
 in your repo's language) and make the final commit before merging this branch.
+
+Choose one of the following options:
+  1. I can help you verify the acceptance criteria automatically.
+  2. You can verify them manually and update the spec's state yourself.
 ```
+
+Wait for the user's choice. If they choose option 1, continue to Phase 5. If they choose option 2, stop and wait for them to verify manually.
+
+---
+
+### Phase 5 (Optional) — Auto verify acceptance criteria
+
+If the user has Playwright installed then ask:
+
+```
+I can run the acceptance criteria automatically using Playwright. Do you want me to do that? [y/N]
+```
+
+If the user answers yes, verify the specs with Playwright when you can. If they answer no, verify manually.
+
+**Playwright execution:** generate logs, accessibility reports, and screenshots. 
+
+With each acceptance criteria, show the result (pass/fail) and any relevant output. Mark each criteria if pass. If all criteria pass, suggest updating the spec's state to "Implemented" (or equivalent):
+
+```
+Do you want me to update the spec's state to "Implemented" now? [y/N]
+```
+
+If any spec fail, provide details. 
 
 ---
 
@@ -222,7 +250,9 @@ in your repo's language) and make the final commit before merging this branch.
   Phase 3  →  git checkout -b spec-01-mvp-arkanoid → git checkout spec-01-mvp-arkanoid
               Shows objective, scope, plan and criteria
   Phase 4  →  Implements step by step with pauses
-              Ends by reminding to verify the acceptance criteria
+              Ends by reminding to verify the acceptance criteria 
+   Phase 5  →  Optionally runs Playwright to verify the acceptance criteria
+               If all pass, suggests updating the spec's state to "Implemented"
 
 /spec-impl 02-powerups  (state: Draft / Borrador)
 
