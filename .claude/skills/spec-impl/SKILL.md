@@ -230,7 +230,7 @@ If the user answers yes, verify the specs with Playwright when you can. If they 
 
 **Playwright execution:** generate logs, accessibility reports, and screenshots. 
 
-With each acceptance criteria, show the result (pass/fail) and any relevant output. Mark each criteria if pass. If all criteria pass, suggest updating the spec's state to "Implemented" (or equivalent):
+With each acceptance criteria, show the result (pass/fail) and any relevant output. Mark each criteria if pass on spec file. If all criteria pass, suggest updating the spec's state to "Implemented" (or equivalent):
 
 ```
 Do you want me to update the spec's state to "Implemented" now? [y/N]
