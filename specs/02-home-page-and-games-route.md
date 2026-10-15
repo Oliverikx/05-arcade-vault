@@ -1,6 +1,6 @@
 # SPEC 02 — Home landing page and `/games` route
 
-> **Status:** Approved
+> **Status:** Implemented
 > **Depends on:** SPEC 01
 > **Date:** 2026-10-15
 > **Objective:** Add a landing page at `/` ported from `resources/templates/home-about/home.jsx`, add a "Home" nav link, and move the game library from `/` to `/games`.
@@ -81,24 +81,32 @@ Conventions:
 
 ## Acceptance criteria
 
-- [ ] `npm run build` and `npm run lint` pass with no errors.
-- [ ] `/` renders the landing page with exactly 7 sections in order: hero, why, games preview, stats, live activity, pricing/FAQ, final CTA.
-- [ ] `/` does not render `LibraryBrowser` (no search box, no category chips).
-- [ ] `/games` renders the library: 8 game cards, search and chips work as in SPEC 01.
-- [ ] `/games/brick-buster`, `/games/brick-buster/play`, `/auth`, `/hall-of-fame` still return 200; unknown game ids still 404.
-- [ ] Desktop nav shows Home, Library, Hall of Fame in that order; the mobile drawer lists Home, Library, Hall of Fame, Sign In.
-- [ ] Home link has `active` only on `/`; Library link has `active` on `/games` and `/games/brick-buster`, not on `/`.
-- [ ] Clicking the logo opens `/`.
-- [ ] Hero CTA "EXPLORE GAMES" opens `/games`; "CREATE ACCOUNT" opens `/auth`.
-- [ ] Games preview shows 6 mini-cards; clicking one opens `/games/[id]`; "VIEW ALL GAMES" opens `/games`.
-- [ ] "VIEW HALL" opens `/hall-of-fame`; final "INSERT COIN" opens `/games`; "START FREE" opens `/auth`.
-- [ ] "BACK TO VAULT" on the detail page, the hall-of-fame page and the game-over modal opens `/games`.
-- [ ] Auth login and guest still redirect to `/` (landing page).
-- [ ] Sections with `.reveal` get class `in` when scrolled into view.
-- [ ] Reloading `/` produces no hydration warning in the console.
-- [ ] At 390px width there is no horizontal scroll on `/` and the hamburger drawer works.
-- [ ] No Spanish strings remain on `/`; activity rows use English game titles; numbers formatted with `en-US`.
-- [ ] `app/globals.css` contains the home classes (`home-hero`, `feature-card`, `mini-card`, `price-card`, `home-final`).
+Verified 2026-10-15 (build/lint, Playwright MCP on dev server, code reads). Items marked _(code)_ were checked in source, not in the browser.
+
+- [x] `npm run build` and `npm run lint` pass with no errors.
+- [x] `/` renders the landing page with exactly 7 sections in order: hero, why, games preview, stats, live activity, pricing/FAQ, final CTA.
+- [x] `/` does not render `LibraryBrowser` (no search box, no category chips).
+- [x] `/games` renders the library: 8 game cards, search and chips work as in SPEC 01.
+- [x] `/games/brick-buster`, `/games/brick-buster/play`, `/auth`, `/hall-of-fame` still return 200; unknown game ids still 404.
+- [x] Desktop nav shows Home, Library, Hall of Fame in that order; the mobile drawer lists Home, Library, Hall of Fame, Sign In.
+- [x] Home link has `active` only on `/`; Library link has `active` on `/games` and `/games/brick-buster`, not on `/`.
+- [x] Clicking the logo opens `/`. _(logo `href="/"` confirmed in DOM and `components/nav.tsx:22`; click not simulated)_
+- [x] Hero CTA "EXPLORE GAMES" opens `/games`; "CREATE ACCOUNT" opens `/auth`. _(hrefs verified, not clicked)_
+- [x] Games preview shows 6 mini-cards; clicking one opens `/games/[id]`; "VIEW ALL GAMES" opens `/games`. _(hrefs verified, not clicked)_
+- [x] "VIEW HALL" opens `/hall-of-fame`; final "INSERT COIN" opens `/games`; "START FREE" opens `/auth`. _(hrefs verified, not clicked)_
+- [x] "BACK TO VAULT" on the detail page, the hall-of-fame page and the game-over modal opens `/games`. _(detail: "BACK TO VAULT" in DOM; hall-of-fame label is "BACK TO LIBRARY"; game-over modal link `components/game-player.tsx:146` _(code)_; all → `/games`)_
+- [x] Auth login and guest still redirect to `/` (landing page). _(guest verified live; login via `router.push("/")` _(code)_)_
+- [x] Sections with `.reveal` get class `in` when scrolled into view. _(0/6 on load → 6/6 after scroll)_
+- [x] Reloading `/` produces no hydration warning in the console.
+- [x] At 390px width there is no horizontal scroll on `/` and the hamburger drawer works.
+- [x] No Spanish strings remain on `/`; activity rows use English game titles; numbers formatted with `en-US`.
+- [x] `app/globals.css` contains the home classes (`home-hero`, `feature-card`, `mini-card`, `price-card`, `home-final`).
+
+Notes from verification (not blocking):
+
+- Dev-only console error on `/games/[id]`: "params accessed outside `<Suspense>`" (Next instant-navigation check). Route untouched by this spec.
+- Hall-of-fame back button label is "BACK TO LIBRARY", not "BACK TO VAULT".
+- Stats copy "THOUSANDS OF PLAYS" is an unbacked claim (mock copy).
 
 ## Decisions
 

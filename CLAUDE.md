@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Arcade Vault: online videogames platform to play and compete for highest score. README says development is spec-driven (`/spec`, `/spec-impl` dirs — not created yet) using skills from `Klerith/fernando-skills` (`npx skills@latest add Klerith/fernando-skills`). Currently a fresh Create Next App scaffold (single commit, placeholder `app/page.tsx`, metadata still "Create Next App").
 
-- No test runner configured.
+       
 
 ## Stack / Architecture
 
@@ -26,3 +26,4 @@ Use always /frontend-design to design the user interface.
 -Save .log files in .playwright-mcp/logs
 -Save .png files or other image files in .playwright-mcp/screenshots
 -Save .yml files in .playwright-mcp/accessibility
+-If app is running in port 3000 use it for testing. Otherwise follow default settings.
