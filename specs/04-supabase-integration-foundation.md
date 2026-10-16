@@ -1,6 +1,6 @@
 # SPEC 04 — Supabase integration foundation
 
-> **Status:** Approved
+> **Status:** Implemented
 > **Depends on:** SPEC 03
 > **Date:** 2026-10-16
 > **Objective:** Connect the app to the existing Supabase project with `@supabase/ssr` browser and server clients, documented env vars, and a health route proving connectivity.
@@ -96,16 +96,16 @@ Conventions:
 
 ## Acceptance criteria
 
-- [ ] `package.json` lists `@supabase/supabase-js` and `@supabase/ssr` in `dependencies`.
-- [ ] `npm run build` and `npm run lint` pass with no Supabase env vars set.
-- [ ] `.env.example` contains `NEXT_PUBLIC_SUPABASE_URL=` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=`.
-- [ ] With valid vars, `GET /api/health/supabase` returns 200 `{"ok":true}`.
-- [ ] With vars removed, `GET /api/health/supabase` returns 503 `{"ok":false,"error":"SUPABASE NOT CONFIGURED"}` and the server log has the error.
-- [ ] With a wrong URL (e.g. `https://invalid.supabase.co`), the route returns 503 `{"ok":false,"error":"SUPABASE UNREACHABLE"}`.
-- [ ] Two consecutive requests both hit Supabase (route not statically cached).
-- [ ] `lib/supabase/client.ts` does not import `next/headers`.
-- [ ] Existing routes (`/`, `/games`, `/games/[id]`, `/hall-of-fame`, `/auth`, `/about`) render unchanged.
-- [ ] No secret / service-role key appears anywhere in the repo or `.env.example`.
+- [x] `package.json` lists `@supabase/supabase-js` and `@supabase/ssr` in `dependencies`.
+- [x] `npm run build` and `npm run lint` pass with no Supabase env vars set.
+- [x] `.env.example` contains `NEXT_PUBLIC_SUPABASE_URL=` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=`.
+- [x] With valid vars, `GET /api/health/supabase` returns 200 `{"ok":true}`.
+- [x] With vars removed, `GET /api/health/supabase` returns 503 `{"ok":false,"error":"SUPABASE NOT CONFIGURED"}` and the server log has the error.
+- [x] With a wrong URL (e.g. `https://invalid.supabase.co`), the route returns 503 `{"ok":false,"error":"SUPABASE UNREACHABLE"}`.
+- [x] Two consecutive requests both hit Supabase (route not statically cached).
+- [x] `lib/supabase/client.ts` does not import `next/headers`.
+- [x] Existing routes (`/`, `/games`, `/games/[id]`, `/hall-of-fame`, `/auth`, `/about`) render unchanged.
+- [x] No secret / service-role key appears anywhere in the repo or `.env.example`.
 
 ## Decisions
 
