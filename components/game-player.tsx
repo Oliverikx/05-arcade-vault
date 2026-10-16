@@ -15,6 +15,7 @@ export function GamePlayer({ game }: { game: Game }) {
   const [lives, setLives] = useState(LIVES);
   const [engineLevel, setEngineLevel] = useState(1);
   const [runId, setRunId] = useState(0);
+  const [endSignal, setEndSignal] = useState(0);
   const [paused, setPaused] = useState(false);
   const [over, setOver] = useState(false);
 
@@ -33,6 +34,33 @@ export function GamePlayer({ game }: { game: Game }) {
     );
     return () => clearInterval(t);
   }, [isAsteroids, over, paused]);
+
+  // Asteroids pause controls: P / Esc toggle, tab hidden auto-pauses.
+  useEffect(() => {
+    if (!isAsteroids || over) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      const tag = (e.target as HTMLElement | null)?.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || e.repeat) return;
+      if (e.code === "KeyP" || e.code === "Escape") {
+        e.preventDefault();
+        setPaused((p) => !p);
+      }
+    };
+    const onVisibility = () => {
+      if (document.hidden) setPaused(true);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, [isAsteroids, over]);
+
+  const endRun = () => {
+    if (isAsteroids) setEndSignal((n) => n + 1);
+    else setOver(true);
+  };
 
   const restart = () => {
     setScore(0);
@@ -78,7 +106,7 @@ export function GamePlayer({ game }: { game: Game }) {
           <button className="btn yellow" onClick={() => setPaused((p) => !p)}>
             {paused ? "RESUME" : "PAUSE"}
           </button>
-          <button className="btn magenta" onClick={() => setOver(true)}>
+          <button className="btn magenta" onClick={endRun}>
             END
           </button>
           <Link href={`/games/${game.id}`} className="btn ghost">
@@ -93,11 +121,14 @@ export function GamePlayer({ game }: { game: Game }) {
             <AsteroidsScreen
               paused={paused}
               runId={runId}
-              endSignal={0}
+              endSignal={endSignal}
               onScore={setScore}
               onLives={setLives}
               onLevel={setEngineLevel}
-              onGameOver={() => {}}
+              onGameOver={(finalScore) => {
+                setScore(finalScore);
+                setOver(true);
+              }}
             />
           ) : (
             <div className="game-arena">
