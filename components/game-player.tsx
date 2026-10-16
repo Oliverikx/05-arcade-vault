@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { AsteroidsScreen } from "@/components/asteroids-screen";
 import { useSession } from "@/components/session-provider";
 import type { Game } from "@/lib/games";
 
@@ -9,7 +10,12 @@ const LIVES = 3;
 
 export function GamePlayer({ game }: { game: Game }) {
   const { user, saveScore } = useSession();
+  const isAsteroids = game.id === "asteroids";
   const [score, setScore] = useState(0);
+  const [lives, setLives] = useState(LIVES);
+  const [engineLevel, setEngineLevel] = useState(1);
+  const [runId, setRunId] = useState(0);
+  const [endSignal, setEndSignal] = useState(0);
   const [paused, setPaused] = useState(false);
   const [over, setOver] = useState(false);
 
@@ -17,20 +23,50 @@ export function GamePlayer({ game }: { game: Game }) {
   const [saved, setSaved] = useState(false);
 
   const name = typedName ?? user?.name ?? "GUEST";
-  const level = 1 + Math.floor(score / 2500);
+  const level = isAsteroids ? engineLevel : 1 + Math.floor(score / 2500);
 
   // Fake score ticker: runs only in the client after mount.
   useEffect(() => {
-    if (over || paused) return;
+    if (isAsteroids || over || paused) return;
     const t = setInterval(
       () => setScore((s) => s + Math.floor(10 + Math.random() * 90)),
       220,
     );
     return () => clearInterval(t);
-  }, [over, paused]);
+  }, [isAsteroids, over, paused]);
+
+  // Asteroids pause controls: P / Esc toggle, tab hidden auto-pauses.
+  useEffect(() => {
+    if (!isAsteroids || over) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      const tag = (e.target as HTMLElement | null)?.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || e.repeat) return;
+      if (e.code === "KeyP" || e.code === "Escape") {
+        e.preventDefault();
+        setPaused((p) => !p);
+      }
+    };
+    const onVisibility = () => {
+      if (document.hidden) setPaused(true);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, [isAsteroids, over]);
+
+  const endRun = () => {
+    if (isAsteroids) setEndSignal((n) => n + 1);
+    else setOver(true);
+  };
 
   const restart = () => {
     setScore(0);
+    setLives(LIVES);
+    setEngineLevel(1);
+    setRunId((r) => r + 1);
     setPaused(false);
     setOver(false);
     setSaved(false);
@@ -57,7 +93,9 @@ export function GamePlayer({ game }: { game: Game }) {
           </div>
           <div className="hud-stat lives">
             <div className="l">Lives</div>
-            <div className="v">{"♥ ".repeat(LIVES).trim() || "—"}</div>
+            <div className="v">
+              {"♥ ".repeat(isAsteroids ? lives : LIVES).trim() || "—"}
+            </div>
           </div>
           <div className="hud-stat level">
             <div className="l">Level</div>
@@ -68,7 +106,7 @@ export function GamePlayer({ game }: { game: Game }) {
           <button className="btn yellow" onClick={() => setPaused((p) => !p)}>
             {paused ? "RESUME" : "PAUSE"}
           </button>
-          <button className="btn magenta" onClick={() => setOver(true)}>
+          <button className="btn magenta" onClick={endRun}>
             END
           </button>
           <Link href={`/games/${game.id}`} className="btn ghost">
@@ -79,13 +117,28 @@ export function GamePlayer({ game }: { game: Game }) {
 
       <div className="crt">
         <div className="crt-screen">
-          <div className="game-arena">
-            <div className="grid-floor"></div>
-            <div className="enemy e1"></div>
-            <div className="enemy e2"></div>
-            <div className="enemy e3"></div>
-            <div className="player-ship"></div>
-          </div>
+          {isAsteroids ? (
+            <AsteroidsScreen
+              paused={paused}
+              runId={runId}
+              endSignal={endSignal}
+              onScore={setScore}
+              onLives={setLives}
+              onLevel={setEngineLevel}
+              onGameOver={(finalScore) => {
+                setScore(finalScore);
+                setOver(true);
+              }}
+            />
+          ) : (
+            <div className="game-arena">
+              <div className="grid-floor"></div>
+              <div className="enemy e1"></div>
+              <div className="enemy e2"></div>
+              <div className="enemy e3"></div>
+              <div className="player-ship"></div>
+            </div>
+          )}
           {paused && (
             <div
               className="crt-content"
@@ -116,6 +169,8 @@ export function GamePlayer({ game }: { game: Game }) {
           <span>LOAD · 1MB</span>
         </div>
       </div>
+
+      {isAsteroids && <div className="keyboard-note">KEYBOARD REQUIRED</div>}
 
       {over && (
         <div className="modal-bd">

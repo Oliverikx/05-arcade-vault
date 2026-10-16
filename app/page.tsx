@@ -1,11 +1,19 @@
 import Link from "next/link";
-import { FeatureIcon, type FeatureIconKind } from "@/components/home/feature-icon";
+import {
+  FeatureIcon,
+  type FeatureIconKind,
+} from "@/components/home/feature-icon";
 import { FloatingSilhouettes } from "@/components/home/floating-silhouettes";
 import { MiniCard } from "@/components/home/mini-card";
 import { Reveal } from "@/components/home/reveal";
 import { GAMES, type Accent } from "@/lib/games";
 
-const FEATURES: { icon: FeatureIconKind; title: string; desc: string; color: Accent }[] = [
+const FEATURES: {
+  icon: FeatureIconKind;
+  title: string;
+  desc: string;
+  color: Accent;
+}[] = [
   {
     icon: "GAMEPAD",
     title: "CLASSIC GAMES",
@@ -45,7 +53,7 @@ const ACTIVITY: Activity[] = [
   { p: "NEONFOX", g: "DROP", s: 184220, t: "2 min ago", c: "magenta" },
   { p: "PX_KAI", g: "CHOMPER", s: 96400, t: "5 min ago", c: "yellow" },
   { p: "Z3R0COOL", g: "INVADERS", s: 54190, t: "8 min ago", c: "green" },
-  { p: "VAULT_07", g: "ROCKS", s: 41200, t: "12 min ago", c: "cyan" },
+  { p: "VAULT_07", g: "ASTEROIDS", s: 41200, t: "12 min ago", c: "cyan" },
   { p: "GLITCHA", g: "BRICK BUSTER", s: 28450, t: "18 min ago", c: "cyan" },
   { p: "ARKADYA", g: "SNAKE", s: 7820, t: "24 min ago", c: "green" },
   { p: "CYBER_LU", g: "FROGGY", s: 18900, t: "31 min ago", c: "yellow" },
@@ -208,7 +216,9 @@ export default function Home() {
 
           <div className="activity-card">
             <div className="ac-head">
-              <div className="ac-title pixel neon-magenta">▸ TOP PLAYERS · TODAY</div>
+              <div className="ac-title pixel neon-magenta">
+                ▸ TOP PLAYERS · TODAY
+              </div>
               <Link href="/hall-of-fame" className="lb-link">
                 VIEW HALL →
               </Link>
@@ -218,12 +228,22 @@ export default function Home() {
                 <div
                   key={r.p}
                   className={
-                    "top-row" + (i === 0 ? " top1" : i === 1 ? " top2" : i === 2 ? " top3" : "")
+                    "top-row" +
+                    (i === 0
+                      ? " top1"
+                      : i === 1
+                        ? " top2"
+                        : i === 2
+                          ? " top3"
+                          : "")
                   }
                 >
                   <span className="tp-rk">#{String(r.r).padStart(2, "0")}</span>
                   <span className="tp-bar">
-                    <span className="tp-fill" style={{ width: 100 - i * 16 + "%" }}></span>
+                    <span
+                      className="tp-fill"
+                      style={{ width: 100 - i * 16 + "%" }}
+                    ></span>
                   </span>
                   <span className="tp-p">{r.p}</span>
                   <span className="tp-s">{r.s.toLocaleString("en-US")}</span>
@@ -255,10 +275,16 @@ export default function Home() {
                 <li key={perk}>✔ {perk}</li>
               ))}
             </ul>
-            <Link href="/auth" className="btn xl pulse" style={{ width: "100%" }}>
+            <Link
+              href="/auth"
+              className="btn xl pulse"
+              style={{ width: "100%" }}
+            >
               START FREE →
             </Link>
-            <div className="pc-foot">We don&apos;t ask for a card. We never will.</div>
+            <div className="pc-foot">
+              We don&apos;t ask for a card. We never will.
+            </div>
             <div className="pc-stamp pixel">
               FREE
               <br />
@@ -283,7 +309,9 @@ export default function Home() {
         <Link href="/games" className="btn xl pulse final-cta">
           INSERT COIN →
         </Link>
-        <div className="final-tag">Free. No sign-up required. Start in seconds.</div>
+        <div className="final-tag">
+          Free. No sign-up required. Start in seconds.
+        </div>
       </section>
     </div>
   );
