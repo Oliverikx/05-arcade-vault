@@ -1,6 +1,6 @@
 # SPEC 05 — Asteroids game integration
 
-> **Status:** Approved
+> **Status:** Implemented
 > **Depends on:** SPEC 01, SPEC 02
 > **Date:** 2026-10-16
 > **Objective:** Port the vanilla-JS Asteroids from `resources/started-games/02-asteroids` into a typed engine that runs inside the platform player at `/games/asteroids/play`, replacing the fake ROCKS entry.
@@ -117,26 +117,26 @@ Conventions:
 
 ## Acceptance criteria
 
-- [ ] `npm run build` and `npm run lint` pass.
-- [ ] `lib/games.ts` has no `rocks` id; catalog/home show `ASTEROIDS`; `/games/rocks` returns 404.
-- [ ] No `ROCKS` / `cover-rocas` string remains in `app/`, `components/`, `lib/`.
-- [ ] `/games/asteroids/play` shows a canvas inside `.crt-screen` with `PRESS SPACE OR CLICK TO START`; asteroids do not hit the ship before start.
-- [ ] Space or click starts the run; arrows rotate/thrust, Space fires.
-- [ ] Arrow keys and Space do not scroll the page while on the play page.
-- [ ] Destroying a large/medium/small asteroid adds exactly 20/50/100 to the React HUD score.
-- [ ] Lives HUD starts at 3 ♥ and drops by one on ship death; Level HUD increments when field is cleared.
-- [ ] Triple-shot and shield power-ups drop, work for 5s, and show their timers inside the canvas.
-- [ ] PAUSE button, `P` and `Esc` each freeze the game and show the PAUSED overlay; same key resumes.
-- [ ] Switching tabs pauses the game.
-- [ ] Losing all lives or pressing END opens GAME OVER modal with the engine's final score.
-- [ ] SAVE SCORE writes `{ game: "asteroids", score, name, at }` to `localStorage.av_scores`.
-- [ ] PLAY AGAIN returns to the ready screen with score 0, 3 lives, level 1.
-- [ ] Leaving the page (EXIT / BACK TO VAULT) stops the rAF loop and removes keyboard listeners (no console errors, no stray keydown handling on other pages).
-- [ ] Canvas colors: ship cyan, asteroids magenta, power-ups green.
-- [ ] No Spanish strings in the game.
-- [ ] Other games' play pages behave as before (fake ticker).
-- [ ] No hydration warning and no console errors on `/games/asteroids/play`.
-- [ ] At 390px width the canvas scales to fit with no horizontal scroll; `KEYBOARD REQUIRED` note visible on touch emulation.
+- [x] `npm run build` and `npm run lint` pass.
+- [x] `lib/games.ts` has no `rocks` id; catalog/home show `ASTEROIDS`; `/games/rocks` returns 404.
+- [x] No `ROCKS` / `cover-rocas` string remains in `app/`, `components/`, `lib/`.
+- [x] `/games/asteroids/play` shows a canvas inside `.crt-screen` with `PRESS SPACE OR CLICK TO START`; asteroids do not hit the ship before start.
+- [x] Space or click starts the run; arrows rotate/thrust, Space fires.
+- [x] Arrow keys and Space do not scroll the page while on the play page.
+- [x] Destroying a large/medium/small asteroid adds exactly 20/50/100 to the React HUD score.
+- [x] Lives HUD starts at 3 ♥ and drops by one on ship death; Level HUD increments when field is cleared.
+- [x] Triple-shot and shield power-ups drop, work for 5s, and show their timers inside the canvas.
+- [x] PAUSE button, `P` and `Esc` each freeze the game and show the PAUSED overlay; same key resumes.
+- [x] Switching tabs pauses the game.
+- [x] Losing all lives or pressing END opens GAME OVER modal with the engine's final score.
+- [x] SAVE SCORE writes `{ game: "asteroids", score, name, at }` to `localStorage.av_scores`.
+- [x] PLAY AGAIN returns to the ready screen with score 0, 3 lives, level 1.
+- [x] Leaving the page (EXIT / BACK TO VAULT) stops the rAF loop and removes keyboard listeners (no console errors, no stray keydown handling on other pages).
+- [x] Canvas colors: ship cyan, asteroids magenta, power-ups green.
+- [x] No Spanish strings in the game.
+- [x] Other games' play pages behave as before (fake ticker).
+- [x] No hydration warning and no console errors on `/games/asteroids/play`.
+- [x] At 390px width the canvas scales to fit with no horizontal scroll; `KEYBOARD REQUIRED` note visible on touch emulation.
 
 ## Decisions
 
