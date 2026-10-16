@@ -326,8 +326,7 @@ class PowerUp {
 // ── Engine ──────────────────────────────────────────────────────────────────
 export function createAsteroidsGame(
   canvas: HTMLCanvasElement,
-  // Wired in step 3 (callbacks fire on change only)
-  _callbacks: AsteroidsCallbacks,
+  callbacks: AsteroidsCallbacks,
 ): AsteroidsGame {
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("2D canvas context unavailable");
@@ -347,10 +346,16 @@ export function createAsteroidsGame(
   let score = 0;
   let lives = START_LIVES;
   let level = 1;
-  let state: "playing" | "dead" | "gameover" = "playing";
+  let state: AsteroidsState = "ready";
+  let paused = false;
   let deadTimer = 0;
   let lastTime: number | null = null;
   let rafId = 0;
+
+  // Last values sent to callbacks, so they fire only on change
+  let sentScore = -1;
+  let sentLives = -1;
+  let sentLevel = -1;
 
   const pressed = (code: string) => {
     const val = justPressed[code];
@@ -359,13 +364,43 @@ export function createAsteroidsGame(
   };
 
   const onKeyDown = (e: KeyboardEvent) => {
-    if (GAME_KEYS.includes(e.code)) e.preventDefault();
+    const target = e.target as HTMLElement | null;
+    if (
+      state === "gameover" ||
+      target?.tagName === "INPUT" ||
+      target?.tagName === "TEXTAREA"
+    )
+      return;
+    if (!paused && GAME_KEYS.includes(e.code)) e.preventDefault();
     if (!e.repeat) justPressed[e.code] = true;
     keys[e.code] = true;
   };
   const onKeyUp = (e: KeyboardEvent) => {
     keys[e.code] = false;
   };
+  const onCanvasClick = () => {
+    if (state === "ready" && !paused) startRun();
+  };
+
+  function syncCallbacks() {
+    if (score !== sentScore) callbacks.onScore((sentScore = score));
+    if (lives !== sentLives) callbacks.onLives((sentLives = lives));
+    if (level !== sentLevel) callbacks.onLevel((sentLevel = level));
+  }
+
+  function startRun() {
+    state = "playing";
+    ship.reset();
+  }
+
+  function finishRun() {
+    if (state === "gameover") return;
+    state = "gameover";
+    tripleShotTimer = 0;
+    shieldTimer = 0;
+    syncCallbacks();
+    callbacks.onGameOver(score);
+  }
 
   function spawnAsteroids(count: number) {
     const SAFE_DIST = 130;
@@ -403,9 +438,14 @@ export function createAsteroidsGame(
     score = 0;
     lives = START_LIVES;
     level = 1;
-    state = "playing";
+    state = "ready";
+    ship.invincible = 0; // visible (no respawn blink) while waiting to start
+    deadTimer = 0;
+    for (const k of Object.keys(keys)) keys[k] = false;
+    for (const k of Object.keys(justPressed)) justPressed[k] = false;
     spawnAsteroids(4);
     setupPowerUp(4);
+    syncCallbacks();
   }
 
   function nextLevel() {
@@ -429,7 +469,7 @@ export function createAsteroidsGame(
     shieldTimer = 0;
     lives--;
     if (lives <= 0) {
-      state = "gameover";
+      finishRun();
     } else {
       state = "dead";
       deadTimer = 2;
@@ -438,9 +478,15 @@ export function createAsteroidsGame(
 
   function update(dt: number) {
     if (state === "gameover") {
-      if (pressed("Space")) initGame();
       particles.forEach((p) => p.update(dt));
       particles = particles.filter((p) => !p.dead);
+      return;
+    }
+
+    if (state === "ready") {
+      // Asteroids drift, ship is untouchable until the run starts
+      asteroids.forEach((a) => a.update(dt));
+      if (pressed("Space")) startRun();
       return;
     }
 
@@ -524,43 +570,19 @@ export function createAsteroidsGame(
     if (asteroids.length === 0) nextLevel();
   }
 
-  function drawLifeIcon(x: number, y: number) {
-    if (!ctx) return;
-    ctx.save();
-    ctx.translate(x, y);
-    ctx.rotate(-Math.PI / 2);
-    ctx.strokeStyle = "#fff";
-    ctx.lineWidth = 1.2;
-    ctx.lineJoin = "round";
-    ctx.beginPath();
-    ctx.moveTo(9, 0);
-    ctx.lineTo(-6, -5);
-    ctx.lineTo(-3, 0);
-    ctx.lineTo(-6, 5);
-    ctx.closePath();
-    ctx.stroke();
-    ctx.restore();
-  }
-
-  function drawHUD() {
+  // Score, lives and level live in the React HUD; only timers stay in canvas
+  function drawTimers() {
     if (!ctx) return;
     ctx.fillStyle = "#fff";
     ctx.font = "15px monospace";
-
     ctx.textAlign = "left";
-    ctx.fillText(`SCORE  ${score}`, 14, 26);
-    let hudY = 46;
+    let y = 26;
     if (tripleShotTimer > 0) {
-      ctx.fillText(`TRIPLE  ${Math.ceil(tripleShotTimer)}s`, 14, hudY);
-      hudY += 20;
+      ctx.fillText(`TRIPLE  ${Math.ceil(tripleShotTimer)}s`, 14, y);
+      y += 20;
     }
     if (shieldTimer > 0)
-      ctx.fillText(`SHIELD  ${Math.ceil(shieldTimer)}s`, 14, hudY);
-
-    ctx.textAlign = "center";
-    ctx.fillText(`LEVEL ${level}`, W / 2, 26);
-
-    for (let i = 0; i < lives; i++) drawLifeIcon(W - 16 - i * 22, 18);
+      ctx.fillText(`SHIELD  ${Math.ceil(shieldTimer)}s`, 14, y);
   }
 
   function drawShield() {
@@ -574,15 +596,12 @@ export function createAsteroidsGame(
     ctx.stroke();
   }
 
-  function drawOverlay(title: string, sub: string) {
+  function drawReadyPrompt() {
     if (!ctx) return;
     ctx.textAlign = "center";
     ctx.fillStyle = "#fff";
-    ctx.font = "bold 46px monospace";
-    ctx.fillText(title, W / 2, H / 2 - 18);
-    ctx.font = "18px monospace";
-    ctx.fillStyle = "rgba(255,255,255,0.65)";
-    ctx.fillText(sub, W / 2, H / 2 + 22);
+    ctx.font = "bold 24px monospace";
+    ctx.fillText("PRESS SPACE OR CLICK TO START", W / 2, H / 2 + 110);
   }
 
   function draw() {
@@ -597,34 +616,46 @@ export function createAsteroidsGame(
     ship.draw(ctx);
     drawShield();
 
-    drawHUD();
-
-    if (state === "gameover")
-      drawOverlay("GAME OVER", `SCORE: ${score}   —   SPACE TO RESTART`);
+    drawTimers();
+    if (state === "ready") drawReadyPrompt();
   }
 
   function loop(ts: number) {
     const dt = lastTime === null ? 0 : Math.min((ts - lastTime) / 1000, MAX_DT);
     lastTime = ts;
-    update(dt);
+    if (!paused) {
+      update(dt);
+      syncCallbacks();
+    }
     draw();
     rafId = requestAnimationFrame(loop);
   }
 
   window.addEventListener("keydown", onKeyDown);
   window.addEventListener("keyup", onKeyUp);
+  canvas.addEventListener("click", onCanvasClick);
   initGame();
   rafId = requestAnimationFrame(loop);
 
   return {
-    // Implemented in step 3
-    setPaused() {},
-    end() {},
-    reset() {},
+    setPaused(value) {
+      paused = value;
+      // Drop input queued/held during the pause so nothing fires on resume
+      for (const k of Object.keys(keys)) keys[k] = false;
+      for (const k of Object.keys(justPressed)) justPressed[k] = false;
+    },
+    end() {
+      finishRun();
+    },
+    reset() {
+      paused = false;
+      initGame();
+    },
     destroy() {
       cancelAnimationFrame(rafId);
       window.removeEventListener("keydown", onKeyDown);
       window.removeEventListener("keyup", onKeyUp);
+      canvas.removeEventListener("click", onCanvasClick);
     },
   };
 }
