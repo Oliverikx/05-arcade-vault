@@ -26,6 +26,14 @@ const SHIELD_DURATION = 5;
 const MAX_DT = 0.05;
 const START_LIVES = 3;
 
+// Platform palette (mirrors the vars in app/globals.css)
+const INK = "#e6e9ff";
+const CYAN = "#00f5ff";
+const MAGENTA = "#ff006e";
+const YELLOW = "#f5ff00";
+const GREEN = "#00ff88";
+const GLOW = 8; // shadowBlur ceiling; particles get none
+
 const GAME_KEYS = ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Space"];
 
 // ── Utils ───────────────────────────────────────────────────────────────────
@@ -65,7 +73,7 @@ class Bullet {
   }
 
   draw(ctx: CanvasRenderingContext2D) {
-    ctx.fillStyle = "#fff";
+    ctx.fillStyle = INK;
     ctx.beginPath();
     ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
     ctx.fill();
@@ -121,7 +129,9 @@ class Asteroid {
     ctx.save();
     ctx.translate(this.x, this.y);
     ctx.rotate(this.rot);
-    ctx.strokeStyle = "#fff";
+    ctx.strokeStyle = MAGENTA;
+    ctx.shadowColor = MAGENTA;
+    ctx.shadowBlur = GLOW;
     ctx.lineWidth = 1.5;
     ctx.lineJoin = "round";
     ctx.beginPath();
@@ -206,7 +216,9 @@ class Ship {
     ctx.save();
     ctx.translate(this.x, this.y);
     ctx.rotate(this.angle);
-    ctx.strokeStyle = "#fff";
+    ctx.strokeStyle = CYAN;
+    ctx.shadowColor = CYAN;
+    ctx.shadowBlur = GLOW;
     ctx.lineWidth = 1.5;
     ctx.lineJoin = "round";
 
@@ -225,7 +237,7 @@ class Ship {
       ctx.moveTo(-8, -4);
       ctx.lineTo(-8 - rand(6, 14), 0);
       ctx.lineTo(-8, 4);
-      ctx.strokeStyle = "rgba(255, 130, 0, 0.85)";
+      ctx.strokeStyle = YELLOW;
       ctx.stroke();
     }
 
@@ -261,7 +273,7 @@ class Particle {
 
   draw(ctx: CanvasRenderingContext2D) {
     const alpha = this.ttl / this.life;
-    ctx.strokeStyle = `rgba(255,255,255,${alpha.toFixed(2)})`;
+    ctx.strokeStyle = `rgba(230,233,255,${alpha.toFixed(2)})`;
     ctx.lineWidth = 1;
     ctx.beginPath();
     ctx.moveTo(this.x, this.y);
@@ -301,7 +313,9 @@ class PowerUp {
     if (this.ttl < 2 && Math.floor(this.ttl * 8) % 2 === 0) return;
     ctx.save();
     ctx.translate(this.x, this.y);
-    ctx.strokeStyle = "#fff";
+    ctx.strokeStyle = GREEN;
+    ctx.shadowColor = GREEN;
+    ctx.shadowBlur = GLOW;
     ctx.lineWidth = 1.5;
     ctx.beginPath();
     ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
@@ -330,6 +344,10 @@ export function createAsteroidsGame(
 ): AsteroidsGame {
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("2D canvas context unavailable");
+
+  // Canvas can't read CSS vars directly; resolve the platform pixel font once.
+  const fontFamily =
+    getComputedStyle(canvas).getPropertyValue("--pixel").trim() || "monospace";
 
   const keys: Keys = {};
   const justPressed: Keys = {};
@@ -573,8 +591,8 @@ export function createAsteroidsGame(
   // Score, lives and level live in the React HUD; only timers stay in canvas
   function drawTimers() {
     if (!ctx) return;
-    ctx.fillStyle = "#fff";
-    ctx.font = "15px monospace";
+    ctx.fillStyle = GREEN;
+    ctx.font = `11px ${fontFamily}`;
     ctx.textAlign = "left";
     let y = 26;
     if (tripleShotTimer > 0) {
@@ -589,7 +607,9 @@ export function createAsteroidsGame(
     if (!ctx || shieldTimer <= 0 || ship.dead) return;
     // Blink when about to expire
     if (shieldTimer < 1.5 && Math.floor(shieldTimer * 8) % 2 === 0) return;
-    ctx.strokeStyle = "rgba(120, 200, 255, 0.85)";
+    ctx.strokeStyle = GREEN;
+    ctx.shadowColor = GREEN;
+    ctx.shadowBlur = GLOW;
     ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.arc(ship.x, ship.y, 22, 0, Math.PI * 2);
@@ -599,8 +619,8 @@ export function createAsteroidsGame(
   function drawReadyPrompt() {
     if (!ctx) return;
     ctx.textAlign = "center";
-    ctx.fillStyle = "#fff";
-    ctx.font = "bold 24px monospace";
+    ctx.fillStyle = INK;
+    ctx.font = `16px ${fontFamily}`;
     ctx.fillText("PRESS SPACE OR CLICK TO START", W / 2, H / 2 + 110);
   }
 

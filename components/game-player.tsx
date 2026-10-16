@@ -170,6 +170,8 @@ export function GamePlayer({ game }: { game: Game }) {
         </div>
       </div>
 
+      {isAsteroids && <div className="keyboard-note">KEYBOARD REQUIRED</div>}
+
       {over && (
         <div className="modal-bd">
           <div className="modal">
