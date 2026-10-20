@@ -14,12 +14,12 @@ export interface Game {
 
 export const GAMES: Game[] = [
   {
-    id: "brick-buster",
-    title: "BRICK BUSTER",
+    id: "arkanoid",
+    title: "ARKANOID",
     short: "Bounce the ball and smash neon walls.",
-    long: "Pilot a paddle-ship and bounce a plasma core to pulverize walls of chromatic bricks. Every level reshuffles the grid into impossible patterns. How far will your streak go?",
+    long: "Slide your paddle and bounce a glowing ball through five walls of neon bricks. Each wall is a new pattern and the ball gets faster every level. Clear all five to bank a bonus for every life left.",
     cat: "ARCADE",
-    cover: "cover-bricks",
+    cover: "cover-arkanoid",
     color: "cyan",
     plays: "12.4K",
   },

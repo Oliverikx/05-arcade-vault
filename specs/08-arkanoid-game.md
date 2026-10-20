@@ -1,6 +1,6 @@
 # SPEC 08 — ARKANOID game integration
 
-> **Status:** Approved
+> **Status:** Implemented
 > **Depends on:** SPEC 05, SPEC 06
 > **Date:** 2026-10-20
 > **Objective:** Port the vanilla-JS Arkanoid from `resources/started-games/04-arkanoid` into a typed engine playable at `/games/arkanoid/play` with a real Supabase leaderboard.
@@ -138,33 +138,33 @@ Each step leaves the app runnable and is commitable alone.
 
 ## Acceptance criteria
 
-- [ ] `npm run build` and `npm run lint` pass.
-- [ ] `lib/games.ts` has no `brick-buster` id; `/games/brick-buster` 404; no `cover-bricks` string in `app/`, `components/`, `lib/`.
-- [ ] `/games/arkanoid/play` shows a 640×480 canvas in `.crt-screen` with `PRESS SPACE OR CLICK TO LAUNCH`; ball does not move before launch.
-- [ ] Controls: `←`/`A`, `→`/`D` move paddle; mouse over canvas moves paddle; `Space` and click launch; arrows/Space do not scroll the page.
-- [ ] Ball launches at 15° to the right; L1 speed 5, L2 5.5, L5 7 px/step.
-- [ ] Scoring: each broken block adds exactly 10 to the HUD score.
-- [ ] Clearing level 5 shows `YOU WIN` then opens GAME OVER with score + exactly 100 per remaining life.
-- [ ] Level layouts have 20/30/40/50/60 blocks; Level HUD goes `01` → `05` as each wall is cleared, with `LEVEL N` banner and ball on paddle.
+- [x] `npm run build` and `npm run lint` pass.
+- [x] `lib/games.ts` has no `brick-buster` id; `/games/brick-buster` 404; no `cover-bricks` string in `app/`, `components/`, `lib/`.
+- [x] `/games/arkanoid/play` shows a 640×480 canvas in `.crt-screen` with `PRESS SPACE OR CLICK TO LAUNCH`; ball does not move before launch.
+- [x] Controls: `←`/`A`, `→`/`D` move paddle; mouse over canvas moves paddle; `Space` and click launch; arrows/Space do not scroll the page.
+- [x] Ball launches at 15° to the right; L1 speed 5, L2 5.5, L5 7 px/step.
+- [x] Scoring: each broken block adds exactly 10 to the HUD score.
+- [x] Clearing level 5 shows `YOU WIN` then opens GAME OVER with score + exactly 100 per remaining life.
+- [x] Level layouts have 20/30/40/50/60 blocks; Level HUD goes `01` → `05` as each wall is cleared, with `LEVEL N` banner and ball on paddle.
 - [ ] Lives HUD starts at 3; ball lost → 2 and ball back on paddle; 0 lives → GAME OVER.
-- [ ] Broken blocks play a 150 ms flash/fade animation; next level loads only after it ends.
+- [x] Broken blocks play a 150 ms flash/fade animation; next level loads only after it ends.
 - [ ] Break sound on block hit, bounce sound on wall/paddle hit; SOUND OFF silences both; choice survives reload; toolbar absent on other games.
-- [ ] PAUSE button, `P`, `Esc` freeze and show PAUSED; same key resumes; tab switch pauses; click/mouse while paused does nothing.
+- [x] PAUSE button, `P`, `Esc` freeze and show PAUSED; same key resumes; tab switch pauses; click/mouse while paused does nothing.
 - [ ] Losing all lives or END opens GAME OVER with the engine's final score.
-- [ ] PLAY AGAIN returns to ready with score 0, 3 lives, level 1.
+- [x] PLAY AGAIN returns to ready with score 0, 3 lives, level 1.
 - [ ] Leaving the page stops rAF, removes listeners and stops audio; no console errors.
-- [ ] Colors match the palette table; no spritesheet loaded; `shadowBlur` ≤ 8.
-- [ ] Typing in the SAVE SCORE input does not move the paddle or launch.
-- [ ] No `KEYBOARD REQUIRED` note on arkanoid.
-- [ ] `public.games` contains row `arkanoid` / `ARKANOID`.
-- [ ] SAVE SCORE inserts one `scores` row (`game_id = 'arkanoid'`, uppercase name, modal score), verified with `execute_sql`.
-- [ ] Hall of Fame tabs are `GLOBAL` + real games in catalog order (`ARKANOID`, `TETRIS`, `ASTEROIDS`); `ARKANOID` tab shows the saved score.
+- [x] Colors match the palette table; no spritesheet loaded; `shadowBlur` ≤ 8.
+- [x] Typing in the SAVE SCORE input does not move the paddle or launch.
+- [x] No `KEYBOARD REQUIRED` note on arkanoid.
+- [x] `public.games` contains row `arkanoid` / `ARKANOID`.
+- [x] SAVE SCORE inserts one `scores` row (`game_id = 'arkanoid'`, uppercase name, modal score), verified with `execute_sql`.
+- [x] Hall of Fame tabs are `GLOBAL` + real games in catalog order (`ARKANOID`, `TETRIS`, `ASTEROIDS`); `ARKANOID` tab shows the saved score.
 - [ ] `/games/arkanoid` TOP SCORES and Global best read from Supabase; empty state before any score, linking to `/games/arkanoid/play`.
-- [ ] Library card BEST SCORE for `arkanoid` equals DB max.
-- [ ] GLOBAL totals count `arkanoid` in `games`.
-- [ ] Other games unchanged: asteroids and tetris still real; fake games show `PRACTICE RUN — SCORE NOT RECORDED`.
-- [ ] No hydration warnings on `/`, `/games`, `/hall-of-fame`, `/games/arkanoid`, `/games/arkanoid/play`.
-- [ ] At 390px width the canvas scales with no horizontal scroll; mouse/paddle mapping stays correct when scaled.
+- [x] Library card BEST SCORE for `arkanoid` equals DB max.
+- [x] GLOBAL totals count `arkanoid` in `games`.
+- [x] Other games unchanged: asteroids and tetris still real; fake games show `PRACTICE RUN — SCORE NOT RECORDED`.
+- [x] No hydration warnings on `/`, `/games`, `/hall-of-fame`, `/games/arkanoid`, `/games/arkanoid/play`.
+- [x] At 390px width the canvas scales with no horizontal scroll; mouse/paddle mapping stays correct when scaled.
 
 ## Decisions
 

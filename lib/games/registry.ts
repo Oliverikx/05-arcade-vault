@@ -1,3 +1,4 @@
+import { createArkanoidGame } from "@/lib/games/arkanoid/engine";
 import { createAsteroidsGame } from "@/lib/games/asteroids/engine";
 import type { GameCallbacks, GameEngine } from "@/lib/games/engine-types";
 import { createTetrisGame } from "@/lib/games/tetris/engine";
@@ -12,6 +13,13 @@ export interface EngineEntry {
 }
 
 const ENGINES: Record<string, EngineEntry> = {
+  arkanoid: {
+    create: createArkanoidGame,
+    width: 640,
+    height: 480,
+    lives: 3,
+    keyboardRequired: false,
+  },
   asteroids: {
     create: createAsteroidsGame,
     width: 800,
