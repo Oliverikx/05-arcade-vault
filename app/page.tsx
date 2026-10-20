@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import {
   FeatureIcon,
   type FeatureIconKind,
@@ -6,7 +7,8 @@ import {
 import { FloatingSilhouettes } from "@/components/home/floating-silhouettes";
 import { MiniCard } from "@/components/home/mini-card";
 import { Reveal } from "@/components/home/reveal";
-import { GAMES, type Accent } from "@/lib/games";
+import { GAMES, getGame, type Accent } from "@/lib/games";
+import { getLatestScores, getTodayTopPlayers } from "@/lib/leaderboard";
 
 const FEATURES: {
   icon: FeatureIconKind;
@@ -46,26 +48,81 @@ const STATS = [
   { n: "GLOBAL", u: "RANKING", s: "COMPETE WITH THE WORLD" },
 ];
 
-type Activity = { p: string; g: string; s: number; t: string; c: Accent };
-type TopPlayer = { r: number; p: string; s: number };
+function relativeTime(iso: string): string {
+  const mins = Math.max(0, Math.floor((Date.now() - Date.parse(iso)) / 60000));
+  if (mins < 1) return "just now";
+  if (mins < 60) return `${mins} min ago`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours} h ago`;
+  return `${Math.floor(hours / 24)} d ago`;
+}
 
-const ACTIVITY: Activity[] = [
-  { p: "NEONFOX", g: "DROP", s: 184220, t: "2 min ago", c: "magenta" },
-  { p: "PX_KAI", g: "CHOMPER", s: 96400, t: "5 min ago", c: "yellow" },
-  { p: "Z3R0COOL", g: "INVADERS", s: 54190, t: "8 min ago", c: "green" },
-  { p: "VAULT_07", g: "ASTEROIDS", s: 41200, t: "12 min ago", c: "cyan" },
-  { p: "GLITCHA", g: "BRICK BUSTER", s: 28450, t: "18 min ago", c: "cyan" },
-  { p: "ARKADYA", g: "SNAKE", s: 7820, t: "24 min ago", c: "green" },
-  { p: "CYBER_LU", g: "FROGGY", s: 18900, t: "31 min ago", c: "yellow" },
-];
+function ActivityState({ offline }: { offline: boolean }) {
+  return (
+    <div className={"lb-empty" + (offline ? " offline" : "")}>
+      {offline ? "LEADERBOARD OFFLINE" : "NO SCORES YET"}
+    </div>
+  );
+}
 
-const TOP_PLAYERS: TopPlayer[] = [
-  { r: 1, p: "NEONFOX", s: 312840 },
-  { r: 2, p: "PX_KAI", s: 248110 },
-  { r: 3, p: "M00NRYU", s: 196720 },
-  { r: 4, p: "VAULT_07", s: 154300 },
-  { r: 5, p: "GLITCHA", s: 138900 },
-];
+async function LatestScores() {
+  const board = await getLatestScores(7);
+  if (!board.ok) return <ActivityState offline />;
+  if (board.rows.length === 0) return <ActivityState offline={false} />;
+  return (
+    <div className="ticker">
+      {board.rows.map((r, i) => {
+        const game = getGame(r.gameId);
+        return (
+          <div
+            key={`${r.at}-${r.name}-${i}`}
+            className="tick-row"
+            style={{ animationDelay: i * 60 + "ms" }}
+          >
+            <span className={"tk-p neon-" + (game?.color ?? "cyan")}>
+              {r.name}
+            </span>
+            <span className="tk-mid">▸ {game?.title ?? r.gameId}</span>
+            <span className="tk-s">+{r.score.toLocaleString("en-US")}</span>
+            <span className="tk-t">{relativeTime(r.at)}</span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+async function TopPlayersToday() {
+  const board = await getTodayTopPlayers(5);
+  if (!board.ok) return <ActivityState offline />;
+  if (board.rows.length === 0) return <ActivityState offline={false} />;
+  const max = Math.max(board.rows[0].total, 1);
+  return (
+    <div className="top-list">
+      {board.rows.map((r, i) => (
+        <div
+          key={r.name}
+          className={
+            "top-row" +
+            (i === 0 ? " top1" : i === 1 ? " top2" : i === 2 ? " top3" : "")
+          }
+        >
+          <span className="tp-rk">#{String(r.rank).padStart(2, "0")}</span>
+          <span className="tp-bar">
+            <span
+              className="tp-fill"
+              style={{
+                width: Math.max(8, Math.round((r.total / max) * 100)) + "%",
+              }}
+            ></span>
+          </span>
+          <span className="tp-p">{r.name}</span>
+          <span className="tp-s">{r.total.toLocaleString("en-US")}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 const PLAN_PERKS = [
   "Access to all games",
@@ -198,20 +255,9 @@ export default function Home() {
             <div className="ac-head">
               <div className="ac-title pixel">▸ LATEST SCORES</div>
             </div>
-            <div className="ticker">
-              {ACTIVITY.map((r, i) => (
-                <div
-                  key={r.p}
-                  className="tick-row"
-                  style={{ animationDelay: i * 60 + "ms" }}
-                >
-                  <span className={"tk-p neon-" + r.c}>{r.p}</span>
-                  <span className="tk-mid">▸ {r.g}</span>
-                  <span className="tk-s">+{r.s.toLocaleString("en-US")}</span>
-                  <span className="tk-t">{r.t}</span>
-                </div>
-              ))}
-            </div>
+            <Suspense fallback={<div className="lb-empty">LOADING...</div>}>
+              <LatestScores />
+            </Suspense>
           </div>
 
           <div className="activity-card">
@@ -223,33 +269,9 @@ export default function Home() {
                 VIEW HALL →
               </Link>
             </div>
-            <div className="top-list">
-              {TOP_PLAYERS.map((r, i) => (
-                <div
-                  key={r.p}
-                  className={
-                    "top-row" +
-                    (i === 0
-                      ? " top1"
-                      : i === 1
-                        ? " top2"
-                        : i === 2
-                          ? " top3"
-                          : "")
-                  }
-                >
-                  <span className="tp-rk">#{String(r.r).padStart(2, "0")}</span>
-                  <span className="tp-bar">
-                    <span
-                      className="tp-fill"
-                      style={{ width: 100 - i * 16 + "%" }}
-                    ></span>
-                  </span>
-                  <span className="tp-p">{r.p}</span>
-                  <span className="tp-s">{r.s.toLocaleString("en-US")}</span>
-                </div>
-              ))}
-            </div>
+            <Suspense fallback={<div className="lb-empty">LOADING...</div>}>
+              <TopPlayersToday />
+            </Suspense>
           </div>
         </div>
       </section>
