@@ -2,6 +2,10 @@
 
 import Link from "next/link";
 import { useEffect, useState, useTransition } from "react";
+import {
+  ArkanoidToolbar,
+  useArkanoidMuted,
+} from "@/components/arkanoid-toolbar";
 import { GameScreen } from "@/components/game-screen";
 import {
   TetrisToolbar,
@@ -19,7 +23,9 @@ export function GamePlayer({ game }: { game: Game }) {
   const { user } = useSession();
   const entry = getEngine(game.id);
   const isTetris = game.id === "tetris";
+  const isArkanoid = game.id === "arkanoid";
   const [appearance, setAppearance] = useTetrisAppearance();
+  const [muted, setMuted] = useArkanoidMuted();
   const initialLives = entry ? entry.lives : PRACTICE_LIVES;
   const [score, setScore] = useState(0);
   const [lives, setLives] = useState(initialLives ?? 0);
@@ -151,6 +157,7 @@ export function GamePlayer({ game }: { game: Game }) {
               runId={runId}
               endSignal={endSignal}
               appearance={isTetris ? appearance : undefined}
+              muted={isArkanoid ? muted : undefined}
               onScore={setScore}
               onLives={setLives}
               onLevel={setEngineLevel}
@@ -202,6 +209,8 @@ export function GamePlayer({ game }: { game: Game }) {
       {isTetris && (
         <TetrisToolbar appearance={appearance} onChange={setAppearance} />
       )}
+
+      {isArkanoid && <ArkanoidToolbar muted={muted} onChange={setMuted} />}
 
       {entry?.keyboardRequired && (
         <div className="keyboard-note">KEYBOARD REQUIRED</div>
