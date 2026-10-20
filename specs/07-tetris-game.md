@@ -1,6 +1,6 @@
 # SPEC 07 — TETRIS game integration
 
-> **Status:** Approved
+> **Status:** Implemented
 > **Depends on:** SPEC 05, SPEC 06
 > **Date:** 2026-10-20
 > **Objective:** Port the vanilla-JS Tetris from `resources/started-games/03-tetris` into a typed engine playable at `/games/tetris/play` with a real Supabase leaderboard, introducing the generic engine registry.
@@ -146,35 +146,35 @@ Each step leaves the app runnable and is commitable alone.
 
 ## Acceptance criteria
 
-- [ ] `npm run build` and `npm run lint` pass.
-- [ ] `lib/games/registry.ts` exists; `components/asteroids-screen.tsx` deleted; no `game.id === "asteroids"` / `isAsteroids` in `components/`.
-- [ ] Asteroids unchanged: ready screen, 3 ♥, scoring, pause, save.
-- [ ] `lib/games.ts` has no `drop` id; `/games/drop` 404; no `cover-tetro` string in `app/`, `components/`, `lib/`.
-- [ ] `/games/tetris/play` shows a 800×600 canvas in `.crt-screen` with `PRESS SPACE TO START`; no piece falls before start; starting with Space does not hard-drop the first piece.
-- [ ] Controls: `←`/`→` move, `↑` and `X` rotate, `↓` soft drop, `Space` hard drop work; arrows/Space do not scroll the page.
-- [ ] Scoring: soft drop adds exactly 1 per row; hard drop adds exactly 2 per row dropped; clearing 1/2/3/4 lines at level L adds exactly 100·L / 300·L / 500·L / 800·L.
-- [ ] Lives HUD shows `—`; Level HUD starts at `01` and becomes `02` at 10 lines; drop interval at level 2 is 910 ms.
-- [ ] LINES panel in canvas shows total lines cleared.
-- [ ] Each cleared line adds 25 energy (max 100); with full energy `E` opens the ability menu and the game freezes; `1`–`5` apply preview/swap/slow/undo/hold and empty energy; `Esc` closes the menu without pausing; undo/hold options shown disabled when unavailable.
-- [ ] Preview shows 5 pieces for 10 spawns; slow halves fall speed for 10 s with countdown `SLOW Ns`; undo restores board, score, lines, level of the previous lock and HUD reflects it; `C` swaps in the held piece.
-- [ ] Screw piece (3×3 ring) spawns.
-- [ ] PAUSE button, `P`, `Esc` freeze and show PAUSED; same key resumes; tab switch pauses; keys held at resume do not act until released.
-- [ ] Spawn collision or END opens GAME OVER with the engine's final score.
-- [ ] PLAY AGAIN returns to ready with score 0, level 1, 0 lines, 0 energy, no hold.
+- [x] `npm run build` and `npm run lint` pass.
+- [x] `lib/games/registry.ts` exists; `components/asteroids-screen.tsx` deleted; no `game.id === "asteroids"` / `isAsteroids` in `components/`.
+- [x] Asteroids unchanged: ready screen, 3 ♥, scoring, pause, save.
+- [x] `lib/games.ts` has no `drop` id; `/games/drop` 404; no `cover-tetro` string in `app/`, `components/`, `lib/`.
+- [x] `/games/tetris/play` shows a 800×600 canvas in `.crt-screen` with `PRESS SPACE TO START`; no piece falls before start; starting with Space does not hard-drop the first piece.
+- [x] Controls: `←`/`→` move, `↑` and `X` rotate, `↓` soft drop, `Space` hard drop work; arrows/Space do not scroll the page.
+- [x] Scoring: soft drop adds exactly 1 per row; hard drop adds exactly 2 per row dropped; clearing 1/2/3/4 lines at level L adds exactly 100·L / 300·L / 500·L / 800·L.
+- [x] Lives HUD shows `—`; Level HUD starts at `01` and becomes `02` at 10 lines; drop interval at level 2 is 910 ms.
+- [x] LINES panel in canvas shows total lines cleared.
+- [x] Each cleared line adds 25 energy (max 100); with full energy `E` opens the ability menu and the game freezes; `1`–`5` apply preview/swap/slow/undo/hold and empty energy; `Esc` closes the menu without pausing; undo/hold options shown disabled when unavailable.
+- [x] Preview shows 5 pieces for 10 spawns; slow halves fall speed for 10 s with countdown `SLOW Ns`; undo restores board, score, lines, level of the previous lock and HUD reflects it; `C` swaps in the held piece.
+- [x] Screw piece (3×3 ring) spawns.
+- [x] PAUSE button, `P`, `Esc` freeze and show PAUSED; same key resumes; tab switch pauses; keys held at resume do not act until released.
+- [x] Spawn collision or END opens GAME OVER with the engine's final score.
+- [x] PLAY AGAIN returns to ready with score 0, level 1, 0 lines, 0 energy, no hold.
 - [ ] Leaving the page stops rAF and removes listeners; no console errors.
-- [ ] Neon skin colors match the palette table; `shadowBlur` ≤ 8.
-- [ ] Toolbar under CRT switches skin (retro/neon/pastel/pixel) and LIGHT/DARK; canvas redraws immediately even while paused; choice survives reload; toolbar absent on asteroids.
-- [ ] Typing in the SAVE SCORE input or using the toolbar select does not move pieces.
-- [ ] No Spanish strings in the game.
-- [ ] `public.games` contains row `tetris` / `TETRIS`.
-- [ ] SAVE SCORE inserts one `scores` row (`game_id = 'tetris'`, uppercase name, modal score), verified with `execute_sql`.
-- [ ] Hall of Fame tabs are `GLOBAL` + real games in catalog order (`TETRIS`, `ASTEROIDS`); `TETRIS` tab shows the saved score; empty-state link points at the tab's game.
+- [x] Neon skin colors match the palette table; `shadowBlur` ≤ 8.
+- [x] Toolbar under CRT switches skin (retro/neon/pastel/pixel) and LIGHT/DARK; canvas redraws immediately even while paused; choice survives reload; toolbar absent on asteroids.
+- [x] Typing in the SAVE SCORE input or using the toolbar select does not move pieces.
+- [x] No Spanish strings in the game.
+- [x] `public.games` contains row `tetris` / `TETRIS`.
+- [x] SAVE SCORE inserts one `scores` row (`game_id = 'tetris'`, uppercase name, modal score), verified with `execute_sql`.
+- [x] Hall of Fame tabs are `GLOBAL` + real games in catalog order (`TETRIS`, `ASTEROIDS`); `TETRIS` tab shows the saved score; empty-state link points at the tab's game.
 - [ ] `/games/tetris` TOP SCORES and Global best read from Supabase; empty state before any score, linking to `/games/tetris/play`.
-- [ ] Library card BEST SCORE for `tetris` equals DB max.
-- [ ] GLOBAL totals count `tetris` in `games`.
-- [ ] Fake games still show `PRACTICE RUN — SCORE NOT RECORDED`.
-- [ ] No hydration warnings on `/`, `/games`, `/hall-of-fame`, `/games/tetris`, `/games/tetris/play`.
-- [ ] At 390px width the canvas scales with no horizontal scroll; `KEYBOARD REQUIRED` visible.
+- [x] Library card BEST SCORE for `tetris` equals DB max.
+- [x] GLOBAL totals count `tetris` in `games`.
+- [x] Fake games still show `PRACTICE RUN — SCORE NOT RECORDED`.
+- [x] No hydration warnings on `/`, `/games`, `/hall-of-fame`, `/games/tetris`, `/games/tetris/play`.
+- [x] At 390px width the canvas scales with no horizontal scroll; `KEYBOARD REQUIRED` visible.
 
 ## Decisions
 
