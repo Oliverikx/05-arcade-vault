@@ -2827,3 +2827,55 @@ a.mini-card {
   text-shadow: 0 0 6px rgba(255, 0, 110, 0.45);
   font-weight: 700;
 }
+
+/* ===== tetris appearance toolbar (under the CRT) ===== */
+.tetris-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 12px;
+  padding: 0 8px;
+  font-family: var(--pixel);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  color: var(--ink-dim);
+}
+.tetris-toolbar .tt-field {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+.tetris-toolbar select,
+.tetris-toolbar .tt-toggle button {
+  padding: 10px 12px;
+  font: inherit;
+  letter-spacing: inherit;
+  color: var(--ink-dim);
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-radius: 0;
+  cursor: pointer;
+}
+.tetris-toolbar select:hover,
+.tetris-toolbar .tt-toggle button:hover:not(.active) {
+  color: var(--ink);
+}
+.tetris-toolbar select:focus-visible,
+.tetris-toolbar .tt-toggle button:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 2px;
+}
+.tetris-toolbar .tt-toggle {
+  display: inline-flex;
+}
+.tetris-toolbar .tt-toggle button + button {
+  border-left: 0;
+}
+.tetris-toolbar .tt-toggle button.active {
+  color: var(--cyan);
+  border-color: var(--cyan);
+  box-shadow: 0 0 10px rgba(0, 245, 255, 0.35);
+  position: relative;
+}

@@ -2,6 +2,8 @@
 
 import { useEffect, useRef } from "react";
 import type { GameCallbacks, GameEngine } from "@/lib/games/engine-types";
+import type { TetrisEngine } from "@/lib/games/tetris/engine";
+import type { TetrisAppearance } from "@/components/tetris-toolbar";
 import { getEngine } from "@/lib/games/registry";
 
 interface GameScreenProps extends GameCallbacks {
@@ -11,6 +13,8 @@ interface GameScreenProps extends GameCallbacks {
   runId: number;
   /** Changing this value ends the current run (fires onGameOver). */
   endSignal: number;
+  /** Skin/theme for engines that support it (tetris). */
+  appearance?: TetrisAppearance;
 }
 
 export function GameScreen({
@@ -18,6 +22,7 @@ export function GameScreen({
   paused,
   runId,
   endSignal,
+  appearance,
   onScore,
   onLives,
   onLevel,
@@ -56,6 +61,12 @@ export function GameScreen({
       gameRef.current = null;
     };
   }, [entry]);
+
+  useEffect(() => {
+    if (!appearance) return;
+    const game = gameRef.current as Partial<TetrisEngine> | null;
+    game?.setAppearance?.(appearance.skin, appearance.theme);
+  }, [appearance, entry]);
 
   useEffect(() => {
     gameRef.current?.setPaused(paused);

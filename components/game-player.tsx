@@ -3,6 +3,10 @@
 import Link from "next/link";
 import { useEffect, useState, useTransition } from "react";
 import { GameScreen } from "@/components/game-screen";
+import {
+  TetrisToolbar,
+  useTetrisAppearance,
+} from "@/components/tetris-toolbar";
 import { useSession } from "@/components/session-provider";
 import { saveScore } from "@/app/actions/scores";
 import type { Game } from "@/lib/games";
@@ -14,6 +18,8 @@ const PRACTICE_LIVES = 3;
 export function GamePlayer({ game }: { game: Game }) {
   const { user } = useSession();
   const entry = getEngine(game.id);
+  const isTetris = game.id === "tetris";
+  const [appearance, setAppearance] = useTetrisAppearance();
   const initialLives = entry ? entry.lives : PRACTICE_LIVES;
   const [score, setScore] = useState(0);
   const [lives, setLives] = useState(initialLives ?? 0);
@@ -144,6 +150,7 @@ export function GamePlayer({ game }: { game: Game }) {
               paused={paused}
               runId={runId}
               endSignal={endSignal}
+              appearance={isTetris ? appearance : undefined}
               onScore={setScore}
               onLives={setLives}
               onLevel={setEngineLevel}
@@ -191,6 +198,10 @@ export function GamePlayer({ game }: { game: Game }) {
           <span>LOAD · 1MB</span>
         </div>
       </div>
+
+      {isTetris && (
+        <TetrisToolbar appearance={appearance} onChange={setAppearance} />
+      )}
 
       {entry?.keyboardRequired && (
         <div className="keyboard-note">KEYBOARD REQUIRED</div>

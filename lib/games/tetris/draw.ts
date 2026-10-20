@@ -40,6 +40,8 @@ interface Surface {
   bg: string;
   grid: string;
   ink: string; // panel values
+  well: string; // playfield tint
+  wall: string; // well border
 }
 
 const NEON_INK = "#e6e9ff";
@@ -47,15 +49,45 @@ const NEON_INK = "#e6e9ff";
 function surfaceFor(skin: TetrisSkin, theme: TetrisTheme): Surface {
   switch (skin) {
     case "neon":
-      return { bg: "#000", grid: "#14141f", ink: NEON_INK };
+      return {
+        bg: "#000",
+        grid: "#14141f",
+        ink: NEON_INK,
+        well: "#0a0a12",
+        wall: "#00f5ff",
+      };
     case "pastel":
-      return { bg: "#fdf6fb", grid: "#f0e4ee", ink: "#22252e" };
+      return {
+        bg: "#fdf6fb",
+        grid: "#f0e4ee",
+        ink: "#22252e",
+        well: "#f3e6f0",
+        wall: "#c58bb8",
+      };
     case "pixel":
-      return { bg: "#101820", grid: "#1c2733", ink: "#e0e0e0" };
+      return {
+        bg: "#101820",
+        grid: "#1c2733",
+        ink: "#e0e0e0",
+        well: "#16202b",
+        wall: "#5d7a94",
+      };
     case "retro":
       return theme === "light"
-        ? { bg: "#ffffff", grid: "#e3e6ee", ink: "#22252e" }
-        : { bg: "#1a1a25", grid: "#22222e", ink: "#e0e0e0" };
+        ? {
+            bg: "#ffffff",
+            grid: "#e3e6ee",
+            ink: "#22252e",
+            well: "#f1f3f8",
+            wall: "#8a90a3",
+          }
+        : {
+            bg: "#1a1a25",
+            grid: "#22222e",
+            ink: "#e0e0e0",
+            well: "#20202d",
+            wall: "#6b6b86",
+          };
   }
 }
 
@@ -213,6 +245,12 @@ const label = (
 
 function drawBoard(ctx: CanvasRenderingContext2D, view: DrawView, s: Surface) {
   const { skin, board, current } = view;
+  const boardW = COLS * BLOCK;
+  const boardH = ROWS * BLOCK;
+
+  // Playfield tint so the well reads against the panels.
+  ctx.fillStyle = s.well;
+  ctx.fillRect(BOARD_X, 0, boardW, boardH);
 
   ctx.strokeStyle = s.grid;
   ctx.lineWidth = 0.5;
@@ -261,26 +299,51 @@ function drawBoard(ctx: CanvasRenderingContext2D, view: DrawView, s: Surface) {
         current.shape[r][c],
         BLOCK,
       );
+
+  // Walls: left, right and floor of the well, just outside the cells.
+  ctx.strokeStyle = s.wall;
+  ctx.lineWidth = 2;
+  if (skin === "neon") {
+    ctx.shadowColor = s.wall;
+    ctx.shadowBlur = 8;
+  }
+  ctx.beginPath();
+  ctx.moveTo(BOARD_X - 1, 0);
+  ctx.lineTo(BOARD_X - 1, boardH + 1);
+  ctx.lineTo(BOARD_X + boardW + 1, boardH + 1);
+  ctx.lineTo(BOARD_X + boardW + 1, 0);
+  ctx.stroke();
+  ctx.shadowBlur = 0;
 }
 
-function drawLeftPanel(
+function drawLeftPanel(ctx: CanvasRenderingContext2D, view: DrawView) {
+  if (!view.held) return;
+  const x = 25;
+  label(ctx, view, "HOLD", x, 34);
+  drawPieceInSlot(ctx, view.skin, view.held.shape, BLOCK, x, 44);
+}
+
+function drawRightPanel(
   ctx: CanvasRenderingContext2D,
   view: DrawView,
   s: Surface,
 ) {
-  const x = 25;
-  if (view.held) {
-    label(ctx, view, "HOLD", x, 34);
-    drawPieceInSlot(ctx, view.skin, view.held.shape, BLOCK, x, 44);
-  }
+  const x = BOARD_X + COLS * BLOCK + 25; // 575
+  label(ctx, view, "NEXT", x, 34);
+  drawPieceInSlot(ctx, view.skin, view.queue[0].shape, BLOCK, x, 44);
+
+  label(ctx, view, "LINES", x, 180);
+  drawText(ctx, view, String(view.lines), x, 206, { size: 16 });
 
   const full = view.energy >= ENERGY_MAX;
-  label(ctx, view, "ENERGY", x, 214);
-  ctx.strokeStyle = s.grid;
+  label(ctx, view, "ENERGY", x, 242);
+  ctx.strokeStyle = s.ink;
+  ctx.globalAlpha = 0.4;
   ctx.lineWidth = 1;
-  ctx.strokeRect(x + 0.5, 224.5, 200, 14);
+  ctx.strokeRect(x + 0.5, 252.5, 200, 14);
+  ctx.globalAlpha = 1;
   ctx.fillStyle = SKIN_COLORS.neon[full ? 4 : 1];
-  ctx.fillRect(x + 1, 225, (198 * view.energy) / ENERGY_MAX, 13);
+  ctx.fillRect(x + 1, 253, (198 * view.energy) / ENERGY_MAX, 13);
 
   const status =
     view.slowMs > 0
@@ -288,21 +351,12 @@ function drawLeftPanel(
       : full
         ? "PRESS E"
         : "";
-  if (status) drawText(ctx, view, status, x, 262, { size: 10 });
-}
-
-function drawRightPanel(ctx: CanvasRenderingContext2D, view: DrawView) {
-  const x = BOARD_X + COLS * BLOCK + 25; // 575
-  label(ctx, view, "NEXT", x, 34);
-  drawPieceInSlot(ctx, view.skin, view.queue[0].shape, BLOCK, x, 44);
-
-  label(ctx, view, "LINES", x, 204);
-  drawText(ctx, view, String(view.lines), x, 230, { size: 16 });
+  if (status) drawText(ctx, view, status, x, 288, { size: 10 });
 
   if (view.previewLeft > 0) {
-    label(ctx, view, "PREVIEW", x, 274);
+    label(ctx, view, "PREVIEW", x, 324);
     for (let i = 0; i < PREVIEW_COUNT; i++)
-      drawPieceInSlot(ctx, view.skin, view.queue[i].shape, 15, x, 284 + i * 60);
+      drawPieceInSlot(ctx, view.skin, view.queue[i].shape, 15, x, 334 + i * 52);
   }
 }
 
@@ -354,14 +408,15 @@ export function drawFrame(ctx: CanvasRenderingContext2D, view: DrawView) {
   ctx.fillRect(0, 0, W, H);
 
   drawBoard(ctx, view, s);
-  drawLeftPanel(ctx, view, s);
-  drawRightPanel(ctx, view);
+  drawLeftPanel(ctx, view);
+  drawRightPanel(ctx, view, s);
   if (view.ready) {
-    ctx.fillStyle = "rgba(0,0,0,0.6)";
+    ctx.globalAlpha = 0.75;
+    ctx.fillStyle = s.bg;
     ctx.fillRect(BOARD_X, 0, COLS * BLOCK, H);
+    ctx.globalAlpha = 1;
     drawText(ctx, view, "PRESS SPACE TO START", W / 2, H / 2, {
       size: 12,
-      color: NEON_INK,
       align: "center",
     });
   }
