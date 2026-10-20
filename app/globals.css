@@ -1291,6 +1291,20 @@ a {
     caret 0.8s steps(1) infinite;
   width: 0;
 }
+.practice-note,
+.save-error {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  margin-top: 14px;
+}
+.practice-note {
+  color: var(--ink-dim);
+}
+.save-error {
+  color: var(--magenta);
+  text-shadow: 0 0 8px var(--magenta);
+}
 @keyframes typewriter {
   to {
     width: 22ch;

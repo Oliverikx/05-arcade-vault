@@ -1,15 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { AsteroidsScreen } from "@/components/asteroids-screen";
 import { useSession } from "@/components/session-provider";
+import { saveScore } from "@/app/actions/scores";
 import type { Game } from "@/lib/games";
 
 const LIVES = 3;
 
 export function GamePlayer({ game }: { game: Game }) {
-  const { user, saveScore } = useSession();
+  const { user } = useSession();
   const isAsteroids = game.id === "asteroids";
   const [score, setScore] = useState(0);
   const [lives, setLives] = useState(LIVES);
@@ -21,6 +22,8 @@ export function GamePlayer({ game }: { game: Game }) {
 
   const [typedName, setTypedName] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
+  const [saveError, setSaveError] = useState(false);
+  const [saving, startSaving] = useTransition();
 
   const name = typedName ?? user?.name ?? "GUEST";
   const level = isAsteroids ? engineLevel : 1 + Math.floor(score / 2500);
@@ -70,11 +73,20 @@ export function GamePlayer({ game }: { game: Game }) {
     setPaused(false);
     setOver(false);
     setSaved(false);
+    setSaveError(false);
   };
 
   const save = () => {
-    saveScore({ game: game.id, score, name, at: Date.now() });
-    setSaved(true);
+    setSaveError(false);
+    startSaving(async () => {
+      try {
+        const result = await saveScore({ gameId: game.id, name, score });
+        if (result.ok) setSaved(true);
+        else setSaveError(true);
+      } catch {
+        setSaveError(true);
+      }
+    });
   };
 
   return (
@@ -178,19 +190,34 @@ export function GamePlayer({ game }: { game: Game }) {
             <h2>GAME OVER</h2>
             <div className="final-label">FINAL SCORE</div>
             <div className="final">{score.toLocaleString("en-US")}</div>
-            {!saved ? (
-              <div className="input-row">
-                <input
-                  value={name}
-                  onChange={(e) =>
-                    setTypedName(e.target.value.toUpperCase().slice(0, 10))
-                  }
-                  placeholder="YOUR INITIALS"
-                />
-                <button className="btn yellow" onClick={save}>
-                  SAVE SCORE
-                </button>
+            {!isAsteroids ? (
+              <div className="practice-note">
+                PRACTICE RUN — SCORE NOT RECORDED
               </div>
+            ) : !saved ? (
+              <>
+                <div className="input-row">
+                  <input
+                    value={name}
+                    onChange={(e) =>
+                      setTypedName(e.target.value.toUpperCase().slice(0, 10))
+                    }
+                    placeholder="YOUR INITIALS"
+                  />
+                  <button
+                    className="btn yellow"
+                    onClick={save}
+                    disabled={saving}
+                  >
+                    {saving ? "SAVING..." : "SAVE SCORE"}
+                  </button>
+                </div>
+                {saveError && (
+                  <div className="save-error" role="alert">
+                    SAVE FAILED — TRY AGAIN
+                  </div>
+                )}
+              </>
             ) : (
               <div className="toast-saved">▸ SCORE SAVED_</div>
             )}
