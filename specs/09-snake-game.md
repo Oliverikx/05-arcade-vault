@@ -1,6 +1,6 @@
 # SPEC 09 — SNAKE game integration
 
-> **Status:** Approved
+> **Status:** Implemented
 > **Depends on:** SPEC 05, SPEC 06
 > **Date:** 2026-10-20
 > **Objective:** Build a new typed Snake engine (no source game) using the fruit sprites in `resources/source-assets/snake-assets`, playable at `/games/snake/play` with a real Supabase leaderboard.
@@ -138,30 +138,30 @@ Each step leaves the app runnable and is commitable alone.
 
 ## Acceptance criteria
 
-- [ ] `npm run build` and `npm run lint` pass.
-- [ ] `/games/snake/play` shows a 640×480 canvas in `.crt-screen` with `PRESS ARROW KEY OR SPACE TO START`; snake does not move before start.
-- [ ] Controls: `←↑→↓` and `WASD` steer; `Space`/click start; arrows/Space do not scroll the page.
-- [ ] Snake starts with length 3 heading right; pressing the opposite direction does not reverse it.
-- [ ] Exactly one fruit is on the board at all times, never on the snake; fruit is drawn from `fruits.png` (not the fallback square) once loaded.
-- [ ] Scoring: each fruit adds exactly 10 to the HUD score and grows the snake by 1.
-- [ ] Level HUD: `01` at start, `02` after 5 fruits, `03` after 10; tick is 150 ms at L1, 140 ms at L2, never below 60 ms.
-- [ ] Lives HUD starts at 3; wall or self hit → 2, snake resets to length 3 and waits for a key; score and level kept; 0 lives → GAME OVER.
-- [ ] PAUSE button, `P`, `Esc` freeze and show PAUSED; same key resumes; tab switch pauses; click/keys while paused do nothing to the game.
-- [ ] END opens GAME OVER with the engine's final score.
-- [ ] PLAY AGAIN returns to ready with score 0, 3 lives, level 1.
-- [ ] Leaving the page stops rAF and removes listeners; no console errors.
-- [ ] Colors match the palette table; `shadowBlur` ≤ 8; no Spanish strings in code or comments.
-- [ ] Typing in the SAVE SCORE input does not steer or start the game.
-- [ ] `KEYBOARD REQUIRED` note shown on snake.
-- [ ] `public.games` contains row `snake` / `SNAKE`.
-- [ ] SAVE SCORE inserts one `scores` row (`game_id = 'snake'`, uppercase name, modal score), verified with `execute_sql`.
-- [ ] Hall of Fame tabs are `GLOBAL` + real games in catalog order (`ARKANOID`, `TETRIS`, `SNAKE`, `ASTEROIDS`); `SNAKE` tab shows the saved score.
+- [x] `npm run build` and `npm run lint` pass.
+- [x] `/games/snake/play` shows a 640×480 canvas in `.crt-screen` with `PRESS ARROW KEY OR SPACE TO START`; snake does not move before start.
+- [x] Controls: `←↑→↓` and `WASD` steer; `Space`/click start; arrows/Space do not scroll the page.
+- [x] Snake starts with length 3 heading right; pressing the opposite direction does not reverse it.
+- [x] Exactly one fruit is on the board at all times, never on the snake; fruit is drawn from `fruits.png` (not the fallback square) once loaded.
+- [x] Scoring: each fruit adds exactly 10 to the HUD score and grows the snake by 1.
+- [x] Level HUD: `01` at start, `02` after 5 fruits, `03` after 10; tick is 150 ms at L1, 140 ms at L2, never below 60 ms.
+- [x] Lives HUD starts at 3; wall or self hit → 2, snake resets to length 3 and waits for a key; score and level kept; 0 lives → GAME OVER.
+- [x] PAUSE button, `P`, `Esc` freeze and show PAUSED; same key resumes; tab switch pauses; click/keys while paused do nothing to the game.
+- [x] END opens GAME OVER with the engine's final score.
+- [x] PLAY AGAIN returns to ready with score 0, 3 lives, level 1.
+- [x] Leaving the page stops rAF and removes listeners; no console errors.
+- [x] Colors match the palette table; `shadowBlur` ≤ 8; no Spanish strings in code or comments.
+- [x] Typing in the SAVE SCORE input does not steer or start the game.
+- [x] `KEYBOARD REQUIRED` note shown on snake.
+- [x] `public.games` contains row `snake` / `SNAKE`.
+- [x] SAVE SCORE inserts one `scores` row (`game_id = 'snake'`, uppercase name, modal score), verified with `execute_sql`.
+- [x] Hall of Fame tabs are `GLOBAL` + real games in catalog order (`ARKANOID`, `TETRIS`, `SNAKE`, `ASTEROIDS`); `SNAKE` tab shows the saved score.
 - [ ] `/games/snake` TOP SCORES and Global best read from Supabase; empty state before any score, linking to `/games/snake/play`.
-- [ ] Library card BEST SCORE for `snake` equals DB max.
-- [ ] GLOBAL totals count `snake` in `games`.
-- [ ] Other games unchanged: arkanoid, tetris, asteroids still real; remaining fake games show `PRACTICE RUN — SCORE NOT RECORDED`.
-- [ ] No hydration warnings on `/`, `/games`, `/hall-of-fame`, `/games/snake`, `/games/snake/play`.
-- [ ] At 390px width the canvas scales with no horizontal scroll.
+- [x] Library card BEST SCORE for `snake` equals DB max.
+- [x] GLOBAL totals count `snake` in `games`.
+- [x] Other games unchanged: arkanoid, tetris, asteroids still real; remaining fake games show `PRACTICE RUN — SCORE NOT RECORDED`.
+- [x] No hydration warnings on `/`, `/games`, `/hall-of-fame`, `/games/snake`, `/games/snake/play`.
+- [x] At 390px width the canvas scales with no horizontal scroll.
 
 ## Decisions
 

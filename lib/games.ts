@@ -36,8 +36,8 @@ export const GAMES: Game[] = [
   {
     id: "snake",
     title: "SNAKE",
-    short: "Grow without biting your own tail.",
-    long: "A snake of light crawls the grid hunting magenta cores. Every bite makes it longer and faster. One wrong move and it devours itself.",
+    short: "Eat the fruit. Don't bite your tail.",
+    long: "A snake of light crawls a neon grid hunting fruit. Every bite makes it longer and the pace faster. Hit a wall or your own tail and you lose a life; three lives and the run is over.",
     cat: "ARCADE",
     cover: "cover-snake",
     color: "green",
