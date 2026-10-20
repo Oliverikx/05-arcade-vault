@@ -690,10 +690,10 @@ a {
   );
 }
 
-.cover-tetro {
+.cover-tetris {
   background: radial-gradient(circle at 50% 100%, #2a004a, #0a0a18);
 }
-.cover-tetro::after {
+.cover-tetris::after {
   content: "";
   position: absolute;
   inset: 20% 30% 0 30%;
