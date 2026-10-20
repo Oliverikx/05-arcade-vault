@@ -1,5 +1,6 @@
 import { createAsteroidsGame } from "@/lib/games/asteroids/engine";
 import type { GameCallbacks, GameEngine } from "@/lib/games/engine-types";
+import { createTetrisGame } from "@/lib/games/tetris/engine";
 
 export interface EngineEntry {
   create(canvas: HTMLCanvasElement, callbacks: GameCallbacks): GameEngine;
@@ -16,6 +17,13 @@ const ENGINES: Record<string, EngineEntry> = {
     width: 800,
     height: 600,
     lives: 3,
+    keyboardRequired: true,
+  },
+  tetris: {
+    create: createTetrisGame,
+    width: 800,
+    height: 600,
+    lives: null,
     keyboardRequired: true,
   },
 };
