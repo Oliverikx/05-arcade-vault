@@ -1,6 +1,6 @@
 # SPEC 06 — Game and global leaderboards
 
-> **Status:** Approved
+> **Status:** Implemented
 > **Depends on:** SPEC 04, SPEC 05
 > **Date:** 2026-10-20
 > **Objective:** Persist scores in new Supabase `games` and `scores` tables and make them the only score source for the Hall of Fame, game detail pages, library cards and home activity.
@@ -175,30 +175,30 @@ Conventions:
 
 ## Acceptance criteria
 
-- [ ] `npm run build` and `npm run lint` pass.
-- [ ] `public.games` contains exactly one row: `asteroids` / `ASTEROIDS`.
-- [ ] Anon insert into `scores` with `player_name = 'bad name!'` or `score = -1` is rejected by the DB.
-- [ ] Anon `update` / `delete` on `scores` affects 0 rows.
-- [ ] Supabase security advisors report no RLS-disabled table in `public`.
-- [ ] `lib/scores.ts` does not exist; `grep -r seededScores app components lib` returns nothing.
-- [ ] `Game` type has no `best` field; no hardcoded score numbers remain in `app/page.tsx` or `lib/games.ts`.
-- [ ] SAVE SCORE on asteroids GAME OVER inserts one `scores` row with uppercase name and the modal's score.
+- [x] `npm run build` and `npm run lint` pass.
+- [x] `public.games` contains exactly one row: `asteroids` / `ASTEROIDS`.
+- [x] Anon insert into `scores` with `player_name = 'bad name!'` or `score = -1` is rejected by the DB.
+- [x] Anon `update` / `delete` on `scores` affects 0 rows.
+- [x] Supabase security advisors report no RLS-disabled table in `public`.
+- [x] `lib/scores.ts` does not exist; `grep -r seededScores app components lib` returns nothing.
+- [x] `Game` type has no `best` field; no hardcoded score numbers remain in `app/page.tsx` or `lib/games.ts`.
+- [x] SAVE SCORE on asteroids GAME OVER inserts one `scores` row with uppercase name and the modal's score.
 - [ ] With Supabase unreachable, SAVE SCORE shows `SAVE FAILED — TRY AGAIN` and the button can be pressed again.
-- [ ] Fake-game GAME OVER shows `PRACTICE RUN — SCORE NOT RECORDED` and no SAVE SCORE button.
-- [ ] `localStorage.av_scores` is not written after any save; no code references `SCORES_KEY`.
-- [ ] `/games/asteroids` TOP SCORES lists the top 10 best-per-player scores stored in Supabase, ordered desc, with rank, name, score and date.
+- [x] Fake-game GAME OVER shows `PRACTICE RUN — SCORE NOT RECORDED` and no SAVE SCORE button.
+- [x] `localStorage.av_scores` is not written after any save; no code references `SCORES_KEY`.
+- [x] `/games/asteroids` TOP SCORES lists the top 10 best-per-player scores stored in Supabase, ordered desc, with rank, name, score and date.
 - [ ] Saving a score on asteroids, then opening `/games/asteroids`, shows that score in TOP SCORES without a manual cache clear.
-- [ ] `/games/asteroids` `Global best` equals the highest `scores.score` for `asteroids` in Supabase, or `—` when none.
-- [ ] `/games/snake` (a game with 0 rows) shows `NO SCORES YET — BE THE FIRST` in TOP SCORES and `—` as `Global best`.
-- [ ] Library card `BEST SCORE` for asteroids equals the DB max; other cards show `—`.
-- [ ] Home `LATEST SCORES` lists the latest DB runs newest first; with an empty DB it shows `NO SCORES YET`.
-- [ ] Home `TOP PLAYERS · TODAY` counts only runs created today (UTC); runs from earlier days are excluded.
-- [ ] `/hall-of-fame` tabs are exactly `GLOBAL` (default) and `ASTEROIDS`.
-- [ ] ASTEROIDS tab shows at most one row per player, ordered by best score desc, max 12 rows.
-- [ ] Saving a new personal best then reloading `/hall-of-fame` shows the new score (no stale cache).
-- [ ] GLOBAL tab rows show total = sum of that name's bests across games and the number of games counted.
-- [ ] Signed-in user with a real asteroids score sees `YOUR BEST` with correct rank and score on ASTEROIDS and GLOBAL tabs; user with no score sees no `YOUR BEST` row.
-- [ ] With 0 scores in the DB, Hall tabs, detail pages and home cards show the empty state, no crash.
+- [x] `/games/asteroids` `Global best` equals the highest `scores.score` for `asteroids` in Supabase, or `—` when none.
+- [x] `/games/snake` (a game with 0 rows) shows `NO SCORES YET — BE THE FIRST` in TOP SCORES and `—` as `Global best`.
+- [x] Library card `BEST SCORE` for asteroids equals the DB max; other cards show `—`.
+- [x] Home `LATEST SCORES` lists the latest DB runs newest first; with an empty DB it shows `NO SCORES YET`.
+- [x] Home `TOP PLAYERS · TODAY` counts only runs created today (UTC); runs from earlier days are excluded.
+- [x] `/hall-of-fame` tabs are exactly `GLOBAL` (default) and `ASTEROIDS`.
+- [x] ASTEROIDS tab shows at most one row per player, ordered by best score desc, max 12 rows.
+- [x] Saving a new personal best then reloading `/hall-of-fame` shows the new score (no stale cache).
+- [x] GLOBAL tab rows show total = sum of that name's bests across games and the number of games counted.
+- [x] Signed-in user with a real asteroids score sees `YOUR BEST` with correct rank and score on ASTEROIDS and GLOBAL tabs; user with no score sees no `YOUR BEST` row.
+- [x] With 0 scores in the DB, Hall tabs, detail pages and home cards show the empty state, no crash.
 - [ ] With Supabase unreachable, Hall, detail, home cards show `LEADERBOARD OFFLINE` and library cards show `—`; no page crashes.
 - [ ] No console errors or hydration warnings on `/`, `/games`, `/hall-of-fame`, `/games/asteroids`, `/games/asteroids/play`.
 - [ ] At 390px width the Hall tabs, GLOBAL table, detail TOP SCORES and home activity cards fit with no horizontal page scroll.
