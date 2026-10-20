@@ -9,19 +9,13 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import {
-  SCORES_KEY,
-  USER_KEY,
-  type SavedScore,
-  type User,
-} from "@/lib/session";
+import { USER_KEY, type User } from "@/lib/session";
 
 interface SessionContextValue {
   user: User | null;
   ready: boolean;
   signIn: (user: User) => void;
   signOut: () => void;
-  saveScore: (score: SavedScore) => void;
 }
 
 const SessionContext = createContext<SessionContextValue | null>(null);
@@ -56,19 +50,9 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     } catch {}
   }, []);
 
-  const saveScore = useCallback((score: SavedScore) => {
-    try {
-      const all = JSON.parse(
-        localStorage.getItem(SCORES_KEY) || "[]",
-      ) as SavedScore[];
-      all.push(score);
-      localStorage.setItem(SCORES_KEY, JSON.stringify(all));
-    } catch {}
-  }, []);
-
   const value = useMemo(
-    () => ({ user, ready, signIn, signOut, saveScore }),
-    [user, ready, signIn, signOut, saveScore],
+    () => ({ user, ready, signIn, signOut }),
+    [user, ready, signIn, signOut],
   );
 
   return (

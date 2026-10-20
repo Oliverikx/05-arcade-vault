@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useRef, type MouseEvent } from "react";
 import type { Game } from "@/lib/games";
 
-export function GameCard({ game }: { game: Game }) {
+export function GameCard({ game, best }: { game: Game; best: number | null }) {
   const router = useRouter();
   const tiltRef = useRef<HTMLDivElement>(null);
 
@@ -24,7 +24,11 @@ export function GameCard({ game }: { game: Game }) {
 
   const href = `/games/${game.id}`;
   const btnColor =
-    game.color === "magenta" ? "magenta" : game.color === "yellow" ? "yellow" : "";
+    game.color === "magenta"
+      ? "magenta"
+      : game.color === "yellow"
+        ? "yellow"
+        : "";
 
   return (
     <div
@@ -44,7 +48,7 @@ export function GameCard({ game }: { game: Game }) {
         <div className="row">
           <div className="score-badge">
             <span>BEST SCORE</span>
-            <b>{game.best.toLocaleString("en-US")}</b>
+            <b>{best === null ? "—" : best.toLocaleString("en-US")}</b>
           </div>
           <Link
             href={href}

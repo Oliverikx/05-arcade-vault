@@ -9,7 +9,6 @@ export interface Game {
   cat: Category;
   cover: string;
   color: Accent;
-  best: number;
   plays: string;
 }
 
@@ -22,7 +21,6 @@ export const GAMES: Game[] = [
     cat: "ARCADE",
     cover: "cover-bricks",
     color: "cyan",
-    best: 28450,
     plays: "12.4K",
   },
   {
@@ -33,7 +31,6 @@ export const GAMES: Game[] = [
     cat: "PUZZLE",
     cover: "cover-tetro",
     color: "magenta",
-    best: 184220,
     plays: "31.8K",
   },
   {
@@ -44,7 +41,6 @@ export const GAMES: Game[] = [
     cat: "ARCADE",
     cover: "cover-snake",
     color: "green",
-    best: 7820,
     plays: "9.1K",
   },
   {
@@ -55,7 +51,6 @@ export const GAMES: Game[] = [
     cat: "ARCADE",
     cover: "cover-glot",
     color: "yellow",
-    best: 96400,
     plays: "27.2K",
   },
   {
@@ -66,7 +61,6 @@ export const GAMES: Game[] = [
     cat: "SHOOTER",
     cover: "cover-invaders",
     color: "green",
-    best: 54190,
     plays: "18.0K",
   },
   {
@@ -77,7 +71,6 @@ export const GAMES: Game[] = [
     cat: "SHOOTER",
     cover: "cover-asteroids",
     color: "yellow",
-    best: 41200,
     plays: "15.6K",
   },
   {
@@ -88,7 +81,6 @@ export const GAMES: Game[] = [
     cat: "ARCADE",
     cover: "cover-rana",
     color: "green",
-    best: 18900,
     plays: "6.4K",
   },
   {
@@ -99,7 +91,6 @@ export const GAMES: Game[] = [
     cat: "VERSUS",
     cover: "cover-duelo",
     color: "cyan",
-    best: 24,
     plays: "4.2K",
   },
 ];
