@@ -55,6 +55,10 @@ Resend (`resend` package), `app/about/actions.ts`. Env: `RESEND_API_KEY`, `CONTA
   - `/spec-impl NN-slug` — implement an **Approved** spec. Creates/switches to branch `spec-NN-slug` (per `specs/.spec-config.yml` `AutoCreateBranch: true`), implements step by step, never auto-commits.
   - `/add-game <starter folder | idea>` — writes ONE spec integrating a new game engine + leaderboard. Reads `.claude/skills/add-game/integration-checklist.md` (platform touchpoints) and `template.md` first. Starter sources in `resources/started-games/`.
 
+## Agents
+
+- `game-planner` (`.claude/agents/game-planner.md`) — picks which game fits the platform next, then feed its pick to `/add-game`. Keeps all past suggestions in `.claude/agent-memory/game-planner/MEMORY.md`. Writes ranked to-do to `resources/game-suggestions-todo.md`.
+
 ## Hooks
 
 `.claude/settings.json` — PostToolUse hook runs `.claude/hooks/format-file.mjs` (Prettier) after every Write/Edit.
