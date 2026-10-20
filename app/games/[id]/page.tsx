@@ -1,8 +1,57 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Suspense, cache } from "react";
 import { GAMES, getGame } from "@/lib/games";
-import { seededScores } from "@/lib/scores";
+import { getGameBoard } from "@/lib/leaderboard";
+
+// One query per request, shared by the stat strip and the TOP SCORES panel.
+const loadBoard = cache((id: string) => getGameBoard(id, 10));
+
+async function GlobalBest({ id }: { id: string }) {
+  const board = await loadBoard(id);
+  const top = board.ok ? board.rows[0] : undefined;
+  return <>{top ? top.score.toLocaleString("en-US") : "—"}</>;
+}
+
+async function TopScores({ id }: { id: string }) {
+  const board = await loadBoard(id);
+
+  if (!board.ok) {
+    return <div className="lb-empty offline">LEADERBOARD OFFLINE</div>;
+  }
+  if (board.rows.length === 0) {
+    return (
+      <div className="lb-empty">
+        <Link href="/games/asteroids/play">NO SCORES YET — BE THE FIRST</Link>
+      </div>
+    );
+  }
+  return board.rows.map((r, i) => (
+    <div
+      key={r.name}
+      className={
+        "lb-row" +
+        (i === 0 ? " top1" : i === 1 ? " top2" : i === 2 ? " top3" : "")
+      }
+    >
+      <div className="rk">#{String(r.rank).padStart(2, "0")}</div>
+      <div className="pl">
+        {r.name}
+        <div
+          style={{
+            fontSize: 10,
+            color: "var(--ink-faint)",
+            letterSpacing: "0.1em",
+          }}
+        >
+          {r.date}
+        </div>
+      </div>
+      <div className="sc">{r.score.toLocaleString("en-US")}</div>
+    </div>
+  ));
+}
 
 export function generateStaticParams() {
   return GAMES.map((g) => ({ id: g.id }));
@@ -21,8 +70,6 @@ export default async function GameDetail(props: PageProps<"/games/[id]">) {
   const { id } = await props.params;
   const game = getGame(id);
   if (!game) notFound();
-
-  const scores = seededScores(id.length * 17 + 3, 10);
 
   return (
     <div className="av-detail fade-in">
@@ -53,7 +100,9 @@ export default async function GameDetail(props: PageProps<"/games/[id]">) {
                   textShadow: "0 0 6px rgba(255,0,110,0.5)",
                 }}
               >
-                {game.best.toLocaleString("en-US")}
+                <Suspense fallback="—">
+                  <GlobalBest id={game.id} />
+                </Suspense>
               </div>
             </div>
             <div>
@@ -83,30 +132,9 @@ export default async function GameDetail(props: PageProps<"/games/[id]">) {
       <aside>
         <div className="leaderboard">
           <h3>TOP SCORES</h3>
-          {scores.map((r, i) => (
-            <div
-              key={r.name}
-              className={
-                "lb-row" +
-                (i === 0 ? " top1" : i === 1 ? " top2" : i === 2 ? " top3" : "")
-              }
-            >
-              <div className="rk">#{String(r.rank).padStart(2, "0")}</div>
-              <div className="pl">
-                {r.name}
-                <div
-                  style={{
-                    fontSize: 10,
-                    color: "var(--ink-faint)",
-                    letterSpacing: "0.1em",
-                  }}
-                >
-                  {r.date}
-                </div>
-              </div>
-              <div className="sc">{r.score.toLocaleString("en-US")}</div>
-            </div>
-          ))}
+          <Suspense fallback={<div className="lb-empty">LOADING...</div>}>
+            <TopScores id={game.id} />
+          </Suspense>
         </div>
       </aside>
     </div>

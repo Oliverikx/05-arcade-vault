@@ -1291,6 +1291,24 @@ a {
     caret 0.8s steps(1) infinite;
   width: 0;
 }
+.lb-empty {
+  padding: 28px 12px;
+  text-align: center;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  color: var(--ink-dim);
+}
+.lb-empty a {
+  color: var(--cyan);
+  text-decoration: none;
+}
+.lb-empty a:hover {
+  text-shadow: 0 0 8px var(--cyan);
+}
+.lb-empty.offline {
+  color: var(--magenta);
+}
 .practice-note,
 .save-error {
   font-family: var(--mono);
