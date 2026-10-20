@@ -8,6 +8,7 @@ import {
   ENERGY_PER_LINE,
   KICKS,
   LINE_SCORES,
+  MAX_SCORE,
   PREVIEW_COUNT,
   PREVIEW_PIECES,
   ROWS,
@@ -64,6 +65,7 @@ export function createTetrisGame(
   let score = 0;
   let lines = 0;
   let level = 1;
+  let ready = true; // waiting for Space / click to start
   let paused = false;
   let gameOver = false;
   let choosing = false;
@@ -77,6 +79,10 @@ export function createTetrisGame(
   let held: Piece | null = null;
   let holdReady = false;
   let undoSnap: UndoSnapshot | null = null;
+
+  // Last values sent to callbacks, so they fire only on change
+  let sentScore = -1;
+  let sentLevel = -1;
 
   const pressed = new Set<string>(); // keys currently held
   let blocked = new Set<string>(); // keys held at resume; ignored until released
@@ -93,8 +99,20 @@ export function createTetrisGame(
     return gy;
   }
 
+  function addScore(points: number) {
+    score = Math.min(MAX_SCORE, score + points);
+  }
+
+  // Also covers state restores (undo): callers just render().
+  function syncCallbacks() {
+    if (score !== sentScore) callbacks.onScore((sentScore = score));
+    if (level !== sentLevel) callbacks.onLevel((sentLevel = level));
+  }
+
   function render() {
+    syncCallbacks();
     drawFrame(ctx!, {
+      ready,
       skin,
       theme,
       fontFamily,
@@ -126,7 +144,7 @@ export function createTetrisGame(
 
   // The loop runs only while nothing freezes it.
   function syncLoop() {
-    if (paused || choosing || gameOver) stopLoop();
+    if (ready || paused || choosing || gameOver) stopLoop();
     else if (!rafId) startLoop();
     render();
   }
@@ -145,7 +163,7 @@ export function createTetrisGame(
       }
     }
     render();
-    if (paused || choosing || gameOver) {
+    if (ready || paused || choosing || gameOver) {
       rafId = 0;
       return;
     }
@@ -183,7 +201,7 @@ export function createTetrisGame(
     }
     if (cleared) {
       lines += cleared;
-      score += (LINE_SCORES[cleared] || 0) * level;
+      addScore((LINE_SCORES[cleared] || 0) * level);
       level = Math.max(1, Math.floor(lines / 10) + 1);
       dropInterval = intervalFor(level);
       energy = Math.min(ENERGY_MAX, energy + cleared * ENERGY_PER_LINE);
@@ -192,7 +210,7 @@ export function createTetrisGame(
 
   function hardDrop() {
     const gy = ghostY();
-    score += (gy - current.y) * 2;
+    addScore((gy - current.y) * 2);
     current.y = gy;
     lockPiece();
   }
@@ -200,7 +218,7 @@ export function createTetrisGame(
   function softDrop() {
     if (!collide(board, current.shape, current.x, current.y + 1)) {
       current.y++;
-      score += 1;
+      addScore(1);
     } else {
       lockPiece();
     }
@@ -237,6 +255,13 @@ export function createTetrisGame(
   function endGame() {
     gameOver = true;
     choosing = false;
+    syncLoop();
+    callbacks.onGameOver(score);
+  }
+
+  function startRun() {
+    ready = false;
+    blocked = new Set(pressed); // the starting Space must not hard-drop
     syncLoop();
   }
 
@@ -332,6 +357,10 @@ export function createTetrisGame(
     pressed.add(e.code);
     if (GAME_KEYS.includes(e.code)) e.preventDefault();
     if (paused) return;
+    if (ready) {
+      if (e.code === "Space") startRun();
+      return;
+    }
 
     // While the menu is open, Esc/P belong to the engine (GamePlayer skips
     // defaultPrevented events), so Esc cancels the menu instead of pausing.
@@ -382,6 +411,10 @@ export function createTetrisGame(
     blocked.delete(e.code);
   };
 
+  const onCanvasClick = () => {
+    if (ready && !paused) startRun();
+  };
+
   const onBlur = () => {
     pressed.clear();
     blocked.clear();
@@ -394,6 +427,7 @@ export function createTetrisGame(
     lines = 0;
     level = 1;
     paused = false;
+    ready = true;
     gameOver = false;
     choosing = false;
     dropInterval = intervalFor(level);
@@ -408,12 +442,15 @@ export function createTetrisGame(
     fillQueue();
     spawn();
     blocked = new Set(pressed);
+    sentScore = -1;
+    sentLevel = -1;
     syncLoop();
   }
 
   document.addEventListener("keydown", onKeyDown);
   document.addEventListener("keyup", onKeyUp);
   window.addEventListener("blur", onBlur);
+  canvas.addEventListener("click", onCanvasClick);
 
   canvas.width = W;
   canvas.height = H;
@@ -435,6 +472,7 @@ export function createTetrisGame(
       document.removeEventListener("keydown", onKeyDown);
       document.removeEventListener("keyup", onKeyUp);
       window.removeEventListener("blur", onBlur);
+      canvas.removeEventListener("click", onCanvasClick);
     },
     setAppearance(nextSkin, nextTheme) {
       skin = nextSkin;

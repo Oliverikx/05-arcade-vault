@@ -19,6 +19,7 @@ export const H = 600;
 const BOARD_X = (W - COLS * BLOCK) / 2; // 250
 
 export interface DrawView {
+  ready: boolean;
   skin: TetrisSkin;
   theme: TetrisTheme;
   fontFamily: string;
@@ -355,5 +356,14 @@ export function drawFrame(ctx: CanvasRenderingContext2D, view: DrawView) {
   drawBoard(ctx, view, s);
   drawLeftPanel(ctx, view, s);
   drawRightPanel(ctx, view);
+  if (view.ready) {
+    ctx.fillStyle = "rgba(0,0,0,0.6)";
+    ctx.fillRect(BOARD_X, 0, COLS * BLOCK, H);
+    drawText(ctx, view, "PRESS SPACE TO START", W / 2, H / 2, {
+      size: 12,
+      color: NEON_INK,
+      align: "center",
+    });
+  }
   if (view.choosing) drawAbilityMenu(ctx, view, s);
 }
