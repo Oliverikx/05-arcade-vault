@@ -9,7 +9,10 @@ export function ContactForm() {
   // Bumping the key remounts the form, resetting action state and fields.
   const [resetKey, setResetKey] = useState(0);
   return (
-    <ContactFormInner key={resetKey} onReset={() => setResetKey((k) => k + 1)} />
+    <ContactFormInner
+      key={resetKey}
+      onReset={() => setResetKey((k) => k + 1)}
+    />
   );
 }
 

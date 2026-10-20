@@ -68,7 +68,10 @@ export function Nav() {
         onClick={close}
       ></div>
       <aside className={"av-mobile-panel" + (open ? " open" : "")}>
-        <div className="pixel neon-cyan" style={{ fontSize: 11, marginBottom: 16 }}>
+        <div
+          className="pixel neon-cyan"
+          style={{ fontSize: 11, marginBottom: 16 }}
+        >
           MENU
         </div>
         <Link href="/" className={homeActive ? "active" : ""} onClick={close}>
@@ -95,13 +98,21 @@ export function Nav() {
         >
           About
         </Link>
-        <Link href="/auth" className={authActive ? "active" : ""} onClick={close}>
+        <Link
+          href="/auth"
+          className={authActive ? "active" : ""}
+          onClick={close}
+        >
           {user ? "Account" : "Sign In"}
         </Link>
         <div style={{ flex: 1 }}></div>
         <div
           className="pixel"
-          style={{ fontSize: 9, color: "var(--ink-faint)", letterSpacing: "0.16em" }}
+          style={{
+            fontSize: 9,
+            color: "var(--ink-faint)",
+            letterSpacing: "0.16em",
+          }}
         >
           CREDITS · 03
         </div>

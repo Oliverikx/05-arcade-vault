@@ -149,7 +149,7 @@ export function HallOfFameBoard({ tabs, global, boards }: Props) {
             </div>
             {rows.length === 0 && (
               <div className="lb-empty">
-                <Link href="/games/asteroids/play">
+                <Link href={isGlobal ? "/games" : `/games/${tab}/play`}>
                   NO SCORES YET — BE THE FIRST
                 </Link>
               </div>
