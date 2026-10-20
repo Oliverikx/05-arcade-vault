@@ -4,7 +4,12 @@ import { useMemo, useState } from "react";
 import { GameCard } from "@/components/game-card";
 import { CATS, GAMES } from "@/lib/games";
 
-export function LibraryBrowser() {
+// bests: max score per game id; null when the leaderboard is offline.
+export function LibraryBrowser({
+  bests,
+}: {
+  bests: Record<string, number> | null;
+}) {
   const [q, setQ] = useState("");
   const [cat, setCat] = useState<(typeof CATS)[number]>("ALL");
 
@@ -44,7 +49,7 @@ export function LibraryBrowser() {
 
       <div className="av-grid">
         {filtered.map((g) => (
-          <GameCard key={g.id} game={g} />
+          <GameCard key={g.id} game={g} best={bests?.[g.id] ?? null} />
         ))}
         {filtered.length === 0 && (
           <div
@@ -57,7 +62,11 @@ export function LibraryBrowser() {
           >
             <div
               className="pixel"
-              style={{ fontSize: 14, color: "var(--magenta)", marginBottom: 12 }}
+              style={{
+                fontSize: 14,
+                color: "var(--magenta)",
+                marginBottom: 12,
+              }}
             >
               NO RESULTS
             </div>
