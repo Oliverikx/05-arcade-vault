@@ -23,7 +23,7 @@ async function TopScores({ id }: { id: string }) {
   if (board.rows.length === 0) {
     return (
       <div className="lb-empty">
-        <Link href="/games/asteroids/play">NO SCORES YET — BE THE FIRST</Link>
+        <Link href={`/games/${id}/play`}>NO SCORES YET — BE THE FIRST</Link>
       </div>
     );
   }

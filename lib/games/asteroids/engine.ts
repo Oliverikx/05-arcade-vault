@@ -1,20 +1,11 @@
 // Asteroids engine — framework-free port of resources/started-games/02-asteroids/game.js
 
+import type { GameCallbacks, GameEngine } from "@/lib/games/engine-types";
+
 export type AsteroidsState = "ready" | "playing" | "dead" | "gameover";
 
-export interface AsteroidsCallbacks {
-  onScore(score: number): void;
-  onLives(lives: number): void;
-  onLevel(level: number): void;
-  onGameOver(finalScore: number): void;
-}
-
-export interface AsteroidsGame {
-  setPaused(paused: boolean): void; // freezes update, keeps drawing last frame
-  end(): void; // force gameover → onGameOver(score)
-  reset(): void; // new run, back to "ready"
-  destroy(): void; // cancel rAF, remove listeners
-}
+export type AsteroidsCallbacks = GameCallbacks;
+export type AsteroidsGame = GameEngine;
 
 const W = 800;
 const H = 600;

@@ -1,13 +1,11 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import {
-  createAsteroidsGame,
-  type AsteroidsCallbacks,
-  type AsteroidsGame,
-} from "@/lib/games/asteroids/engine";
+import type { GameCallbacks, GameEngine } from "@/lib/games/engine-types";
+import { getEngine } from "@/lib/games/registry";
 
-interface AsteroidsScreenProps extends AsteroidsCallbacks {
+interface GameScreenProps extends GameCallbacks {
+  gameId: string;
   paused: boolean;
   /** Changing this value resets the engine to its ready screen. */
   runId: number;
@@ -15,7 +13,8 @@ interface AsteroidsScreenProps extends AsteroidsCallbacks {
   endSignal: number;
 }
 
-export function AsteroidsScreen({
+export function GameScreen({
+  gameId,
   paused,
   runId,
   endSignal,
@@ -23,12 +22,13 @@ export function AsteroidsScreen({
   onLives,
   onLevel,
   onGameOver,
-}: AsteroidsScreenProps) {
+}: GameScreenProps) {
+  const entry = getEngine(gameId);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const gameRef = useRef<AsteroidsGame | null>(null);
+  const gameRef = useRef<GameEngine | null>(null);
 
   // Always call the latest callbacks without recreating the engine.
-  const callbacksRef = useRef<AsteroidsCallbacks>({
+  const callbacksRef = useRef<GameCallbacks>({
     onScore,
     onLives,
     onLevel,
@@ -43,8 +43,8 @@ export function AsteroidsScreen({
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
-    const game = createAsteroidsGame(canvas, {
+    if (!canvas || !entry) return;
+    const game = entry.create(canvas, {
       onScore: (s) => callbacksRef.current.onScore(s),
       onLives: (l) => callbacksRef.current.onLives(l),
       onLevel: (l) => callbacksRef.current.onLevel(l),
@@ -55,7 +55,7 @@ export function AsteroidsScreen({
       game.destroy();
       gameRef.current = null;
     };
-  }, []);
+  }, [entry]);
 
   useEffect(() => {
     gameRef.current?.setPaused(paused);
@@ -73,11 +73,13 @@ export function AsteroidsScreen({
     gameRef.current?.end();
   }, [endSignal]);
 
+  if (!entry) return null;
+
   return (
     <canvas
       ref={canvasRef}
-      width={800}
-      height={600}
+      width={entry.width}
+      height={entry.height}
       style={{ display: "block", width: "100%", height: "100%" }}
     />
   );

@@ -2,18 +2,21 @@
 
 import Link from "next/link";
 import { useEffect, useState, useTransition } from "react";
-import { AsteroidsScreen } from "@/components/asteroids-screen";
+import { GameScreen } from "@/components/game-screen";
 import { useSession } from "@/components/session-provider";
 import { saveScore } from "@/app/actions/scores";
 import type { Game } from "@/lib/games";
+import { getEngine } from "@/lib/games/registry";
 
-const LIVES = 3;
+// Lives shown for practice (unregistered) games.
+const PRACTICE_LIVES = 3;
 
 export function GamePlayer({ game }: { game: Game }) {
   const { user } = useSession();
-  const isAsteroids = game.id === "asteroids";
+  const entry = getEngine(game.id);
+  const initialLives = entry ? entry.lives : PRACTICE_LIVES;
   const [score, setScore] = useState(0);
-  const [lives, setLives] = useState(LIVES);
+  const [lives, setLives] = useState(initialLives ?? 0);
   const [engineLevel, setEngineLevel] = useState(1);
   const [runId, setRunId] = useState(0);
   const [endSignal, setEndSignal] = useState(0);
@@ -26,24 +29,30 @@ export function GamePlayer({ game }: { game: Game }) {
   const [saving, startSaving] = useTransition();
 
   const name = typedName ?? user?.name ?? "GUEST";
-  const level = isAsteroids ? engineLevel : 1 + Math.floor(score / 2500);
+  const level = entry ? engineLevel : 1 + Math.floor(score / 2500);
 
   // Fake score ticker: runs only in the client after mount.
   useEffect(() => {
-    if (isAsteroids || over || paused) return;
+    if (entry || over || paused) return;
     const t = setInterval(
       () => setScore((s) => s + Math.floor(10 + Math.random() * 90)),
       220,
     );
     return () => clearInterval(t);
-  }, [isAsteroids, over, paused]);
+  }, [entry, over, paused]);
 
-  // Asteroids pause controls: P / Esc toggle, tab hidden auto-pauses.
+  // Engine game pause controls: P / Esc toggle, tab hidden auto-pauses.
   useEffect(() => {
-    if (!isAsteroids || over) return;
+    if (!entry || over) return;
     const onKeyDown = (e: KeyboardEvent) => {
       const tag = (e.target as HTMLElement | null)?.tagName;
-      if (tag === "INPUT" || tag === "TEXTAREA" || e.repeat) return;
+      if (
+        e.defaultPrevented ||
+        tag === "INPUT" ||
+        tag === "TEXTAREA" ||
+        e.repeat
+      )
+        return;
       if (e.code === "KeyP" || e.code === "Escape") {
         e.preventDefault();
         setPaused((p) => !p);
@@ -58,16 +67,16 @@ export function GamePlayer({ game }: { game: Game }) {
       window.removeEventListener("keydown", onKeyDown);
       document.removeEventListener("visibilitychange", onVisibility);
     };
-  }, [isAsteroids, over]);
+  }, [entry, over]);
 
   const endRun = () => {
-    if (isAsteroids) setEndSignal((n) => n + 1);
+    if (entry) setEndSignal((n) => n + 1);
     else setOver(true);
   };
 
   const restart = () => {
     setScore(0);
-    setLives(LIVES);
+    setLives(initialLives ?? 0);
     setEngineLevel(1);
     setRunId((r) => r + 1);
     setPaused(false);
@@ -106,7 +115,7 @@ export function GamePlayer({ game }: { game: Game }) {
           <div className="hud-stat lives">
             <div className="l">Lives</div>
             <div className="v">
-              {"♥ ".repeat(isAsteroids ? lives : LIVES).trim() || "—"}
+              {initialLives === null ? "—" : "♥ ".repeat(lives).trim() || "—"}
             </div>
           </div>
           <div className="hud-stat level">
@@ -129,8 +138,9 @@ export function GamePlayer({ game }: { game: Game }) {
 
       <div className="crt">
         <div className="crt-screen">
-          {isAsteroids ? (
-            <AsteroidsScreen
+          {entry ? (
+            <GameScreen
+              gameId={game.id}
               paused={paused}
               runId={runId}
               endSignal={endSignal}
@@ -182,7 +192,9 @@ export function GamePlayer({ game }: { game: Game }) {
         </div>
       </div>
 
-      {isAsteroids && <div className="keyboard-note">KEYBOARD REQUIRED</div>}
+      {entry?.keyboardRequired && (
+        <div className="keyboard-note">KEYBOARD REQUIRED</div>
+      )}
 
       {over && (
         <div className="modal-bd">
@@ -190,7 +202,7 @@ export function GamePlayer({ game }: { game: Game }) {
             <h2>GAME OVER</h2>
             <div className="final-label">FINAL SCORE</div>
             <div className="final">{score.toLocaleString("en-US")}</div>
-            {!isAsteroids ? (
+            {!entry ? (
               <div className="practice-note">
                 PRACTICE RUN — SCORE NOT RECORDED
               </div>
