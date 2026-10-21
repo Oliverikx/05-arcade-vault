@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import type { GameCallbacks, GameEngine } from "@/lib/games/engine-types";
-import type { ArkanoidEngine } from "@/lib/games/arkanoid/engine";
+import type { ArkanoidEngine, ArkanoidSkin } from "@/lib/games/arkanoid/engine";
 import type {
   AsteroidsEngine,
   AsteroidsSkin,
@@ -22,6 +22,8 @@ interface GameScreenProps extends GameCallbacks {
   appearance?: TetrisAppearance;
   /** Sound mute for engines that support it (arkanoid). */
   muted?: boolean;
+  /** Canvas skin for arkanoid. */
+  arkanoidSkin?: ArkanoidSkin;
   /** Skin for engines that support it (asteroids). */
   asteroidsSkin?: AsteroidsSkin;
 }
@@ -33,6 +35,7 @@ export function GameScreen({
   endSignal,
   appearance,
   muted,
+  arkanoidSkin,
   asteroidsSkin,
   onScore,
   onLives,
@@ -84,6 +87,12 @@ export function GameScreen({
     const game = gameRef.current as Partial<ArkanoidEngine> | null;
     game?.setMuted?.(muted);
   }, [muted, entry]);
+
+  useEffect(() => {
+    if (arkanoidSkin === undefined) return;
+    const game = gameRef.current as Partial<ArkanoidEngine> | null;
+    game?.setAppearance?.(arkanoidSkin);
+  }, [arkanoidSkin, entry]);
 
   useEffect(() => {
     if (asteroidsSkin === undefined) return;

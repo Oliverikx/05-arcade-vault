@@ -1,7 +1,7 @@
 // Arkanoid engine — framework-free port of resources/started-games/04-arkanoid/game.js
 
 import type { GameCallbacks, GameEngine } from "@/lib/games/engine-types";
-import { drawFrame, type Ball, type Rect } from "./draw";
+import { drawFrame, type ArkanoidSkin, type Ball, type Rect } from "./draw";
 import {
   BALL_SIZE,
   EXPLOSION_DURATION,
@@ -26,8 +26,11 @@ import {
   type Block,
 } from "./levels";
 
+export type { ArkanoidSkin } from "./draw";
+
 export interface ArkanoidEngine extends GameEngine {
   setMuted(muted: boolean): void;
+  setAppearance(skin: ArkanoidSkin): void; // redraws now
 }
 
 const GAME_KEYS = ["ArrowLeft", "ArrowRight", "Space"];
@@ -71,6 +74,7 @@ export function createArkanoidGame(
   let sentLevel = -1;
 
   let muted = false;
+  let skin: ArkanoidSkin = "neon";
   const sounds = {
     bounce: new Audio(`${SOUND_BASE}/ball-bounce.mp3`),
     brk: new Audio(`${SOUND_BASE}/break-sound.mp3`),
@@ -267,6 +271,7 @@ export function createArkanoidGame(
       ready: phase === "ready",
       serveLevel: phase === "playing" && serve ? level : null,
       win: winSteps > 0,
+      skin,
     });
   }
 
@@ -372,6 +377,10 @@ export function createArkanoidGame(
         sounds.bounce.pause();
         sounds.brk.pause();
       }
+    },
+    setAppearance(next) {
+      skin = next;
+      render();
     },
     destroy() {
       stopLoop();

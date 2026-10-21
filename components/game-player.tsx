@@ -5,6 +5,7 @@ import { useEffect, useState, useTransition } from "react";
 import {
   ArkanoidToolbar,
   useArkanoidMuted,
+  useArkanoidSkin,
 } from "@/components/arkanoid-toolbar";
 import {
   AsteroidsToolbar,
@@ -32,6 +33,7 @@ export function GamePlayer({ game }: { game: Game }) {
   const [appearance, setAppearance] = useTetrisAppearance();
   const [asteroidsSkin, setAsteroidsSkin] = useAsteroidsSkin();
   const [muted, setMuted] = useArkanoidMuted();
+  const [arkanoidSkin, setArkanoidSkin] = useArkanoidSkin();
   const initialLives = entry ? entry.lives : PRACTICE_LIVES;
   const [score, setScore] = useState(0);
   const [lives, setLives] = useState(initialLives ?? 0);
@@ -164,6 +166,7 @@ export function GamePlayer({ game }: { game: Game }) {
               endSignal={endSignal}
               appearance={isTetris ? appearance : undefined}
               muted={isArkanoid ? muted : undefined}
+              arkanoidSkin={isArkanoid ? arkanoidSkin : undefined}
               asteroidsSkin={isAsteroids ? asteroidsSkin : undefined}
               onScore={setScore}
               onLives={setLives}
@@ -217,7 +220,14 @@ export function GamePlayer({ game }: { game: Game }) {
         <TetrisToolbar appearance={appearance} onChange={setAppearance} />
       )}
 
-      {isArkanoid && <ArkanoidToolbar muted={muted} onChange={setMuted} />}
+      {isArkanoid && (
+        <ArkanoidToolbar
+          muted={muted}
+          onChange={setMuted}
+          skin={arkanoidSkin}
+          onSkinChange={setArkanoidSkin}
+        />
+      )}
 
       {isAsteroids && (
         <AsteroidsToolbar skin={asteroidsSkin} onChange={setAsteroidsSkin} />

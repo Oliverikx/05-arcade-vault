@@ -1,6 +1,6 @@
 # SPEC SKIN-02 — ARKANOID skin selector
 
-> **Status:** Approved
+> **Status:** Implemented
 > **Depends on:** SPEC 08 (arkanoid integration), SPEC 07 (tetris toolbar pattern)
 > **Date:** 2026-10-21
 > **Objective:** Add a canvas-only `SKIN` selector (`neon` / `retro` / `classic`) to the existing toolbar under the CRT at `/games/arkanoid/play`, persisted per browser, redrawing immediately.
@@ -102,23 +102,23 @@ Each step leaves the app runnable and is commitable alone.
 
 ## Acceptance criteria
 
-- [ ] `npm run build` and `npm run lint` pass.
-- [ ] `lib/games/arkanoid/engine.ts` exports `ArkanoidSkin = "neon" | "retro" | "classic"` and `ArkanoidEngine` with `setAppearance(skin)` and `setMuted`.
-- [ ] `components/arkanoid-toolbar.tsx` has a select labelled `SKIN` with options `NEON`, `RETRO`, `CLASSIC` in that order, plus the existing `SOUND ON` / `SOUND OFF` toggle.
-- [ ] Default (no localStorage) is `neon` and renders identically to the pre-spec build.
-- [ ] Choice persists in `localStorage["av_arkanoid_skin"]` and survives reload; invalid or blocked storage falls back to `neon`.
-- [ ] `av_arkanoid_muted` behavior is unchanged.
-- [ ] Changing skin redraws the canvas immediately in `ready`, while paused, and in `gameover`.
-- [ ] Changing skin does not reset score, lives, level, bricks, ball or paddle position.
-- [ ] Select loses focus after change; arrows / Space afterwards control the paddle / launch, not the select.
-- [ ] With the select focused, Space / arrow keys do not move the paddle or launch the ball.
-- [ ] `neon` colors match the palette table exactly (paddle `#00f5ff`, ball `#e6e9ff`, red brick `#ff006e`).
-- [ ] `retro` and `classic` have `shadowBlur` 0; `neon` uses 8 (paddle) and 6 (ball); no skin exceeds 8.
-- [ ] `classic` bricks use `#bcbcbc`, `#fc0000`, `#fcfc00`, `#00fcfc`, `#fc00fc`, `#fc7400`, `#00fc00` by row order on `#000000`.
+- [x] `npm run build` and `npm run lint` pass.
+- [x] `lib/games/arkanoid/engine.ts` exports `ArkanoidSkin = "neon" | "retro" | "classic"` and `ArkanoidEngine` with `setAppearance(skin)` and `setMuted`.
+- [x] `components/arkanoid-toolbar.tsx` has a select labelled `SKIN` with options `NEON`, `RETRO`, `CLASSIC` in that order, plus the existing `SOUND ON` / `SOUND OFF` toggle.
+- [x] Default (no localStorage) is `neon` and renders identically to the pre-spec build.
+- [x] Choice persists in `localStorage["av_arkanoid_skin"]` and survives reload; invalid or blocked storage falls back to `neon`.
+- [x] `av_arkanoid_muted` behavior is unchanged.
+- [x] Changing skin redraws the canvas immediately in `ready`, while paused, and in `gameover`.
+- [x] Changing skin does not reset score, lives, level, bricks, ball or paddle position.
+- [x] Select loses focus after change; arrows / Space afterwards control the paddle / launch, not the select.
+- [x] With the select focused, Space / arrow keys do not move the paddle or launch the ball.
+- [x] `neon` colors match the palette table exactly (paddle `#00f5ff`, ball `#e6e9ff`, red brick `#ff006e`).
+- [x] `retro` and `classic` have `shadowBlur` 0; `neon` uses 8 (paddle) and 6 (ball); no skin exceeds 8.
+- [x] `classic` bricks use `#bcbcbc`, `#fc0000`, `#fcfc00`, `#00fcfc`, `#fc00fc`, `#fc7400`, `#00fc00` by row order on `#000000`.
 - [ ] Break animation uses the skin's flash and row color.
-- [ ] Skin select is present only at `/games/arkanoid/play` (absent for tetris, asteroids, practice games).
+- [x] Skin select is present only at `/games/arkanoid/play` (absent for tetris, asteroids, practice games).
 - [ ] No hydration warnings on `/games/arkanoid/play`; no console errors on leaving the page.
-- [ ] Toolbar fits at 390px width with no horizontal scroll.
+- [x] Toolbar fits at 390px width with no horizontal scroll.
 
 ## Decisions
 
