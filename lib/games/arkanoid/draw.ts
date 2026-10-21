@@ -32,26 +32,85 @@ export interface FrameView {
   ready: boolean; // pre-run screen: PRESS SPACE OR CLICK TO LAUNCH
   serveLevel: number | null; // ball stuck to paddle → LEVEL N banner + hint
   win: boolean; // YOU WIN banner
+  skin: ArkanoidSkin;
 }
 
-const BG = "#000";
-const BANNER_COLOR = "#f5ff00";
-const HINT_COLOR = "rgba(230, 233, 255, 0.7)";
-const PADDLE_COLOR = "#00f5ff";
-const BALL_COLOR = "#e6e9ff";
+export type ArkanoidSkin = "neon" | "retro" | "classic";
 
-const ROW_HEX: Record<RowColor, string> = {
-  gray: "#e6e9ff",
-  red: "#ff006e",
-  yellow: "#f5ff00",
-  cyan: "#00f5ff",
-  magenta: "#aa00ff",
-  hotpink: "#ff7700",
-  green: "#00ff88",
+interface Palette {
+  bg: string;
+  rows: Record<RowColor, string>;
+  flash: string;
+  paddle: string;
+  ball: string;
+  banner: string;
+  hint: string;
+  glowPaddle: number;
+  glowBall: number;
+}
+
+const PALETTES: Record<ArkanoidSkin, Palette> = {
+  neon: {
+    bg: "#000000",
+    rows: {
+      gray: "#e6e9ff",
+      red: "#ff006e",
+      yellow: "#f5ff00",
+      cyan: "#00f5ff",
+      magenta: "#aa00ff",
+      hotpink: "#ff7700",
+      green: "#00ff88",
+    },
+    flash: "#ffffff",
+    paddle: "#00f5ff",
+    ball: "#e6e9ff",
+    banner: "#f5ff00",
+    hint: "rgba(230, 233, 255, 0.7)",
+    glowPaddle: 8,
+    glowBall: 6,
+  },
+  retro: {
+    bg: "#06100d",
+    rows: {
+      gray: "#c9c6b4",
+      red: "#b8506a",
+      yellow: "#d4a64a",
+      cyan: "#6fb7b0",
+      magenta: "#8a64a8",
+      hotpink: "#c8803c",
+      green: "#7dae7a",
+    },
+    flash: "#efe8cc",
+    paddle: "#6fb7b0",
+    ball: "#d9d2b8",
+    banner: "#d4a64a",
+    hint: "rgba(217, 210, 184, 0.7)",
+    glowPaddle: 0,
+    glowBall: 0,
+  },
+  classic: {
+    bg: "#000000",
+    rows: {
+      gray: "#bcbcbc",
+      red: "#fc0000",
+      yellow: "#fcfc00",
+      cyan: "#00fcfc",
+      magenta: "#fc00fc",
+      hotpink: "#fc7400",
+      green: "#00fc00",
+    },
+    flash: "#ffffff",
+    paddle: "#bcbcbc",
+    ball: "#fcfcfc",
+    banner: "#fcfc00",
+    hint: "rgba(252, 252, 252, 0.7)",
+    glowPaddle: 0,
+    glowBall: 0,
+  },
 };
 
-function drawBlock(ctx: CanvasRenderingContext2D, b: Block) {
-  const color = ROW_HEX[b.color];
+function drawBlock(ctx: CanvasRenderingContext2D, b: Block, pal: Palette) {
+  const color = pal.rows[b.color];
   ctx.fillStyle = color;
   ctx.fillRect(b.x, b.y, b.w, b.h);
   ctx.strokeStyle = "rgba(0, 0, 0, 0.45)";
@@ -64,6 +123,7 @@ function drawBreaking(
   ctx: CanvasRenderingContext2D,
   b: Block,
   elapsed: number,
+  pal: Palette,
 ) {
   const i = Math.min(
     EXPLOSION_FRAMES - 1,
@@ -73,7 +133,7 @@ function drawBreaking(
   const w = b.w * scale;
   const h = b.h * scale;
   ctx.globalAlpha = scale;
-  ctx.fillStyle = i === 0 ? "#fff" : ROW_HEX[b.color];
+  ctx.fillStyle = i === 0 ? pal.flash : pal.rows[b.color];
   ctx.fillRect(b.x + (b.w - w) / 2, b.y + (b.h - h) / 2, w, h);
   ctx.globalAlpha = 1;
 }
@@ -96,25 +156,32 @@ function roundRect(
 }
 
 export function drawFrame(ctx: CanvasRenderingContext2D, view: FrameView) {
-  ctx.fillStyle = BG;
+  const pal = PALETTES[view.skin];
+  ctx.fillStyle = pal.bg;
   ctx.fillRect(0, 0, W, H);
 
   for (const b of view.blocks) {
-    if (b.alive) drawBlock(ctx, b);
-    else if (b.breakElapsed !== null) drawBreaking(ctx, b, b.breakElapsed);
+    if (b.alive) drawBlock(ctx, b, pal);
+    else if (b.breakElapsed !== null) drawBreaking(ctx, b, b.breakElapsed, pal);
   }
 
   const p = view.paddle;
-  ctx.shadowColor = PADDLE_COLOR;
-  ctx.shadowBlur = 8;
-  ctx.fillStyle = PADDLE_COLOR;
+  if (pal.glowPaddle > 0) {
+    ctx.shadowColor = pal.paddle;
+    ctx.shadowBlur = pal.glowPaddle;
+  }
+  ctx.fillStyle = pal.paddle;
   roundRect(ctx, p.x, p.y, p.w, p.h, p.h / 2);
   ctx.fill();
 
   const ball = view.ball;
-  ctx.shadowColor = BALL_COLOR;
-  ctx.shadowBlur = 6;
-  ctx.fillStyle = BALL_COLOR;
+  if (pal.glowBall > 0) {
+    ctx.shadowColor = pal.ball;
+    ctx.shadowBlur = pal.glowBall;
+  } else {
+    ctx.shadowBlur = 0;
+  }
+  ctx.fillStyle = pal.ball;
   ctx.fillRect(ball.x, ball.y, ball.size, ball.size);
   ctx.shadowBlur = 0;
 
@@ -126,7 +193,7 @@ export function drawFrame(ctx: CanvasRenderingContext2D, view: FrameView) {
       "PRESS SPACE OR CLICK TO LAUNCH",
       H / 2 + 40,
       14,
-      HINT_COLOR,
+      pal.hint,
       view.fontFamily,
     );
   } else if (view.serveLevel !== null) {
@@ -135,7 +202,7 @@ export function drawFrame(ctx: CanvasRenderingContext2D, view: FrameView) {
       `LEVEL ${view.serveLevel}`,
       H / 2 + 40,
       28,
-      BANNER_COLOR,
+      pal.banner,
       view.fontFamily,
     );
     drawText(
@@ -143,11 +210,11 @@ export function drawFrame(ctx: CanvasRenderingContext2D, view: FrameView) {
       "SPACE / CLICK TO LAUNCH",
       H / 2 + 80,
       12,
-      HINT_COLOR,
+      pal.hint,
       view.fontFamily,
     );
   } else if (view.win) {
-    drawText(ctx, "YOU WIN", H / 2 + 40, 36, BANNER_COLOR, view.fontFamily);
+    drawText(ctx, "YOU WIN", H / 2 + 40, 36, pal.banner, view.fontFamily);
   }
 }
 

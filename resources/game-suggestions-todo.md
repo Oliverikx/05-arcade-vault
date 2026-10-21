@@ -1,0 +1,113 @@
+# Game suggestions — to-do
+
+Last updated: 2026-10-21 by game-planner
+
+## Next up (ranked)
+
+- [ ] **INVADERS**
+  - ID: `invaders`
+  - Category: SHOOTER
+  - Description: Slide a cannon, shoot descending alien rows, and survive waves before they reach the ground.
+  - Run: `/add-game id: invaders — INVADERS — 5x11 alien grid marches sideways and steps down, speeds up as fewer remain; 4 destructible shields; random alien bombs; bonus UFO. Left/Right move, Space fire (one bullet at a time). Rows worth 10/20/30, UFO 50-300. 3 lives (bomb hit). Level = cleared wave. Game over if aliens reach the ground.`
+- [ ] **PIXEL DUEL**
+  - ID: `pixel-duel`
+  - Category: VERSUS
+  - Description: Bounce the ball past the CPU paddle. Win rallies and rounds to climb tougher opponents.
+  - Run: `/add-game id: pixel-duel — PIXEL DUEL — Pong vs CPU, player paddle left, ball speeds up per rally hit, first to 7 wins a match, W/S or Up/Down, +100 per point won, +50 per rally hit, win bonus 500 x level, 3 lives (lose a match = lose a life), levels = CPU opponents with faster, more accurate paddle`
+- [ ] **2048**
+  - ID: `2048`
+  - Category: PUZZLE
+  - Description: Slide numbered tiles on a 4x4 grid; merge equal tiles to reach 2048.
+  - Run: `/add-game id: 2048 — 2048 — 4x4 grid, arrows/WASD slide all tiles, equal tiles merge, new 2/4 tile spawns each move; score = sum of merged values; lives null; level = highest tile tier; game over when no moves remain`
+- [ ] **MINESWEEPER**
+  - ID: `minesweeper`
+  - Category: PUZZLE
+  - Description: Reveal safe cells on a hidden mine field using number clues; flag mines and clear the board.
+  - Run: `/add-game id: minesweeper — MINESWEEPER — 9x9, 12x12, 16x16 boards, arrows move cursor, Space/Enter reveal, F flag, first click safe; score = cells revealed + time bonus per cleared board; 3 lives (a mine costs a life and flags it); level = board size`
+- [ ] **GEM MATCH**
+  - ID: `gem-match`
+  - Category: PUZZLE
+  - Description: Swap adjacent neon gems to line up three or more; chain cascades for points.
+  - Run: `/add-game id: gem-match — GEM MATCH — 8x8 grid, arrows move cursor, Space selects then swaps with next arrow direction, 3+ matches clear, gravity refill, cascade multiplier; score = gems x chain; 60s timer per level, 3 lives (lose one when timer ends under target score); level = rising target score`
+- [ ] **CONNECT FOUR**
+  - ID: `connect-four`
+  - Category: VERSUS
+  - Description: Drop discs into a grid to line up four before the CPU does.
+  - Run: `/add-game id: connect-four — CONNECT FOUR — 7x6 board vs CPU, left/right pick column, Down/Space drop disc; 1000 per win minus 20 per move used; 3 lives (loss or draw = lose a life); levels = CPU minimax depth 1 to 6`
+- [ ] **GALAXY RAID**
+  - ID: `galaxy-raid`
+  - Category: SHOOTER
+  - Description: Shoot diving alien squadrons that peel off from formation. Survive escalating stages as your ship dodges attacks.
+  - Run: `/add-game id: galaxy-raid — GALAXY RAID — fixed-screen formation shooter; enemies enter in swoops, then dive in curved paths at the player; scrolling starfield. Left/Right, Space fire (max 2 bullets). 50-150 per enemy, double for a diving one, stage-clear bonus. 3 lives. Level = stage, faster dives, more enemies.`
+- [ ] **FLAPPY NEON**
+  - ID: `flappy-neon`
+  - Category: ARCADE
+  - Description: Flap through gaps between neon pipes. Survive as long as possible; each gap passed scores.
+  - Run: `/add-game id: flappy-neon — FLAPPY NEON — Space/Up to flap a glowing ship through scrolling neon pipe gaps; gravity pull, gap shrinks and speed rises per level (every 10 pipes); +1 per pipe passed (+ bonus per level); 3 lives, hit pipe/floor loses a life and respawns mid-gap with brief invulnerability`
+- [ ] **MISSILE DEFENSE**
+  - ID: `missile-defense`
+  - Category: SHOOTER
+  - Description: Aim a crosshair and detonate counter-missiles to protect your cities from incoming warheads.
+  - Run: `/add-game id: missile-defense — MISSILE DEFENSE — 6 cities and 3 silos with limited ammo; enemy missile trails fall toward cities; shots explode into expanding blast circles that chain-kill. Arrows move crosshair, Z/X/C fire from left/mid/right silo (Space = nearest). 25 per missile, bonus per surviving city and unused ammo. Lives null (ends when all cities destroyed). Level = wave, more and faster missiles.`
+- [ ] **BUG BLASTER**
+  - ID: `bug-blaster`
+  - Category: SHOOTER
+  - Description: Shoot a winding centipede through a mushroom field before it reaches your bottom-zone ship.
+  - Run: `/add-game id: bug-blaster — BUG BLASTER — centipede snakes down a mushroom grid; shooting a segment splits it and leaves a mushroom; spider and flea hazards. Arrows move in bottom zone, Space fire. 10 per segment, 100 per head, 300-900 per spider, plus mushroom points. 3 lives. Level = new wave, faster and longer centipede.`
+- [ ] **COLUMNS DROP**
+  - ID: `columns-drop`
+  - Category: PUZZLE
+  - Description: Drop falling gem triples; rearrange colors and line up three or more to clear them.
+  - Run: `/add-game id: columns-drop — COLUMNS DROP — 6x13 well, falling vertical triple of gems, left/right move, up cycles colors, down soft-drops; match 3+ in row/column/diagonal, chain gravity; score = gems cleared x chain; level every 30 gems raises speed; no lives`
+- [ ] **LIGHT CYCLES**
+  - ID: `light-cycles`
+  - Category: VERSUS
+  - Description: Steer a light trail around the arena and trap the CPU rider into crashing.
+  - Run: `/add-game id: light-cycles — LIGHT CYCLES — Tron-style grid duel, arrows or WASD turn 90 degrees, trails are walls, last rider alive wins the round; 500 per round win + survival ticks; 3 lives (crash = lose a life); levels = faster cycles and smarter CPU`
+- [ ] **FROGGY**
+  - ID: `froggy`
+  - Category: ARCADE
+  - Description: Hop across traffic lanes and river logs to fill all lily pads before time runs out.
+  - Run: `/add-game id: froggy — FROGGY — arrows hop one tile across road lanes (cars) and river lanes (logs/turtles) to reach 5 lily pads; timer per run; +10 per forward row, +50 per pad, time bonus on level clear; 3 lives; level up when all pads filled (faster lanes)`
+- [ ] **DINO RUN**
+  - ID: `dino-run`
+  - Category: ARCADE
+  - Description: Run endlessly, jump cacti and duck pterodactyls. Survive longest as speed ramps up.
+  - Run: `/add-game id: dino-run — DINO RUN — Space/Up jump, Down duck; neon dino runs endlessly past cacti and flying obstacles, speed rises; +1 per 10 distance units, +100 per level milestone (every 500m, night palette swap); 3 lives, hit costs a life with brief invulnerability`
+- [ ] **AIR HOCKEY**
+  - ID: `air-hockey`
+  - Category: VERSUS
+  - Description: Slide your mallet to smash the puck into the CPU goal. First to seven wins.
+  - Run: `/add-game id: air-hockey — AIR HOCKEY — top-down table vs CPU, arrows or WASD move mallet on your half, puck bounces off walls, first to 7 goals; 200 per goal + 50 per save; 3 lives (lose a match = lose a life); levels = faster puck, sharper CPU`
+- [ ] **SOKOBAN**
+  - ID: `sokoban`
+  - Category: PUZZLE
+  - Description: Push crates onto target tiles through tight warehouse mazes in as few moves as possible.
+  - Run: `/add-game id: sokoban — SOKOBAN — 8-10 handcrafted grid levels, arrows push crates, U undo, R restart level; per-level base minus move/push penalty plus clear bonus; lives null; level = stage number`
+- [ ] **CHOMPER**
+  - ID: `chomper`
+  - Category: ARCADE
+  - Description: Eat all dots in the maze while dodging four ghosts; power pills let you eat them.
+  - Run: `/add-game id: chomper — CHOMPER — arrows steer a circle through a fixed maze eating dots; 4 ghosts with simple chase/scatter AI; power pills make ghosts edible briefly; 10/dot, 50/pill, ghost chain 200-400-800-1600; 3 lives; level up when maze cleared (faster ghosts, shorter frightened time)`
+- [ ] **SKY HOP**
+  - ID: `sky-hop`
+  - Category: ARCADE
+  - Description: Bounce upward from platform to platform, avoiding gaps. Climb as high as you can.
+  - Run: `/add-game id: sky-hop — SKY HOP — Left/Right steer an auto-bouncing blob upward across random platforms (moving/crumbling types, spring pads); score = max height + coin pickups; 3 lives, falling off screen loses a life and respawns on a safe platform; level every 1000 height (denser gaps, more crumbling)`
+- [ ] **STAR SCRAMBLE**
+  - ID: `star-scramble`
+  - Category: SHOOTER
+  - Description: Fly a ship through a scrolling cavern, shooting enemies and bombing ground targets while fuel runs down.
+  - Run: `/add-game id: star-scramble — STAR SCRAMBLE — auto-scrolling side view over terrain; ground rockets and fuel tanks; enemies from the right. Arrows move, Space shoot, Z drop bomb. 50-200 per target, distance bonus; shooting fuel tanks refuels. 3 lives (collision or empty fuel). Level = stage loop, faster scroll, denser enemies.`
+- [ ] **TANK DUEL**
+  - ID: `tank-duel`
+  - Category: VERSUS
+  - Description: Maneuver your tank around walls and outshoot the CPU tank in a small maze arena.
+  - Run: `/add-game id: tank-duel — TANK DUEL — Combat-style arena vs CPU tank, arrows rotate and move, Space fires bouncing shells, a hit kills, first to 5 kills wins the round; 300 per kill + time bonus; 3 lives; levels = new wall layouts, smarter CPU`
+
+## Done / dropped
+
+- [x] TETRIS — implemented
+- [x] ARKANOID — implemented
+- [x] SNAKE — implemented
+- [x] ASTEROIDS — implemented

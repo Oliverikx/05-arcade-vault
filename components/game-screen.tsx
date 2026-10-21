@@ -2,7 +2,12 @@
 
 import { useEffect, useRef } from "react";
 import type { GameCallbacks, GameEngine } from "@/lib/games/engine-types";
-import type { ArkanoidEngine } from "@/lib/games/arkanoid/engine";
+import type { ArkanoidEngine, ArkanoidSkin } from "@/lib/games/arkanoid/engine";
+import type {
+  AsteroidsEngine,
+  AsteroidsSkin,
+} from "@/lib/games/asteroids/engine";
+import type { SnakeEngine, SnakeSkin } from "@/lib/games/snake/engine";
 import type { TetrisEngine } from "@/lib/games/tetris/engine";
 import type { TetrisAppearance } from "@/components/tetris-toolbar";
 import { getEngine } from "@/lib/games/registry";
@@ -18,6 +23,12 @@ interface GameScreenProps extends GameCallbacks {
   appearance?: TetrisAppearance;
   /** Sound mute for engines that support it (arkanoid). */
   muted?: boolean;
+  /** Canvas skin for arkanoid. */
+  arkanoidSkin?: ArkanoidSkin;
+  /** Skin for engines that support it (asteroids). */
+  asteroidsSkin?: AsteroidsSkin;
+  /** Skin for engines that support it (snake). */
+  snakeSkin?: SnakeSkin;
 }
 
 export function GameScreen({
@@ -27,6 +38,9 @@ export function GameScreen({
   endSignal,
   appearance,
   muted,
+  arkanoidSkin,
+  asteroidsSkin,
+  snakeSkin,
   onScore,
   onLives,
   onLevel,
@@ -77,6 +91,24 @@ export function GameScreen({
     const game = gameRef.current as Partial<ArkanoidEngine> | null;
     game?.setMuted?.(muted);
   }, [muted, entry]);
+
+  useEffect(() => {
+    if (arkanoidSkin === undefined) return;
+    const game = gameRef.current as Partial<ArkanoidEngine> | null;
+    game?.setAppearance?.(arkanoidSkin);
+  }, [arkanoidSkin, entry]);
+
+  useEffect(() => {
+    if (asteroidsSkin === undefined) return;
+    const game = gameRef.current as Partial<AsteroidsEngine> | null;
+    game?.setAppearance?.(asteroidsSkin);
+  }, [asteroidsSkin, entry]);
+
+  useEffect(() => {
+    if (snakeSkin === undefined) return;
+    const game = gameRef.current as Partial<SnakeEngine> | null;
+    game?.setAppearance?.(snakeSkin);
+  }, [snakeSkin, entry]);
 
   useEffect(() => {
     gameRef.current?.setPaused(paused);

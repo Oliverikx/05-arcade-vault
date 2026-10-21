@@ -1,6 +1,6 @@
 // Tetris pieces, rules and constants — ported from resources/started-games/03-tetris/game.js
 
-export type TetrisSkin = "retro" | "neon" | "pastel" | "pixel";
+export type TetrisSkin = "retro" | "neon" | "pastel" | "pixel" | "classic";
 export type TetrisTheme = "dark" | "light";
 
 export type Shape = number[][];
@@ -118,6 +118,17 @@ export const SKIN_COLORS: Record<TetrisSkin, string[]> = {
     "#3f7fd6",
     "#e8821e",
     "#8a9ba5",
+  ],
+  classic: [
+    "",
+    "#00f0f0",
+    "#f0f000",
+    "#a000f0",
+    "#00f000",
+    "#f00000",
+    "#0000f0",
+    "#f0a000",
+    "#808080",
   ],
 };
 

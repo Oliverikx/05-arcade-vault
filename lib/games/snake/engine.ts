@@ -1,7 +1,7 @@
 // Snake engine — framework-free, new game (no source port).
 
 import type { GameCallbacks, GameEngine } from "@/lib/games/engine-types";
-import { COLS, H, ROWS, W, drawFrame, type Cell } from "./draw";
+import { COLS, H, ROWS, W, drawFrame, type Cell, type SnakeSkin } from "./draw";
 import { FRUITS, FRUIT_SHEET } from "./sprites";
 
 type Dir = "up" | "down" | "left" | "right";
@@ -55,10 +55,16 @@ function startSnake(): Cell[] {
   }));
 }
 
+export type { SnakeSkin };
+
+export interface SnakeEngine extends GameEngine {
+  setAppearance(skin: SnakeSkin): void; // redraws now
+}
+
 export function createSnakeGame(
   canvas: HTMLCanvasElement,
   callbacks: GameCallbacks,
-): GameEngine {
+): SnakeEngine {
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("2D canvas context unavailable");
 
@@ -83,6 +89,7 @@ export function createSnakeGame(
   let accum = 0;
   let lastTime = 0;
   let rafId = 0;
+  let skin: SnakeSkin = "neon";
 
   // Last values sent to callbacks, so they fire only on change
   let sentScore = -1;
@@ -199,6 +206,7 @@ export function createSnakeGame(
       fruit,
       fruitName,
       sheet,
+      skin,
       hint: gameOver
         ? null
         : ready
@@ -300,6 +308,10 @@ export function createSnakeGame(
   rafId = requestAnimationFrame(loop);
 
   return {
+    setAppearance(next) {
+      skin = next;
+      render();
+    },
     setPaused(next) {
       if (next === paused || gameOver) return;
       paused = next;

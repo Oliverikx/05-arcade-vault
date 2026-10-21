@@ -5,8 +5,14 @@ import { useEffect, useState, useTransition } from "react";
 import {
   ArkanoidToolbar,
   useArkanoidMuted,
+  useArkanoidSkin,
 } from "@/components/arkanoid-toolbar";
+import {
+  AsteroidsToolbar,
+  useAsteroidsSkin,
+} from "@/components/asteroids-toolbar";
 import { GameScreen } from "@/components/game-screen";
+import { SnakeToolbar, useSnakeSkin } from "@/components/snake-toolbar";
 import {
   TetrisToolbar,
   useTetrisAppearance,
@@ -24,8 +30,13 @@ export function GamePlayer({ game }: { game: Game }) {
   const entry = getEngine(game.id);
   const isTetris = game.id === "tetris";
   const isArkanoid = game.id === "arkanoid";
+  const isAsteroids = game.id === "asteroids";
+  const isSnake = game.id === "snake";
   const [appearance, setAppearance] = useTetrisAppearance();
+  const [asteroidsSkin, setAsteroidsSkin] = useAsteroidsSkin();
+  const [snakeSkin, setSnakeSkin] = useSnakeSkin();
   const [muted, setMuted] = useArkanoidMuted();
+  const [arkanoidSkin, setArkanoidSkin] = useArkanoidSkin();
   const initialLives = entry ? entry.lives : PRACTICE_LIVES;
   const [score, setScore] = useState(0);
   const [lives, setLives] = useState(initialLives ?? 0);
@@ -158,6 +169,9 @@ export function GamePlayer({ game }: { game: Game }) {
               endSignal={endSignal}
               appearance={isTetris ? appearance : undefined}
               muted={isArkanoid ? muted : undefined}
+              arkanoidSkin={isArkanoid ? arkanoidSkin : undefined}
+              asteroidsSkin={isAsteroids ? asteroidsSkin : undefined}
+              snakeSkin={isSnake ? snakeSkin : undefined}
               onScore={setScore}
               onLives={setLives}
               onLevel={setEngineLevel}
@@ -210,7 +224,20 @@ export function GamePlayer({ game }: { game: Game }) {
         <TetrisToolbar appearance={appearance} onChange={setAppearance} />
       )}
 
-      {isArkanoid && <ArkanoidToolbar muted={muted} onChange={setMuted} />}
+      {isArkanoid && (
+        <ArkanoidToolbar
+          muted={muted}
+          onChange={setMuted}
+          skin={arkanoidSkin}
+          onSkinChange={setArkanoidSkin}
+        />
+      )}
+
+      {isAsteroids && (
+        <AsteroidsToolbar skin={asteroidsSkin} onChange={setAsteroidsSkin} />
+      )}
+
+      {isSnake && <SnakeToolbar skin={snakeSkin} onChange={setSnakeSkin} />}
 
       {entry?.keyboardRequired && (
         <div className="keyboard-note">KEYBOARD REQUIRED</div>

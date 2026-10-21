@@ -55,6 +55,12 @@ Resend (`resend` package), `app/about/actions.ts`. Env: `RESEND_API_KEY`, `CONTA
   - `/spec-impl NN-slug` — implement an **Approved** spec. Creates/switches to branch `spec-NN-slug` (per `specs/.spec-config.yml` `AutoCreateBranch: true`), implements step by step, never auto-commits.
   - `/add-game <starter folder | idea>` — writes ONE spec integrating a new game engine + leaderboard. Reads `.claude/skills/add-game/integration-checklist.md` (platform touchpoints) and `template.md` first. Starter sources in `resources/started-games/`.
 
+## Agents
+
+- `game-planner` (`.claude/agents/game-planner.md`) — picks which game fits the platform next, then feed its pick to `/add-game`. Keeps all past suggestions in `.claude/agent-memory/game-planner/MEMORY.md`. Writes ranked to-do to `resources/game-suggestions-todo.md`.
+- `game-jam` (`.claude/agents/game-jam.md`) — give it a game proposal; writes 3 Draft specs (same shape as 07–09) in `specs/game-jam/<game-id>/NN-<game-id>-<feature>.md`. Refuses if that game id already exists there.
+- `skin-designer` (`.claude/agents/skin-designer.md`) — give it one or more game ids; checks each has a skin selector with neon/retro/classic (tetris = reference). Writes Draft specs `specs/skin-designer/NN-<game-id>-skin-selector.md` (no selector) or `NN-<game-id>-missing-skins.md` (some skins missing). Spec only.
+
 ## Hooks
 
 `.claude/settings.json` — PostToolUse hook runs `.claude/hooks/format-file.mjs` (Prettier) after every Write/Edit.

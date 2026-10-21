@@ -8,7 +8,7 @@ export interface TetrisAppearance {
   theme: TetrisTheme;
 }
 
-const SKINS: TetrisSkin[] = ["retro", "neon", "pastel", "pixel"];
+const SKINS: TetrisSkin[] = ["retro", "neon", "pastel", "pixel", "classic"];
 const THEMES: TetrisTheme[] = ["light", "dark"];
 const SKIN_KEY = "av_tetris_skin";
 const THEME_KEY = "av_tetris_theme";
