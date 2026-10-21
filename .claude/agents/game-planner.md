@@ -59,7 +59,11 @@ Last updated: YYYY-MM-DD by game-planner
 
 ## Next up (ranked)
 
-- [ ] **GAME** (CATEGORY, slot `id`) — score N/35. Why: ... · `/add-game id: ...`
+- [ ] **TITLE**
+  - ID: `game-id`
+  - Category: ARCADE | PUZZLE | SHOOTER | VERSUS
+  - Description: 1 sentence, what player does + goal.
+  - Run: `/add-game id: TITLE — mechanics, controls, scoring, lives/levels`
 
 ## Done / dropped
 
@@ -67,7 +71,7 @@ Last updated: YYYY-MM-DD by game-planner
 - [~] GAME — rejected (reason)
 ```
 
-Rules: keep user-checked `[x]` items and any manual notes; move implemented/rejected games (per memory + `implemented-games.md`) to "Done / dropped"; replace "Next up" with the current ranked candidates; no duplicates.
+Rules: every Next up item MUST have all 4 fields (ID, Title, Category, Description). ID = kebab-case, matches `lib/games.ts` slot if reusing one. Description ≤ 20 words, plain gameplay/goal, no scoring math or stack talk. Keep user-checked `[x]` items and any manual notes; move implemented/rejected games (per memory + `implemented-games.md`) to "Done / dropped"; replace "Next up" with the current ranked candidates; no duplicates.
 
 ## Step 5 — Write memory (mandatory, every run)
 
