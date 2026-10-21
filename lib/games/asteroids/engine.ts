@@ -4,8 +4,12 @@ import type { GameCallbacks, GameEngine } from "@/lib/games/engine-types";
 
 export type AsteroidsState = "ready" | "playing" | "dead" | "gameover";
 
+export type AsteroidsSkin = "neon" | "retro" | "classic";
+
 export type AsteroidsCallbacks = GameCallbacks;
-export type AsteroidsGame = GameEngine;
+export interface AsteroidsEngine extends GameEngine {
+  setAppearance(skin: AsteroidsSkin): void; // redraws now
+}
 
 const W = 800;
 const H = 600;
@@ -17,13 +21,63 @@ const SHIELD_DURATION = 5;
 const MAX_DT = 0.05;
 const START_LIVES = 3;
 
-// Platform palette (mirrors the vars in app/globals.css)
-const INK = "#e6e9ff";
-const CYAN = "#00f5ff";
-const MAGENTA = "#ff006e";
-const YELLOW = "#f5ff00";
-const GREEN = "#00ff88";
-const GLOW = 8; // shadowBlur ceiling; particles get none
+interface Palette {
+  background: string;
+  ship: string;
+  flame: string;
+  asteroid: string;
+  bullet: string;
+  particleRgb: string;
+  powerUp: string; // power-up ring/icon, shield and timer text
+  prompt: string;
+  glow: number; // shadowBlur, 0 = none (ceiling 8)
+}
+
+// neon mirrors the platform vars in app/globals.css
+const PALETTES: Record<AsteroidsSkin, Palette> = {
+  neon: {
+    background: "#000000",
+    ship: "#00f5ff",
+    flame: "#f5ff00",
+    asteroid: "#ff006e",
+    bullet: "#e6e9ff",
+    particleRgb: "230,233,255",
+    powerUp: "#00ff88",
+    prompt: "#e6e9ff",
+    glow: 8,
+  },
+  retro: {
+    background: "#06100d",
+    ship: "#6fb7b0",
+    flame: "#d4a64a",
+    asteroid: "#b8607a",
+    bullet: "#d9d2b8",
+    particleRgb: "217,210,184",
+    powerUp: "#7dae7a",
+    prompt: "#d9d2b8",
+    glow: 0,
+  },
+  classic: {
+    background: "#000000",
+    ship: "#ffffff",
+    flame: "#ffffff",
+    asteroid: "#ffffff",
+    bullet: "#ffffff",
+    particleRgb: "255,255,255",
+    powerUp: "#ffffff",
+    prompt: "#ffffff",
+    glow: 0,
+  },
+};
+
+// Read at draw time; swapped by setAppearance
+let palette: Palette = PALETTES.neon;
+
+function setGlow(ctx: CanvasRenderingContext2D, color: string) {
+  if (palette.glow === 0) return;
+  ctx.shadowColor = color;
+  ctx.shadowBlur = palette.glow;
+}
 
 const GAME_KEYS = ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Space"];
 
@@ -64,7 +118,7 @@ class Bullet {
   }
 
   draw(ctx: CanvasRenderingContext2D) {
-    ctx.fillStyle = INK;
+    ctx.fillStyle = palette.bullet;
     ctx.beginPath();
     ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
     ctx.fill();
@@ -120,9 +174,8 @@ class Asteroid {
     ctx.save();
     ctx.translate(this.x, this.y);
     ctx.rotate(this.rot);
-    ctx.strokeStyle = MAGENTA;
-    ctx.shadowColor = MAGENTA;
-    ctx.shadowBlur = GLOW;
+    ctx.strokeStyle = palette.asteroid;
+    setGlow(ctx, palette.asteroid);
     ctx.lineWidth = 1.5;
     ctx.lineJoin = "round";
     ctx.beginPath();
@@ -207,9 +260,8 @@ class Ship {
     ctx.save();
     ctx.translate(this.x, this.y);
     ctx.rotate(this.angle);
-    ctx.strokeStyle = CYAN;
-    ctx.shadowColor = CYAN;
-    ctx.shadowBlur = GLOW;
+    ctx.strokeStyle = palette.ship;
+    setGlow(ctx, palette.ship);
     ctx.lineWidth = 1.5;
     ctx.lineJoin = "round";
 
@@ -228,7 +280,7 @@ class Ship {
       ctx.moveTo(-8, -4);
       ctx.lineTo(-8 - rand(6, 14), 0);
       ctx.lineTo(-8, 4);
-      ctx.strokeStyle = YELLOW;
+      ctx.strokeStyle = palette.flame;
       ctx.stroke();
     }
 
@@ -264,7 +316,7 @@ class Particle {
 
   draw(ctx: CanvasRenderingContext2D) {
     const alpha = this.ttl / this.life;
-    ctx.strokeStyle = `rgba(230,233,255,${alpha.toFixed(2)})`;
+    ctx.strokeStyle = `rgba(${palette.particleRgb},${alpha.toFixed(2)})`;
     ctx.lineWidth = 1;
     ctx.beginPath();
     ctx.moveTo(this.x, this.y);
@@ -304,9 +356,8 @@ class PowerUp {
     if (this.ttl < 2 && Math.floor(this.ttl * 8) % 2 === 0) return;
     ctx.save();
     ctx.translate(this.x, this.y);
-    ctx.strokeStyle = GREEN;
-    ctx.shadowColor = GREEN;
-    ctx.shadowBlur = GLOW;
+    ctx.strokeStyle = palette.powerUp;
+    setGlow(ctx, palette.powerUp);
     ctx.lineWidth = 1.5;
     ctx.beginPath();
     ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
@@ -332,9 +383,10 @@ class PowerUp {
 export function createAsteroidsGame(
   canvas: HTMLCanvasElement,
   callbacks: AsteroidsCallbacks,
-): AsteroidsGame {
+): AsteroidsEngine {
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("2D canvas context unavailable");
+  palette = PALETTES.neon; // module-level: don't inherit a previous engine's skin
 
   // Canvas can't read CSS vars directly; resolve the platform pixel font once.
   const fontFamily =
@@ -376,6 +428,7 @@ export function createAsteroidsGame(
     const target = e.target as HTMLElement | null;
     if (
       state === "gameover" ||
+      target?.tagName === "SELECT" ||
       target?.tagName === "INPUT" ||
       target?.tagName === "TEXTAREA"
     )
@@ -582,7 +635,7 @@ export function createAsteroidsGame(
   // Score, lives and level live in the React HUD; only timers stay in canvas
   function drawTimers() {
     if (!ctx) return;
-    ctx.fillStyle = GREEN;
+    ctx.fillStyle = palette.powerUp;
     ctx.font = `11px ${fontFamily}`;
     ctx.textAlign = "left";
     let y = 26;
@@ -598,9 +651,8 @@ export function createAsteroidsGame(
     if (!ctx || shieldTimer <= 0 || ship.dead) return;
     // Blink when about to expire
     if (shieldTimer < 1.5 && Math.floor(shieldTimer * 8) % 2 === 0) return;
-    ctx.strokeStyle = GREEN;
-    ctx.shadowColor = GREEN;
-    ctx.shadowBlur = GLOW;
+    ctx.strokeStyle = palette.powerUp;
+    setGlow(ctx, palette.powerUp);
     ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.arc(ship.x, ship.y, 22, 0, Math.PI * 2);
@@ -610,14 +662,14 @@ export function createAsteroidsGame(
   function drawReadyPrompt() {
     if (!ctx) return;
     ctx.textAlign = "center";
-    ctx.fillStyle = INK;
+    ctx.fillStyle = palette.prompt;
     ctx.font = `16px ${fontFamily}`;
     ctx.fillText("PRESS SPACE OR CLICK TO START", W / 2, H / 2 + 110);
   }
 
   function draw() {
     if (!ctx) return;
-    ctx.fillStyle = "#000";
+    ctx.fillStyle = palette.background;
     ctx.fillRect(0, 0, W, H);
 
     particles.forEach((p) => p.draw(ctx));
@@ -661,6 +713,10 @@ export function createAsteroidsGame(
     reset() {
       paused = false;
       initGame();
+    },
+    setAppearance(skin) {
+      palette = PALETTES[skin];
+      draw();
     },
     destroy() {
       cancelAnimationFrame(rafId);

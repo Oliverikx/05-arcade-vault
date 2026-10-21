@@ -6,6 +6,10 @@ import {
   ArkanoidToolbar,
   useArkanoidMuted,
 } from "@/components/arkanoid-toolbar";
+import {
+  AsteroidsToolbar,
+  useAsteroidsSkin,
+} from "@/components/asteroids-toolbar";
 import { GameScreen } from "@/components/game-screen";
 import {
   TetrisToolbar,
@@ -24,7 +28,9 @@ export function GamePlayer({ game }: { game: Game }) {
   const entry = getEngine(game.id);
   const isTetris = game.id === "tetris";
   const isArkanoid = game.id === "arkanoid";
+  const isAsteroids = game.id === "asteroids";
   const [appearance, setAppearance] = useTetrisAppearance();
+  const [asteroidsSkin, setAsteroidsSkin] = useAsteroidsSkin();
   const [muted, setMuted] = useArkanoidMuted();
   const initialLives = entry ? entry.lives : PRACTICE_LIVES;
   const [score, setScore] = useState(0);
@@ -158,6 +164,7 @@ export function GamePlayer({ game }: { game: Game }) {
               endSignal={endSignal}
               appearance={isTetris ? appearance : undefined}
               muted={isArkanoid ? muted : undefined}
+              asteroidsSkin={isAsteroids ? asteroidsSkin : undefined}
               onScore={setScore}
               onLives={setLives}
               onLevel={setEngineLevel}
@@ -211,6 +218,10 @@ export function GamePlayer({ game }: { game: Game }) {
       )}
 
       {isArkanoid && <ArkanoidToolbar muted={muted} onChange={setMuted} />}
+
+      {isAsteroids && (
+        <AsteroidsToolbar skin={asteroidsSkin} onChange={setAsteroidsSkin} />
+      )}
 
       {entry?.keyboardRequired && (
         <div className="keyboard-note">KEYBOARD REQUIRED</div>
