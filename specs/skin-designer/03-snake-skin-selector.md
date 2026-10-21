@@ -1,6 +1,6 @@
 # SPEC SKIN-03 — SNAKE skin selector
 
-> **Status:** Approved
+> **Status:** Implemented
 > **Depends on:** SPEC 09 (snake game), SPEC 07 (tetris toolbar pattern)
 > **Date:** 2026-10-21
 > **Objective:** Add a canvas-only `SKIN` selector (`neon` / `retro` / `classic`) under the CRT at `/games/snake/play`, persisted per browser, redrawing immediately.

@@ -1,4 +1,4 @@
-// Snake rendering — vector neon snake, sprite fruit with magenta fallback.
+// Snake rendering — vector snake in three skins, sprite fruit with flat fallback.
 
 import { FRUITS } from "./sprites";
 
@@ -9,8 +9,49 @@ export const W = COLS * CELL; // 640
 export const H = ROWS * CELL; // 480
 
 const FRUIT_BOX = 28;
-const GREEN = "#00ff88";
-const MAGENTA = "#ff006e";
+const GLOW_BLUR = 8;
+
+export type SnakeSkin = "neon" | "retro" | "classic";
+
+interface Palette {
+  background: string;
+  grid: string | null; // null = grid not drawn
+  head: string;
+  body: string;
+  fruit: string; // fallback square when the sprite is missing
+  hint: string;
+  glow: string | null; // head shadowColor, null = no glow
+}
+
+const PALETTES: Record<SnakeSkin, Palette> = {
+  neon: {
+    background: "#000000",
+    grid: "rgba(230, 233, 255, 0.06)",
+    head: "#00ff88",
+    body: "rgba(0, 255, 136, 0.7)",
+    fruit: "#ff006e",
+    hint: "rgba(230, 233, 255, 0.7)",
+    glow: "#00ff88",
+  },
+  retro: {
+    background: "#06100d",
+    grid: "rgba(217, 210, 184, 0.06)",
+    head: "#7dae7a",
+    body: "rgba(125, 174, 122, 0.7)",
+    fruit: "#b8607a",
+    hint: "rgba(217, 210, 184, 0.7)",
+    glow: null,
+  },
+  classic: {
+    background: "#000000",
+    grid: null,
+    head: "#00ff00",
+    body: "#00c800",
+    fruit: "#ff0000",
+    hint: "#ffffff",
+    glow: null,
+  },
+};
 
 export interface Cell {
   c: number;
@@ -24,10 +65,11 @@ export interface FrameView {
   fruitName: string;
   sheet: HTMLImageElement | null; // null until loaded
   hint: string | null; // centered text (ready / serve)
+  skin: SnakeSkin;
 }
 
-function drawGrid(ctx: CanvasRenderingContext2D) {
-  ctx.strokeStyle = "rgba(230, 233, 255, 0.06)";
+function drawGrid(ctx: CanvasRenderingContext2D, color: string) {
+  ctx.strokeStyle = color;
   ctx.lineWidth = 1;
   ctx.beginPath();
   for (let c = 1; c < COLS; c++) {
@@ -46,6 +88,7 @@ function drawFruit(
   cell: Cell,
   name: string,
   sheet: HTMLImageElement | null,
+  fallback: string,
 ) {
   const x = cell.c * CELL;
   const y = cell.r * CELL;
@@ -53,7 +96,7 @@ function drawFruit(
   if (!sheet || !sprite) {
     const size = FRUIT_BOX - 8;
     const off = (CELL - size) / 2;
-    ctx.fillStyle = MAGENTA;
+    ctx.fillStyle = fallback;
     ctx.beginPath();
     ctx.roundRect(x + off, y + off, size, size, 4);
     ctx.fill();
@@ -77,9 +120,13 @@ function drawFruit(
   );
 }
 
-function drawSnake(ctx: CanvasRenderingContext2D, snake: Cell[]) {
-  // Body first so the glowing head sits on top.
-  ctx.fillStyle = "rgba(0, 255, 136, 0.7)";
+function drawSnake(
+  ctx: CanvasRenderingContext2D,
+  snake: Cell[],
+  palette: Palette,
+) {
+  // Body first so the head sits on top.
+  ctx.fillStyle = palette.body;
   for (let i = snake.length - 1; i >= 1; i--) {
     const { c, r } = snake[i];
     ctx.fillRect(c * CELL + 1, r * CELL + 1, CELL - 2, CELL - 2);
@@ -87,16 +134,23 @@ function drawSnake(ctx: CanvasRenderingContext2D, snake: Cell[]) {
   if (snake.length === 0) return;
   const head = snake[0];
   ctx.save();
-  ctx.shadowColor = GREEN;
-  ctx.shadowBlur = 8;
-  ctx.fillStyle = GREEN;
+  if (palette.glow) {
+    ctx.shadowColor = palette.glow;
+    ctx.shadowBlur = GLOW_BLUR;
+  }
+  ctx.fillStyle = palette.head;
   ctx.fillRect(head.c * CELL + 1, head.r * CELL + 1, CELL - 2, CELL - 2);
   ctx.restore();
 }
 
-function drawHint(ctx: CanvasRenderingContext2D, text: string, font: string) {
+function drawHint(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  font: string,
+  color: string,
+) {
   ctx.save();
-  ctx.fillStyle = "rgba(230, 233, 255, 0.7)";
+  ctx.fillStyle = color;
   ctx.font = `12px ${font}`;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
@@ -105,10 +159,12 @@ function drawHint(ctx: CanvasRenderingContext2D, text: string, font: string) {
 }
 
 export function drawFrame(ctx: CanvasRenderingContext2D, view: FrameView) {
-  ctx.fillStyle = "#000";
+  const palette = PALETTES[view.skin];
+  ctx.fillStyle = palette.background;
   ctx.fillRect(0, 0, W, H);
-  drawGrid(ctx);
-  if (view.fruit) drawFruit(ctx, view.fruit, view.fruitName, view.sheet);
-  drawSnake(ctx, view.snake);
-  if (view.hint) drawHint(ctx, view.hint, view.fontFamily);
+  if (palette.grid) drawGrid(ctx, palette.grid);
+  if (view.fruit)
+    drawFruit(ctx, view.fruit, view.fruitName, view.sheet, palette.fruit);
+  drawSnake(ctx, view.snake, palette);
+  if (view.hint) drawHint(ctx, view.hint, view.fontFamily, palette.hint);
 }

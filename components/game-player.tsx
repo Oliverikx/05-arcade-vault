@@ -12,6 +12,7 @@ import {
   useAsteroidsSkin,
 } from "@/components/asteroids-toolbar";
 import { GameScreen } from "@/components/game-screen";
+import { SnakeToolbar, useSnakeSkin } from "@/components/snake-toolbar";
 import {
   TetrisToolbar,
   useTetrisAppearance,
@@ -30,8 +31,10 @@ export function GamePlayer({ game }: { game: Game }) {
   const isTetris = game.id === "tetris";
   const isArkanoid = game.id === "arkanoid";
   const isAsteroids = game.id === "asteroids";
+  const isSnake = game.id === "snake";
   const [appearance, setAppearance] = useTetrisAppearance();
   const [asteroidsSkin, setAsteroidsSkin] = useAsteroidsSkin();
+  const [snakeSkin, setSnakeSkin] = useSnakeSkin();
   const [muted, setMuted] = useArkanoidMuted();
   const [arkanoidSkin, setArkanoidSkin] = useArkanoidSkin();
   const initialLives = entry ? entry.lives : PRACTICE_LIVES;
@@ -168,6 +171,7 @@ export function GamePlayer({ game }: { game: Game }) {
               muted={isArkanoid ? muted : undefined}
               arkanoidSkin={isArkanoid ? arkanoidSkin : undefined}
               asteroidsSkin={isAsteroids ? asteroidsSkin : undefined}
+              snakeSkin={isSnake ? snakeSkin : undefined}
               onScore={setScore}
               onLives={setLives}
               onLevel={setEngineLevel}
@@ -232,6 +236,8 @@ export function GamePlayer({ game }: { game: Game }) {
       {isAsteroids && (
         <AsteroidsToolbar skin={asteroidsSkin} onChange={setAsteroidsSkin} />
       )}
+
+      {isSnake && <SnakeToolbar skin={snakeSkin} onChange={setSnakeSkin} />}
 
       {entry?.keyboardRequired && (
         <div className="keyboard-note">KEYBOARD REQUIRED</div>

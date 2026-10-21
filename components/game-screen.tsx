@@ -7,6 +7,7 @@ import type {
   AsteroidsEngine,
   AsteroidsSkin,
 } from "@/lib/games/asteroids/engine";
+import type { SnakeEngine, SnakeSkin } from "@/lib/games/snake/engine";
 import type { TetrisEngine } from "@/lib/games/tetris/engine";
 import type { TetrisAppearance } from "@/components/tetris-toolbar";
 import { getEngine } from "@/lib/games/registry";
@@ -26,6 +27,8 @@ interface GameScreenProps extends GameCallbacks {
   arkanoidSkin?: ArkanoidSkin;
   /** Skin for engines that support it (asteroids). */
   asteroidsSkin?: AsteroidsSkin;
+  /** Skin for engines that support it (snake). */
+  snakeSkin?: SnakeSkin;
 }
 
 export function GameScreen({
@@ -37,6 +40,7 @@ export function GameScreen({
   muted,
   arkanoidSkin,
   asteroidsSkin,
+  snakeSkin,
   onScore,
   onLives,
   onLevel,
@@ -99,6 +103,12 @@ export function GameScreen({
     const game = gameRef.current as Partial<AsteroidsEngine> | null;
     game?.setAppearance?.(asteroidsSkin);
   }, [asteroidsSkin, entry]);
+
+  useEffect(() => {
+    if (snakeSkin === undefined) return;
+    const game = gameRef.current as Partial<SnakeEngine> | null;
+    game?.setAppearance?.(snakeSkin);
+  }, [snakeSkin, entry]);
 
   useEffect(() => {
     gameRef.current?.setPaused(paused);
