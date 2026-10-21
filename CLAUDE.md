@@ -59,6 +59,7 @@ Resend (`resend` package), `app/about/actions.ts`. Env: `RESEND_API_KEY`, `CONTA
 
 - `game-planner` (`.claude/agents/game-planner.md`) — picks which game fits the platform next, then feed its pick to `/add-game`. Keeps all past suggestions in `.claude/agent-memory/game-planner/MEMORY.md`. Writes ranked to-do to `resources/game-suggestions-todo.md`.
 - `game-jam` (`.claude/agents/game-jam.md`) — give it a game proposal; writes 3 Draft specs (same shape as 07–09) in `specs/game-jam/<game-id>/NN-<game-id>-<feature>.md`. Refuses if that game id already exists there.
+- `skin-designer` (`.claude/agents/skin-designer.md`) — give it one or more game ids; checks each has a skin selector with neon/retro/classic (tetris = reference). Writes Draft specs `specs/skin-designer/NN-<game-id>-skin-selector.md` (no selector) or `NN-<game-id>-missing-skins.md` (some skins missing). Spec only.
 
 ## Hooks
 
