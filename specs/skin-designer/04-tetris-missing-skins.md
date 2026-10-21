@@ -1,6 +1,6 @@
 # SPEC SKIN-04 — TETRIS missing skins
 
-> **Status:** Approved
+> **Status:** Implemented
 > **Depends on:** SPEC 07
 > **Date:** 2026-10-21
 > **Objective:** Add the missing `classic` skin (original flat Tetris colors) to the existing tetris skin selector, leaving `neon`, `retro`, `pastel`, `pixel` untouched.

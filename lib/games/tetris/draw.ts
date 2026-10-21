@@ -72,6 +72,14 @@ function surfaceFor(skin: TetrisSkin, theme: TetrisTheme): Surface {
         well: "#16202b",
         wall: "#5d7a94",
       };
+    case "classic":
+      return {
+        bg: "#000000",
+        grid: "#202020",
+        ink: "#ffffff",
+        well: "#000000",
+        wall: "#9a9a9a",
+      };
     case "retro":
       return theme === "light"
         ? {
@@ -170,6 +178,10 @@ const BLOCK_DRAWERS: Record<TetrisSkin, BlockDrawer> = {
     ctx.fillStyle = "rgba(0,0,0,0.5)";
     ctx.fillRect(px, py + s - u, s, u);
     ctx.fillRect(px + s - u, py, u, s);
+  },
+  classic(ctx, px, py, s, color) {
+    ctx.fillStyle = color;
+    ctx.fillRect(px, py, s, s);
   },
 };
 
