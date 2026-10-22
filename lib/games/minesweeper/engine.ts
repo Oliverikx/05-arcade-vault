@@ -5,6 +5,7 @@ import {
   boardForLevel,
   chord,
   createCells,
+  pickHintCell,
   placeMines,
   reveal,
   type BoardSpec,
@@ -20,6 +21,9 @@ const CLEAR_BANNER_MS = 1500;
 const LONG_PRESS_MS = 450;
 const LONG_PRESS_MOVE_PX = 8;
 const MAX_SECONDS = 999;
+const HINTS_PER_BOARD = 2;
+const HINT_COST = 100;
+const HINT_PULSE_MS = 600;
 const MAX_SCORE = 10_000_000;
 
 const KEY_MOVES: Record<string, [number, number]> = {
@@ -32,7 +36,7 @@ const KEY_MOVES: Record<string, [number, number]> = {
   ArrowDown: [0, 1],
   KeyS: [0, 1],
 };
-const GAME_KEYS = [...Object.keys(KEY_MOVES), "Space", "KeyF"];
+const GAME_KEYS = [...Object.keys(KEY_MOVES), "Space", "KeyF", "KeyH"];
 const IGNORED_TARGETS = ["INPUT", "SELECT", "TEXTAREA", "BUTTON"];
 
 interface Press {
@@ -44,6 +48,7 @@ interface Press {
 }
 
 export interface MinesweeperEngine extends GameEngine {
+  hint(): void;
   setMuted(muted: boolean): void;
 }
 
@@ -69,6 +74,8 @@ export function createMinesweeperGame(
   let boardMs = 0;
   let phaseMs = 0; // time left in the loss delay / clear banner
   let hitIndex: number | null = null;
+  let hintsLeft = HINTS_PER_BOARD;
+  let pulse: { index: number; ms: number } | null = null;
   let cursor: number | null = null;
   let kbUsed = false;
   let hover: number | null = null;
@@ -84,6 +91,7 @@ export function createMinesweeperGame(
   // Last values sent to callbacks, so they fire only on change
   let sentScore = -1;
   let sentLevel = -1;
+  let sentHints = "";
 
   const seconds = () => Math.min(MAX_SECONDS, Math.floor(boardMs / 1000));
   const clamp = (n: number) => Math.min(MAX_SCORE, Math.max(0, n));
@@ -91,6 +99,11 @@ export function createMinesweeperGame(
   function syncCallbacks() {
     if (score !== sentScore) callbacks.onScore((sentScore = score));
     if (level !== sentLevel) callbacks.onLevel((sentLevel = level));
+    const hints = `${hintsLeft}:${phase === "playing"}`;
+    if (hints !== sentHints) {
+      sentHints = hints;
+      callbacks.onHints?.(hintsLeft, phase === "playing");
+    }
   }
 
   function newBoard() {
@@ -100,6 +113,8 @@ export function createMinesweeperGame(
     hintShown = true;
     boardMs = 0;
     hitIndex = null;
+    hintsLeft = HINTS_PER_BOARD;
+    pulse = null;
     cursor = null;
     hover = null;
   }
@@ -173,8 +188,33 @@ export function createMinesweeperGame(
     sound.play(cell.flagged ? "flag" : "unflag");
   }
 
+  function hint() {
+    if (paused || phase !== "playing" || hintsLeft <= 0 || score < HINT_COST) {
+      return;
+    }
+    const index = pickHintCell(cells, spec, Math.random);
+    if (index === null) return;
+    score -= HINT_COST;
+    hintsLeft--;
+    cells[index].flagged = false; // a wrong flag on a safe cell gives way
+    const res = reveal(cells, spec, index);
+    pulse = { index, ms: HINT_PULSE_MS };
+    checkClear(); // hint reveals award no cell points
+    sound.play(
+      (phase as Phase) === "clear"
+        ? "clear"
+        : res.opened > 1
+          ? "flood"
+          : "reveal",
+    );
+  }
+
   function update(dt: number) {
     if (paused || finished) return;
+    if (pulse) {
+      pulse.ms -= dt;
+      if (pulse.ms <= 0) pulse = null;
+    }
     if (phase === "playing") {
       const before = Math.floor(boardMs / 1000);
       boardMs += dt;
@@ -207,6 +247,9 @@ export function createMinesweeperGame(
       cursor: kbUsed ? cursor : null,
       hover,
       hitIndex,
+      pulse: pulse
+        ? { index: pulse.index, alpha: pulse.ms / HINT_PULSE_MS }
+        : null,
       hint:
         phase === "ready" && hintShown ? "CLICK OR PRESS SPACE TO START" : null,
       banner: phase === "clear" ? "BOARD CLEARED" : null,
@@ -269,6 +312,10 @@ export function createMinesweeperGame(
       cursor = r * spec.cols + c;
       kbUsed = true;
       hintShown = false;
+      return;
+    }
+    if (e.code === "KeyH") {
+      hint();
       return;
     }
     if (e.code !== "Space" && e.code !== "KeyF") return;
@@ -358,6 +405,7 @@ export function createMinesweeperGame(
     phaseMs = 0;
     sentScore = -1;
     sentLevel = -1;
+    sentHints = "";
     newBoard();
     render();
   }
@@ -380,6 +428,7 @@ export function createMinesweeperGame(
       if (phase !== "gameover") lose();
       finish();
     },
+    hint,
     setMuted(muted) {
       sound.setMuted(muted);
     },

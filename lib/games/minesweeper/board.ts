@@ -121,3 +121,24 @@ export function chord(
   }
   return { opened, hitMine };
 }
+
+/** Safe hint target: a hidden non-mine cell, frontier cells (next to a revealed number) first. */
+export function pickHintCell(
+  cells: Cell[],
+  spec: BoardSpec,
+  rng: () => number,
+): number | null {
+  const safe: number[] = [];
+  const frontier: number[] = [];
+  for (let i = 0; i < cells.length; i++) {
+    const cell = cells[i];
+    if (cell.revealed || cell.mine) continue;
+    safe.push(i);
+    if (neighbors(spec, i).some((n) => cells[n].revealed && cells[n].adj > 0)) {
+      frontier.push(i);
+    }
+  }
+  const pool = frontier.length > 0 ? frontier : safe;
+  if (pool.length === 0) return null;
+  return pool[Math.floor(rng() * pool.length)];
+}

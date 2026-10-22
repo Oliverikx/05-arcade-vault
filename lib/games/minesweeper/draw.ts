@@ -47,6 +47,7 @@ export interface FrameState {
   cursor: number | null; // keyboard cursor, drawn only after keyboard use
   hover: number | null; // mouse hover
   hitIndex: number | null;
+  pulse: { index: number; alpha: number } | null; // hint highlight, alpha 1 → 0
   hint: string | null;
   banner: string | null;
 }
@@ -211,6 +212,22 @@ export function drawFrame(ctx: CanvasRenderingContext2D, s: FrameState) {
       oy + Math.floor(idx / s.spec.cols) * CELL,
       "#f5ff00",
     );
+  }
+
+  if (s.pulse) {
+    ctx.save();
+    ctx.globalAlpha = s.pulse.alpha;
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = "#f5ff00";
+    ctx.shadowColor = "#f5ff00";
+    ctx.shadowBlur = GLOW_BLUR;
+    ctx.strokeRect(
+      ox + (s.pulse.index % s.spec.cols) * CELL + 2,
+      oy + Math.floor(s.pulse.index / s.spec.cols) * CELL + 2,
+      CELL - 4,
+      CELL - 4,
+    );
+    ctx.restore();
   }
 
   // Overlays

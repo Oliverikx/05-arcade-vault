@@ -58,6 +58,9 @@ export function GamePlayer({ game }: { game: Game }) {
   const [engineLevel, setEngineLevel] = useState(1);
   const [runId, setRunId] = useState(0);
   const [endSignal, setEndSignal] = useState(0);
+  const [hintSignal, setHintSignal] = useState(0);
+  const [hintsLeft, setHintsLeft] = useState(2);
+  const [hintsActive, setHintsActive] = useState(false);
   const [paused, setPaused] = useState(false);
   const [over, setOver] = useState(false);
   const [abilityMenu, setAbilityMenu] = useState(false);
@@ -129,6 +132,8 @@ export function GamePlayer({ game }: { game: Game }) {
     setPaused(false);
     setOver(false);
     setAbilityMenu(false);
+    setHintsLeft(2);
+    setHintsActive(false);
     setSaved(false);
     setSaveError(false);
   };
@@ -192,6 +197,7 @@ export function GamePlayer({ game }: { game: Game }) {
               paused={paused}
               runId={runId}
               endSignal={endSignal}
+              hintSignal={hintSignal}
               appearance={isTetris ? appearance : undefined}
               muted={
                 isArkanoid
@@ -210,6 +216,10 @@ export function GamePlayer({ game }: { game: Game }) {
               onLives={setLives}
               onLevel={setEngineLevel}
               onAbilityMenu={setAbilityMenu}
+              onHints={(left, active) => {
+                setHintsLeft(left);
+                setHintsActive(active);
+              }}
               onGameOver={(finalScore) => {
                 setScore(finalScore);
                 setOver(true);
@@ -293,6 +303,11 @@ export function GamePlayer({ game }: { game: Game }) {
         <MinesweeperToolbar
           muted={minesweeperMuted}
           onChange={setMinesweeperMuted}
+          hintsLeft={hintsLeft}
+          canHint={
+            hintsActive && hintsLeft > 0 && score >= 100 && !paused && !over
+          }
+          onHint={() => setHintSignal((n) => n + 1)}
         />
       )}
 

@@ -36,11 +36,32 @@ export function useMinesweeperSound() {
 interface Props {
   muted: boolean;
   onChange(next: boolean): void;
+  hintsLeft: number;
+  canHint: boolean; // playing, not paused, score >= 100, hintsLeft > 0
+  onHint(): void;
 }
 
-export function MinesweeperToolbar({ muted, onChange }: Props) {
+export function MinesweeperToolbar({
+  muted,
+  onChange,
+  hintsLeft,
+  canHint,
+  onHint,
+}: Props) {
   return (
-    <div className="tetris-toolbar">
+    <div className="tetris-toolbar ms-toolbar">
+      <div className="tt-toggle" role="group" aria-label="Hint">
+        <button
+          type="button"
+          disabled={!canHint}
+          onClick={(e) => {
+            onHint();
+            e.currentTarget.blur();
+          }}
+        >
+          {`HINT (${hintsLeft})`}
+        </button>
+      </div>
       <div className="tt-toggle" role="group" aria-label="Sound">
         <button
           type="button"

@@ -3005,3 +3005,14 @@ a.mini-card {
   box-shadow: 0 0 10px rgba(0, 245, 255, 0.35);
   position: relative;
 }
+
+.tetris-toolbar .tt-toggle button:disabled {
+  color: #4a4f70;
+  border-color: #4a4f70;
+  cursor: not-allowed;
+}
+.ms-toolbar .tt-toggle button.active {
+  color: var(--yellow);
+  border-color: var(--yellow);
+  box-shadow: 0 0 8px rgba(245, 255, 0, 0.35);
+}
