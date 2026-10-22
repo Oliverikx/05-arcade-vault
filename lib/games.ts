@@ -1,4 +1,4 @@
-export type Category = "ARCADE" | "PUZZLE" | "SHOOTER" | "VERSUS";
+export type Category = "ARCADE" | "PUZZLE" | "SHOOTER";
 export type Accent = "cyan" | "magenta" | "yellow" | "green";
 
 export interface Game {
@@ -44,26 +44,6 @@ export const GAMES: Game[] = [
     plays: "9.1K",
   },
   {
-    id: "chomper",
-    title: "CHOMPER",
-    short: "Gobble dots and escape the ghosts.",
-    long: "A hungry circle patrols a maze collecting glowing dots. Four specters chase it, but every so often a pill appears that turns the tables.",
-    cat: "ARCADE",
-    cover: "cover-glot",
-    color: "yellow",
-    plays: "27.2K",
-  },
-  {
-    id: "invaders",
-    title: "INVADERS",
-    short: "Defend the planet from alien rows.",
-    long: "Waves of hostile pixels descend formation after formation. Slide your cannon sideways and fire with precision before they touch the surface.",
-    cat: "SHOOTER",
-    cover: "cover-invaders",
-    color: "green",
-    plays: "18.0K",
-  },
-  {
     id: "asteroids",
     title: "ASTEROIDS",
     short: "Pulverize asteroids in zero gravity.",
@@ -73,26 +53,6 @@ export const GAMES: Game[] = [
     color: "yellow",
     plays: "15.6K",
   },
-  {
-    id: "froggy",
-    title: "FROGGY",
-    short: "Cross the pixel highway.",
-    long: "Hop between lanes of speeding cars and drifting logs on the river. Reach the lily pads before time runs out.",
-    cat: "ARCADE",
-    cover: "cover-rana",
-    color: "green",
-    plays: "6.4K",
-  },
-  {
-    id: "pixel-duel",
-    title: "PIXEL DUEL",
-    short: "Two paddles. One ball. Maximum reflexes.",
-    long: "The purest duel: two vertical paddles fight over a glowing ball. Play solo against the CPU or local two-player.",
-    cat: "VERSUS",
-    cover: "cover-duelo",
-    color: "cyan",
-    plays: "4.2K",
-  },
 ];
 
 export const CATS: ("ALL" | Category)[] = [
@@ -100,7 +60,6 @@ export const CATS: ("ALL" | Category)[] = [
   "ARCADE",
   "PUZZLE",
   "SHOOTER",
-  "VERSUS",
 ];
 
 export function getGame(id: string): Game | undefined {
