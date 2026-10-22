@@ -11,6 +11,11 @@ import {
   AsteroidsToolbar,
   useAsteroidsSkin,
 } from "@/components/asteroids-toolbar";
+import {
+  FroggyToolbar,
+  useFroggyMuted,
+  useFroggySkin,
+} from "@/components/froggy-toolbar";
 import { GameScreen } from "@/components/game-screen";
 import { TouchPad } from "@/components/touch-pad";
 import { SnakeToolbar, useSnakeSkin } from "@/components/snake-toolbar";
@@ -33,10 +38,13 @@ export function GamePlayer({ game }: { game: Game }) {
   const isArkanoid = game.id === "arkanoid";
   const isAsteroids = game.id === "asteroids";
   const isSnake = game.id === "snake";
+  const isFroggy = game.id === "froggy";
   const [appearance, setAppearance] = useTetrisAppearance();
   const [asteroidsSkin, setAsteroidsSkin] = useAsteroidsSkin();
   const [snakeSkin, setSnakeSkin] = useSnakeSkin();
   const [muted, setMuted] = useArkanoidMuted();
+  const [froggyMuted, setFroggyMuted] = useFroggyMuted();
+  const [froggySkin, setFroggySkin] = useFroggySkin();
   const [arkanoidSkin, setArkanoidSkin] = useArkanoidSkin();
   const initialLives = entry ? entry.lives : PRACTICE_LIVES;
   const [score, setScore] = useState(0);
@@ -179,10 +187,11 @@ export function GamePlayer({ game }: { game: Game }) {
               runId={runId}
               endSignal={endSignal}
               appearance={isTetris ? appearance : undefined}
-              muted={isArkanoid ? muted : undefined}
+              muted={isArkanoid ? muted : isFroggy ? froggyMuted : undefined}
               arkanoidSkin={isArkanoid ? arkanoidSkin : undefined}
               asteroidsSkin={isAsteroids ? asteroidsSkin : undefined}
               snakeSkin={isSnake ? snakeSkin : undefined}
+              froggySkin={isFroggy ? froggySkin : undefined}
               onScore={setScore}
               onLives={setLives}
               onLevel={setEngineLevel}
@@ -255,6 +264,15 @@ export function GamePlayer({ game }: { game: Game }) {
 
       {isAsteroids && (
         <AsteroidsToolbar skin={asteroidsSkin} onChange={setAsteroidsSkin} />
+      )}
+
+      {isFroggy && (
+        <FroggyToolbar
+          skin={froggySkin}
+          onSkinChange={setFroggySkin}
+          muted={froggyMuted}
+          onMutedChange={setFroggyMuted}
+        />
       )}
 
       {isSnake && <SnakeToolbar skin={snakeSkin} onChange={setSnakeSkin} />}

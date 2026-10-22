@@ -1,6 +1,7 @@
 import { createArkanoidGame } from "@/lib/games/arkanoid/engine";
 import { createAsteroidsGame } from "@/lib/games/asteroids/engine";
 import type { GameCallbacks, GameEngine } from "@/lib/games/engine-types";
+import { createFroggyGame } from "@/lib/games/froggy/engine";
 import { createSnakeGame } from "@/lib/games/snake/engine";
 import { createTetrisGame } from "@/lib/games/tetris/engine";
 
@@ -46,6 +47,16 @@ const ENGINES: Record<string, EngineEntry> = {
     touch: {
       dpad: ["ArrowLeft", "ArrowRight", "ArrowUp"],
       buttons: [{ label: "FIRE", code: "Space" }],
+    },
+  },
+  froggy: {
+    create: createFroggyGame,
+    width: 640,
+    height: 480,
+    lives: 3,
+    touch: {
+      dpad: ["ArrowLeft", "ArrowUp", "ArrowRight", "ArrowDown"],
+      buttons: [],
     },
   },
   snake: {

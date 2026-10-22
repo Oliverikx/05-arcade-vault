@@ -24,10 +24,11 @@ Read:
 - `components/touch-pad.tsx`, `components/game-player.tsx`, `components/game-screen.tsx`
 - `lib/games.ts`, `lib/games/registry.ts`, `lib/games/engine-types.ts`
 - `app/globals.css` (`.touch-pad`, `.tp-*`, `--ab-mid`/`--ab-deep`/`--ab-glow`, `@media (max-width: 620px)`, `touch-play`, neon palette)
+- `specs/game-core/<id>/*.md` when present (spec-only mode, see Step 2)
 
 ## Step 2 — Audit each id
 
-1. Validate: id must exist in `lib/games.ts`. Unknown id → skip, report, write nothing. Placeholder/practice game with no engine folder `lib/games/<id>/` → skip, report "no engine" (out of scope: needs `/add-game` first).
+1. Validate: id must exist in `lib/games.ts`. Unknown id → skip, report, write nothing. Placeholder/practice game with no engine folder `lib/games/<id>/` → skip, report "no engine" (out of scope: needs `/add-game` first). **Exception, spec-only mode:** no engine folder BUT `specs/game-core/<id>/01-*.md` exists (game specced, not built) → classify **Missing**, write `NN-<id>-gamepad.md`. Read all `specs/game-core/<id>/*.md`; derive handled keys, start flow and modal states from their input/constants sections instead of code (skip the grep; no `file:line` evidence).
 2. Read `lib/games/<id>/*`. Grep `keydown|keyup|\.code|\.key\b|Arrow|Space|Key[A-Z]|Digit|Escape|isTrusted|mousedown|click|pointer` there. List: every key the engine handles, where listeners attach (`document` / `window` / canvas), mouse/click start, and any in-canvas menu or mode that changes which keys matter (like Tetris ability menu).
 3. Read the game's `lib/games/registry.ts` entry (`touch` field). Classify:
    - **Missing** — no registry entry, or no `touch` field, or empty layout (no dpad and no buttons) → spec `NN-<id>-gamepad.md`. Full integration like spec 10: registry `touch` layout, any engine callback needed (optional `GameCallbacks` member, fires only on change), acceptance per control.
@@ -56,7 +57,7 @@ Same sections, order and density as `specs/10-touch-controls-pad.md`. Title: `# 
 
 Structure:
 
-1. Header: `> **Status:** Draft`, `> **Depends on:**` (the game's own spec in `specs/`, SPEC 10, SPEC 11), `> **Date:**` (today, from environment), `> **Objective:**` (one sentence)
+1. Header: `> **Status:** Draft`, `> **Depends on:**` (the game's own spec in `specs/`; in spec-only mode `specs/game-core/<id>/01-*.md`; plus SPEC 10, SPEC 11), `> **Date:**` (today, from environment), `> **Objective:**` (one sentence)
 2. `## Why this spec exists` (fix case: the defects, with `file:line`)
 3. `## Scope` — **In:** / **Out of scope (for future specs):**
 4. `## Data model` — TS snippets of the `TouchLayout` entry and any `GameCallbacks` addition, layout table row (same columns as spec 10), MK-II visual table (button index → color magenta/cyan/yellow, circle vs pill per label, as in spec 11), **Constants**, event shape notes, Conventions (read `node_modules/next/dist/docs/01-app` first; UI per `/frontend-design`)

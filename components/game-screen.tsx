@@ -7,6 +7,7 @@ import type {
   AsteroidsEngine,
   AsteroidsSkin,
 } from "@/lib/games/asteroids/engine";
+import type { FroggyEngine, FroggySkin } from "@/lib/games/froggy/engine";
 import type { SnakeEngine, SnakeSkin } from "@/lib/games/snake/engine";
 import type { TetrisEngine } from "@/lib/games/tetris/engine";
 import type { TetrisAppearance } from "@/components/tetris-toolbar";
@@ -21,7 +22,7 @@ interface GameScreenProps extends GameCallbacks {
   endSignal: number;
   /** Skin/theme for engines that support it (tetris). */
   appearance?: TetrisAppearance;
-  /** Sound mute for engines that support it (arkanoid). */
+  /** Sound mute for engines that support it (arkanoid, froggy). */
   muted?: boolean;
   /** Canvas skin for arkanoid. */
   arkanoidSkin?: ArkanoidSkin;
@@ -29,6 +30,8 @@ interface GameScreenProps extends GameCallbacks {
   asteroidsSkin?: AsteroidsSkin;
   /** Skin for engines that support it (snake). */
   snakeSkin?: SnakeSkin;
+  /** Skin for froggy. */
+  froggySkin?: FroggySkin;
 }
 
 export function GameScreen({
@@ -41,6 +44,7 @@ export function GameScreen({
   arkanoidSkin,
   asteroidsSkin,
   snakeSkin,
+  froggySkin,
   onScore,
   onLives,
   onLevel,
@@ -97,7 +101,9 @@ export function GameScreen({
 
   useEffect(() => {
     if (muted === undefined) return;
-    const game = gameRef.current as Partial<ArkanoidEngine> | null;
+    const game = gameRef.current as Partial<
+      ArkanoidEngine & FroggyEngine
+    > | null;
     game?.setMuted?.(muted);
   }, [muted, entry]);
 
@@ -118,6 +124,12 @@ export function GameScreen({
     const game = gameRef.current as Partial<SnakeEngine> | null;
     game?.setAppearance?.(snakeSkin);
   }, [snakeSkin, entry]);
+
+  useEffect(() => {
+    if (froggySkin === undefined) return;
+    const game = gameRef.current as Partial<FroggyEngine> | null;
+    game?.setAppearance?.(froggySkin);
+  }, [froggySkin, entry]);
 
   useEffect(() => {
     gameRef.current?.setPaused(paused);
