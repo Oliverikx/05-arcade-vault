@@ -12,6 +12,7 @@ import {
   useAsteroidsSkin,
 } from "@/components/asteroids-toolbar";
 import { GameScreen } from "@/components/game-screen";
+import { TouchPad } from "@/components/touch-pad";
 import { SnakeToolbar, useSnakeSkin } from "@/components/snake-toolbar";
 import {
   TetrisToolbar,
@@ -45,6 +46,7 @@ export function GamePlayer({ game }: { game: Game }) {
   const [endSignal, setEndSignal] = useState(0);
   const [paused, setPaused] = useState(false);
   const [over, setOver] = useState(false);
+  const [abilityMenu, setAbilityMenu] = useState(false);
 
   const [typedName, setTypedName] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
@@ -92,6 +94,14 @@ export function GamePlayer({ game }: { game: Game }) {
     };
   }, [entry, over]);
 
+  // Lets CSS hide the navbar on touch devices while a real game is open.
+  // Effect cleanup also runs when the cached page is hidden on navigation.
+  useEffect(() => {
+    if (!entry) return;
+    document.body.classList.add("touch-play");
+    return () => document.body.classList.remove("touch-play");
+  }, [entry]);
+
   const endRun = () => {
     if (entry) setEndSignal((n) => n + 1);
     else setOver(true);
@@ -104,6 +114,7 @@ export function GamePlayer({ game }: { game: Game }) {
     setRunId((r) => r + 1);
     setPaused(false);
     setOver(false);
+    setAbilityMenu(false);
     setSaved(false);
     setSaveError(false);
   };
@@ -175,6 +186,7 @@ export function GamePlayer({ game }: { game: Game }) {
               onScore={setScore}
               onLives={setLives}
               onLevel={setEngineLevel}
+              onAbilityMenu={setAbilityMenu}
               onGameOver={(finalScore) => {
                 setScore(finalScore);
                 setOver(true);
@@ -220,6 +232,14 @@ export function GamePlayer({ game }: { game: Game }) {
         </div>
       </div>
 
+      {entry && (
+        <TouchPad
+          layout={entry.touch}
+          abilityMenu={abilityMenu}
+          disabled={paused || over}
+        />
+      )}
+
       {isTetris && (
         <TetrisToolbar appearance={appearance} onChange={setAppearance} />
       )}
@@ -238,10 +258,6 @@ export function GamePlayer({ game }: { game: Game }) {
       )}
 
       {isSnake && <SnakeToolbar skin={snakeSkin} onChange={setSnakeSkin} />}
-
-      {entry?.keyboardRequired && (
-        <div className="keyboard-note">KEYBOARD REQUIRED</div>
-      )}
 
       {over && (
         <div className="modal-bd">

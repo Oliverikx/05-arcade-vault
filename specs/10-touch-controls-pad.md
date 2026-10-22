@@ -18,12 +18,14 @@ The four real games (`asteroids`, `tetris`, `arkanoid`, `snake`) read keyboard e
   - `snake` — D-pad `←↑→↓` steer (also starts from ready/serve, existing engine behavior). No action buttons.
   - `arkanoid` — D-pad `←` `→` move; `↑` `↓` rendered dimmed/disabled. Button `LAUNCH` = `Space`.
   - `asteroids` — D-pad `←` `→` rotate, `↑` thrust; `↓` dimmed. Button `FIRE` = `Space`.
-  - `tetris` — D-pad `←` `→` move, `↓` soft drop, `↑` rotate. Buttons `DROP` = `Space`, `HOLD` = `KeyC`, `ABILITY` = `KeyE`. While the ability menu is open the buttons become `1`…`5` (`Digit1`…`Digit5`) + `BACK` (`Escape`).
+  - `tetris` — D-pad `←` `→` move, `↓` soft drop, `↑` rotate. Buttons `DROP` = `Space`, `ABILITY` = `KeyE`. While the ability menu is open the buttons become `1`…`5` (`Digit1`…`Digit5`) + `BACK` (`Escape`).
 - Start from ready: the `Space`-mapped button (or a canvas tap, already handled by engines' click/mousedown) starts each game; Snake starts from the D-pad.
 - Pause stays on the HUD `PAUSE` button; no pad pause button.
 - Input bridge: `pointerdown` → `document.dispatchEvent(new KeyboardEvent("keydown", { code, key, bubbles: true, cancelable: true }))`; `pointerup` / `pointercancel` / `lostpointercapture` → `keyup`. Pointer capture per button. Multi-touch: each button independent (e.g. Asteroids thrust + fire at once).
 - Auto-repeat (Tetris `←` `→` `↓` only): after 170 ms held, extra `keydown` with `repeat: true` every 50 ms until release.
 - Release safety: all held pad keys get `keyup` when the game pauses, on GAME OVER, on ability-mode swap and on unmount.
+- Action button labels never break across lines; buttons size to their text and the cluster wraps to a new line when they do not fit.
+- Navbar hidden on touch devices while a real game is open: `GamePlayer` toggles a `touch-play` class on `body` (effect cleanup, since Next keeps the previous page cached); CSS hides `.av-nav` under `any-pointer: coarse`.
 - Touch hygiene on the pad: `touch-action: none`, `user-select: none`, `-webkit-touch-callout: none`, `contextmenu` prevented; buttons ≥ 48×48 px; visible pressed state.
 - Visibility by CSS only: `.touch-pad { display: none }`, shown under `@media (any-pointer: coarse)`. No JS detection → no hydration mismatch.
 - Tetris engine: emits optional `onAbilityMenu(open)` whenever its `choosing` flag changes (open, pick, cancel, reset/`init`, game over). Fires only on change.
@@ -90,12 +92,12 @@ export function TouchPad(props: {
 
 **Layouts:**
 
-| Game      | `dpad`    | `buttons`                                       | `repeat` | `abilityButtons`                           |
-| --------- | --------- | ----------------------------------------------- | -------- | ------------------------------------------ |
-| snake     | `← ↑ → ↓` | —                                               | —        | —                                          |
-| arkanoid  | `← →`     | `LAUNCH`=`Space`                                | —        | —                                          |
-| asteroids | `← → ↑`   | `FIRE`=`Space`                                  | —        | —                                          |
-| tetris    | `← → ↓ ↑` | `DROP`=`Space`, `HOLD`=`KeyC`, `ABILITY`=`KeyE` | `← → ↓`  | `1`…`5`=`Digit1`…`Digit5`, `BACK`=`Escape` |
+| Game      | `dpad`    | `buttons`                        | `repeat` | `abilityButtons`                           |
+| --------- | --------- | -------------------------------- | -------- | ------------------------------------------ |
+| snake     | `← ↑ → ↓` | —                                | —        | —                                          |
+| arkanoid  | `← →`     | `LAUNCH`=`Space`                 | —        | —                                          |
+| asteroids | `← → ↑`   | `FIRE`=`Space`                   | —        | —                                          |
+| tetris    | `← → ↓ ↑` | `DROP`=`Space`, `ABILITY`=`KeyE` | `← → ↓`  | `1`…`5`=`Digit1`…`Digit5`, `BACK`=`Escape` |
 
 **Constants:** repeat delay 170 ms, repeat interval 50 ms, min button size 48×48 px.
 
@@ -126,13 +128,15 @@ Each step leaves the app runnable and is commitable alone.
 - [ ] Snake: D-pad starts the run and steers; no action buttons rendered.
 - [ ] Arkanoid: `◀ ▶` hold moves paddle; `▲ ▼` dimmed and do nothing; `LAUNCH` starts/launches ball.
 - [ ] Asteroids: `◀ ▶` rotate while held, `▲` thrusts while held, `FIRE` shoots; holding `▲` + tapping `FIRE` at once both work; `▼` dimmed.
-- [ ] Tetris: `DROP` starts from ready and hard-drops; `◀ ▶ ▼` move/soft-drop and auto-repeat when held > 170 ms; `▲` rotates; `HOLD` swaps held piece.
+- [ ] Tetris: `DROP` starts from ready and hard-drops; `◀ ▶ ▼` move/soft-drop and auto-repeat when held > 170 ms; `▲` rotates.
 - [ ] Tetris: `ABILITY` with full energy opens the menu and the buttons become `1 2 3 4 5 BACK`; a number applies the ability and buttons revert; `BACK` closes the menu without pausing the game.
-- [ ] Tetris: `ABILITY` with energy not full → menu does not open, buttons stay `DROP HOLD ABILITY`.
+- [ ] Tetris: `ABILITY` with energy not full → menu does not open, buttons stay `DROP ABILITY`.
 - [ ] Releasing a finger always stops the action (no stuck thrust/move), incl. finger sliding off the button.
 - [ ] Pausing (HUD `PAUSE`) or GAME OVER releases held keys; pad presses do nothing to the game while paused/over.
 - [ ] Long-press on pad does not select text, open a context menu, zoom or scroll the page.
 - [ ] GAME OVER `SAVE SCORE` input can be typed in on touch; pad does not interfere.
+- [ ] Navbar hidden while a real game is open on touch, and visible again after EXIT.
+- [ ] Action button labels stay on one line (e.g. `ABILITY`); buttons wrap to a new row when space runs out.
 - [ ] `KEYBOARD REQUIRED` note gone on all devices; `keyboardRequired` absent from `app/`, `components/`, `lib/`, `CLAUDE.md`, add-game skill files.
 - [ ] Pad glow ≤ 8 px; labels English; no console errors or hydration warnings on `/games/<id>/play`.
 - [ ] Manual check on a real phone via LAN (`http://<LAN-IP>:3000`): all 4 games playable start → GAME OVER.
@@ -148,7 +152,7 @@ Each step leaves the app runnable and is commitable alone.
 - **Yes:** Tetris reports ability menu via optional `onAbilityMenu`; pad swaps to `1–5` + `BACK`. Always in sync. Discarded: pad-only toggle (desyncs when energy not full), abilities keyboard-only.
 - **Yes:** Auto-repeat only for Tetris `← → ↓` (170 / 50 ms). Others read held state from keydown/keyup.
 - **Yes:** Remove `KEYBOARD REQUIRED` note and `keyboardRequired` field everywhere. Every game is now touch-playable.
-- **No:** Pad pause button. HUD `PAUSE` already works on touch.
+- **No:** `HOLD` button (the `C` swap only works after the ability-menu hold, so a pad button did nothing). Pad pause button. HUD `PAUSE` already works on touch.
 - **No:** Touch-specific in-canvas prompt text. Canvas tap already starts games; wording change deferred.
 
 ## Risks

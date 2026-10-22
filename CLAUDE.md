@@ -27,7 +27,7 @@ Server Actions: `app/actions/scores.ts` (`saveScore`, `getMyBests`), `app/about/
 - **Catalog**: `lib/games.ts` — 8 entries (`Game`, `Category`, `Accent`). Some are real/playable (see `resources/implemented-games.md` for the current list); the rest are placeholder/practice entries.
 - **Engines**: framework-free TS in `lib/games/<id>/` (`engine.ts` + `draw.ts`/`levels.ts`/`pieces.ts`/`sprites.ts`). `createXGame(canvas, callbacks)` returns a `GameEngine`.
 - **Contract** (`lib/games/engine-types.ts`): `GameEngine` = `setPaused`/`end`/`reset`/`destroy`; `GameCallbacks` = `onScore`/`onLives`/`onLevel`/`onGameOver`.
-- **Registry** (`lib/games/registry.ts`): `id → { create, width, height, lives: number|null, keyboardRequired }`. One entry per real game.
+- **Registry** (`lib/games/registry.ts`): `id → { create, width, height, lives: number|null, touch: TouchLayout }`. One entry per real game.
 - **Rendering**: `components/game-screen.tsx` (generic canvas wrapper), `components/game-player.tsx` (React HUD, GAME OVER modal, PAUSE via `P`/`Esc` + tab-hidden auto-pause; branches on registry lookup, not `game.id`). Per-game toolbars: `tetris-toolbar.tsx`, `arkanoid-toolbar.tsx`.
 - **Presentation**: canvas CSS-scaled inside `.crt-screen` (4:3). Neon palette in `app/globals.css` (`.cover-<id>` classes too). Assets in `public/games/<id>/`.
 - **Conventions**: callbacks fire only on change; engine created in `useEffect`, Strict-Mode safe; ignore game keys when target is an input; `shadowBlur` ≤ 8.

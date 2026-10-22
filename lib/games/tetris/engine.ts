@@ -252,9 +252,16 @@ export function createTetrisGame(
     }
   }
 
+  // Updates the ability-menu flag and notifies the UI only on change.
+  function setChoosing(next: boolean) {
+    if (choosing === next) return;
+    choosing = next;
+    callbacks.onAbilityMenu?.(next);
+  }
+
   function endGame() {
     gameOver = true;
-    choosing = false;
+    setChoosing(false);
     syncLoop();
     callbacks.onGameOver(score);
   }
@@ -331,13 +338,13 @@ export function createTetrisGame(
 
   function openAbilityMenu() {
     if (energy < ENERGY_MAX || paused || gameOver || choosing) return;
-    choosing = true;
+    setChoosing(true);
     syncLoop();
   }
 
   function closeAbilityMenu() {
     if (!choosing) return;
-    choosing = false;
+    setChoosing(false);
     syncLoop();
   }
 
@@ -429,7 +436,7 @@ export function createTetrisGame(
     paused = false;
     ready = true;
     gameOver = false;
-    choosing = false;
+    setChoosing(false);
     dropInterval = intervalFor(level);
     dropAccum = 0;
     energy = 0;
