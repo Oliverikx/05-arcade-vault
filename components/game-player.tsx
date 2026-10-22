@@ -19,6 +19,7 @@ import {
 import { GameScreen } from "@/components/game-screen";
 import {
   MinesweeperToolbar,
+  useMinesweeperSkin,
   useMinesweeperSound,
 } from "@/components/minesweeper-toolbar";
 import { TouchPad } from "@/components/touch-pad";
@@ -50,6 +51,7 @@ export function GamePlayer({ game }: { game: Game }) {
   const [muted, setMuted] = useArkanoidMuted();
   const [froggyMuted, setFroggyMuted] = useFroggyMuted();
   const [minesweeperMuted, setMinesweeperMuted] = useMinesweeperSound();
+  const [minesweeperSkin, setMinesweeperSkin] = useMinesweeperSkin();
   const [froggySkin, setFroggySkin] = useFroggySkin();
   const [arkanoidSkin, setArkanoidSkin] = useArkanoidSkin();
   const initialLives = entry ? entry.lives : PRACTICE_LIVES;
@@ -198,6 +200,7 @@ export function GamePlayer({ game }: { game: Game }) {
               runId={runId}
               endSignal={endSignal}
               hintSignal={hintSignal}
+              minesweeperSkin={isMinesweeper ? minesweeperSkin : undefined}
               appearance={isTetris ? appearance : undefined}
               muted={
                 isArkanoid
@@ -301,6 +304,8 @@ export function GamePlayer({ game }: { game: Game }) {
 
       {isMinesweeper && (
         <MinesweeperToolbar
+          skin={minesweeperSkin}
+          onSkinChange={setMinesweeperSkin}
           muted={minesweeperMuted}
           onChange={setMinesweeperMuted}
           hintsLeft={hintsLeft}

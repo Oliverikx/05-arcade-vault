@@ -8,7 +8,10 @@ import type {
   AsteroidsSkin,
 } from "@/lib/games/asteroids/engine";
 import type { FroggyEngine, FroggySkin } from "@/lib/games/froggy/engine";
-import type { MinesweeperEngine } from "@/lib/games/minesweeper/engine";
+import type {
+  MinesweeperEngine,
+  MinesweeperSkin,
+} from "@/lib/games/minesweeper/engine";
 import type { SnakeEngine, SnakeSkin } from "@/lib/games/snake/engine";
 import type { TetrisEngine } from "@/lib/games/tetris/engine";
 import type { TetrisAppearance } from "@/components/tetris-toolbar";
@@ -35,6 +38,8 @@ interface GameScreenProps extends GameCallbacks {
   snakeSkin?: SnakeSkin;
   /** Skin for froggy. */
   froggySkin?: FroggySkin;
+  /** Skin for minesweeper. */
+  minesweeperSkin?: MinesweeperSkin;
 }
 
 export function GameScreen({
@@ -49,6 +54,7 @@ export function GameScreen({
   asteroidsSkin,
   snakeSkin,
   froggySkin,
+  minesweeperSkin,
   onScore,
   onLives,
   onLevel,
@@ -138,6 +144,12 @@ export function GameScreen({
     const game = gameRef.current as Partial<FroggyEngine> | null;
     game?.setAppearance?.(froggySkin);
   }, [froggySkin, entry]);
+
+  useEffect(() => {
+    if (minesweeperSkin === undefined) return;
+    const game = gameRef.current as Partial<MinesweeperEngine> | null;
+    game?.setAppearance?.(minesweeperSkin);
+  }, [minesweeperSkin, entry]);
 
   useEffect(() => {
     gameRef.current?.setPaused(paused);
