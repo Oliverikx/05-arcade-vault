@@ -1,6 +1,6 @@
 # SPEC FROGGY-03 — FROGGY sound and mute
 
-> **Status:** Draft
+> **Status:** Implemented
 > **Depends on:** 01 of this game (`01-froggy-core-game.md`); event names for fly/turtle/snake sounds exist only if `02-froggy-hazards-bonus.md` is implemented
 > **Date:** 2026-10-22
 > **Objective:** Add synthesized Web Audio sound effects to Froggy and a mute toggle in a Froggy toolbar.
