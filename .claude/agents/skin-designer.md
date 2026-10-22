@@ -21,10 +21,11 @@ Read:
 - Structural reference: `specs/07-tetris-game.md`
 - Reference selector (tetris): `components/tetris-toolbar.tsx`, `components/game-screen.tsx`, `components/game-player.tsx`, `lib/games/tetris/engine.ts`, `lib/games/tetris/draw.ts`, `lib/games/tetris/pieces.ts`
 - `lib/games.ts`, `lib/games/registry.ts`, `lib/games/engine-types.ts`, `app/globals.css` (neon palette, `.tetris-toolbar`)
+- `specs/game-core/<id>/*.md` when present (spec-only mode, see Step 2)
 
 ## Step 2 — Audit each id
 
-1. Validate: id must have an entry in `lib/games/registry.ts` (real engine). Unknown or placeholder id → skip, report, write nothing.
+1. Validate: id must have an entry in `lib/games/registry.ts` (real engine). Unknown or placeholder id → skip, report, write nothing. **Exception, spec-only mode:** no registry entry BUT `specs/game-core/<id>/01-*.md` exists (game specced, not built) → continue. Read all `specs/game-core/<id>/*.md`; if none of them already defines neon/retro/classic skins, classify as "no skin selector" and base the spec on their file paths, palette and draw design instead of code (skip the code reads/greps in step 2). If they already cover some skins → "missing skins" for the rest; all three → OK.
 2. Read `lib/games/<id>/*` and `components/<id>-toolbar.tsx` if it exists. Grep `skin|Skin|setAppearance` in `lib/games/<id>/` and `components/`.
 3. Classify:
    - No skin selector → spec `NN-<id>-skin-selector.md`.
@@ -42,7 +43,7 @@ Same sections, order and density as `specs/07-tetris-game.md`. Title: `# SPEC SK
 
 Structure:
 
-1. Header: `> **Status:** Draft`, `> **Depends on:**` (the game's own spec in `specs/`), `> **Date:**` (today, from environment), `> **Objective:**` (one sentence)
+1. Header: `> **Status:** Draft`, `> **Depends on:**` (the game's own spec in `specs/`; in spec-only mode `specs/game-core/<id>/01-*.md`, plus the game-core spec that adds a toolbar, if any), `> **Date:**` (today, from environment), `> **Objective:**` (one sentence)
 2. `## Why this spec exists`
 3. `## Scope` — **In:** / **Out of scope (for future specs):**
 4. `## Data model` — TS contract snippets, **Constants** table, **Palette** table (per skin, exact hex), callbacks/input notes, Conventions (read `node_modules/next/dist/docs/01-app` first; UI per `/frontend-design`)
