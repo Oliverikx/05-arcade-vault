@@ -1,6 +1,15 @@
 // Froggy rendering — vector neon drawn on canvas.
 
-import { CELL, H, LANES, ROWS, W, entityXs, type Lane } from "./lanes";
+import {
+  CELL,
+  H,
+  LANES,
+  ROWS,
+  W,
+  diveState,
+  entityXs,
+  type Lane,
+} from "./lanes";
 
 const GLOW = 8;
 const CAR_GLOW = 4;
@@ -20,6 +29,9 @@ export interface FrameView {
   frog: FrogView | null;
   pads: boolean[];
   timeFrac: number; // 0..1
+  playMs: number; // playing time, drives the turtle dive cycle
+  flyPad: number | null; // pad index showing a fly
+  snake: { x: number; dir: 1 | -1 } | null; // median snake (left x)
   hint: string | null;
 }
 
@@ -28,6 +40,7 @@ const LANE_COLOR: Record<Lane["kind"], string> = {
   truck: "#f5ff00",
   bus: "#00f5ff",
   log: "#d97a3a",
+  turtle: "#00ff88",
 };
 
 function glow(ctx: CanvasRenderingContext2D, color: string, blur: number) {
@@ -106,15 +119,55 @@ function drawBackground(ctx: CanvasRenderingContext2D, pads: boolean[]) {
   });
 }
 
-function drawEntities(ctx: CanvasRenderingContext2D, phases: number[]) {
+function drawTurtle(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  playMs: number,
+  index: number,
+) {
+  const state = diveState(index, playMs);
+  const cy = y + CELL / 2;
+  if (state === "under") {
+    ctx.strokeStyle = "rgba(0, 245, 255, 0.25)";
+    ctx.lineWidth = 1;
+    for (let k = 0; k < 3; k++) {
+      ctx.beginPath();
+      ctx.arc(x + k * CELL + CELL / 2, cy, 12, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+    return;
+  }
+  const blinkOn = Math.floor(playMs / 150) % 2 === 0;
+  const alpha = state === "warn" ? (blinkOn ? 1 : 0.3) : 0.8;
+  const r = state === "warn" ? 10 : 14;
+  for (let k = 0; k < 3; k++) {
+    const cx = x + k * CELL + CELL / 2;
+    ctx.fillStyle = `rgba(0, 255, 136, ${alpha})`;
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = "#00f5ff";
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  }
+}
+
+function drawEntities(
+  ctx: CanvasRenderingContext2D,
+  phases: number[],
+  playMs: number,
+) {
   LANES.forEach((lane, i) => {
     const color = LANE_COLOR[lane.kind];
     const isLog = lane.kind === "log";
-    for (const x of entityXs(lane, phases[i])) {
+    entityXs(lane, phases[i]).forEach((x, idx) => {
       const w = lane.w * CELL;
-      if (x + w < 0 || x > W) continue;
+      if (x + w < 0 || x > W) return;
       const y = lane.row * CELL;
-      if (isLog) {
+      if (lane.kind === "turtle") {
+        drawTurtle(ctx, x, y, playMs, idx);
+      } else if (isLog) {
         ctx.fillStyle = color;
         ctx.fillRect(x, y + 6, w, CELL - 12);
         ctx.strokeStyle = "#ffcf3a";
@@ -129,8 +182,37 @@ function drawEntities(ctx: CanvasRenderingContext2D, phases: number[]) {
         const wx = lane.dir === 1 ? x + w - 10 : x + 5;
         ctx.fillRect(wx, y + 12, 5, CELL - 24);
       }
-    }
+    });
   });
+}
+
+function drawFly(ctx: CanvasRenderingContext2D, pad: number) {
+  const cx = PAD_COLS[pad] * CELL + CELL / 2;
+  const cy = CELL / 2;
+  glow(ctx, "#f5ff00", CAR_GLOW);
+  ctx.fillStyle = "#f5ff00";
+  ctx.fillRect(cx - 3, cy - 3, 6, 6);
+  ctx.strokeStyle = "#f5ff00";
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(cx - 2, cy - 3);
+  ctx.lineTo(cx - 9, cy - 9);
+  ctx.moveTo(cx + 2, cy - 3);
+  ctx.lineTo(cx + 9, cy - 9);
+  ctx.stroke();
+  noGlow(ctx);
+}
+
+function drawSnake(ctx: CanvasRenderingContext2D, x: number, dir: 1 | -1) {
+  const y = 5 * CELL + CELL / 2;
+  glow(ctx, "#ff006e", CAR_GLOW);
+  ctx.fillStyle = "#ff006e";
+  for (let k = 0; k < 5; k++) {
+    ctx.fillRect(x + 4 + k * 14, y - 6 + (k % 2 === 0 ? -2 : 2), 12, 12);
+  }
+  noGlow(ctx);
+  ctx.fillStyle = "#000"; // eye on the head end
+  ctx.fillRect(dir === 1 ? x + 4 + 4 * 14 + 6 : x + 6, y - 6, 3, 3);
 }
 
 function drawTimer(ctx: CanvasRenderingContext2D, frac: number) {
@@ -141,7 +223,9 @@ function drawTimer(ctx: CanvasRenderingContext2D, frac: number) {
 
 export function drawFrame(ctx: CanvasRenderingContext2D, v: FrameView) {
   drawBackground(ctx, v.pads);
-  drawEntities(ctx, v.phases);
+  drawEntities(ctx, v.phases, v.playMs);
+  if (v.flyPad !== null) drawFly(ctx, v.flyPad);
+  if (v.snake) drawSnake(ctx, v.snake.x, v.snake.dir);
 
   if (v.frog) {
     const f = v.frog;
