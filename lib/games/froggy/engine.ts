@@ -2,6 +2,7 @@
 
 import type { GameCallbacks, GameEngine } from "@/lib/games/engine-types";
 import { PAD_COLS, drawFrame } from "./draw";
+import { createFroggySound } from "./sound";
 import {
   CELL,
   H,
@@ -61,10 +62,16 @@ const isRoad = (row: number) => row >= 6 && row <= 10;
 const laneOf = (row: number): Lane | undefined =>
   LANES.find((l) => l.row === row);
 
+export interface FroggyEngine extends GameEngine {
+  setMuted(muted: boolean): void;
+}
+
+type DeathKind = "splash" | "squash" | "timeout";
+
 export function createFroggyGame(
   canvas: HTMLCanvasElement,
   callbacks: GameCallbacks,
-): GameEngine {
+): FroggyEngine {
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("2D canvas context unavailable");
 
@@ -82,6 +89,8 @@ export function createFroggyGame(
   let timeLeft = TIME_LIMIT;
   let dyingT = -1; // >= 0 while dying (ms elapsed)
   let pads: boolean[] = PAD_COLS.map(() => false);
+  const sound = createFroggySound();
+  let warnSeen: boolean[] = [];
   let playMs = 0; // playing time, drives the turtle dive cycle
   let flyClock = 0;
   let fly: { pad: number; ms: number } | null = null;
@@ -117,6 +126,7 @@ export function createFroggyGame(
   function endGame() {
     if (gameOver) return;
     gameOver = true;
+    sound.play("gameOver");
     syncCallbacks();
     callbacks.onGameOver(score);
   }
@@ -130,8 +140,9 @@ export function createFroggyGame(
     dyingT = -1;
   }
 
-  function die() {
+  function die(kind: DeathKind) {
     if (dyingT >= 0) return;
+    sound.play(kind);
     dyingT = 0;
     hopT = HOP_MS;
   }
@@ -152,6 +163,7 @@ export function createFroggyGame(
     addScore(PTS_PAD + PTS_SECOND * Math.floor(timeLeft));
     if (fly && fly.pad === i) addScore(PTS_FLY);
     fly = null;
+    sound.play(pads.every(Boolean) ? "levelClear" : "pad");
     if (pads.every(Boolean)) {
       addScore(PTS_LEVEL);
       roundsCleared++;
@@ -200,6 +212,7 @@ export function createFroggyGame(
           pad: empty[Math.floor(Math.random() * empty.length)],
           ms: FLY_VISIBLE_MS,
         };
+        sound.play("fly");
       }
       flyClock = 0;
     }
@@ -239,16 +252,16 @@ export function createFroggyGame(
       const i = PAD_COLS.findIndex(
         (c) => frogX >= c * CELL && frogX <= (c + 1) * CELL,
       );
-      if (i < 0 || pads[i]) die();
+      if (i < 0 || pads[i]) die("splash");
       else fillPad(i);
       return;
     }
     if (isRiver(frogRow)) {
-      if (!onLog()) die();
+      if (!onLog()) die("splash");
       return;
     }
     frogX = Math.min(620, Math.max(20, frogX));
-    if ((isRoad(frogRow) && hitsVehicle()) || hitsSnake()) die();
+    if ((isRoad(frogRow) && hitsVehicle()) || hitsSnake()) die("squash");
   }
 
   function hop(dir: Dir) {
@@ -264,6 +277,7 @@ export function createFroggyGame(
     hopFromX = frogX;
     hopFromY = rowY(frogRow);
     hopT = 0;
+    sound.play("hop");
     frogX = nx;
     frogRow = nr;
     if (nr < bestRow) {
@@ -290,6 +304,15 @@ export function createFroggyGame(
       return;
     }
 
+    const turtles = laneOf(4);
+    if (turtles) {
+      const n = entityXs(turtles, phases[laneIndex(4)]).length;
+      for (let i = 0; i < n; i++) {
+        const warn = diveState(i, playMs) === "warn";
+        if (warn && !warnSeen[i]) sound.play("dive");
+        warnSeen[i] = warn;
+      }
+    }
     updateFly(dt);
     updateSnake(dt, sec, mult);
 
@@ -300,18 +323,18 @@ export function createFroggyGame(
     if (lane && isRiver(frogRow)) {
       frogX += lane.dir * lane.speed * mult * sec;
       if (!onLog() || frogX < 0 || frogX > W) {
-        die();
+        die("splash");
         return;
       }
     } else if ((isRoad(frogRow) && hitsVehicle()) || hitsSnake()) {
-      die();
+      die("squash");
       return;
     }
 
     timeLeft -= sec;
     if (timeLeft <= 0) {
       timeLeft = 0;
-      die();
+      die("timeout");
     }
   }
 
@@ -357,13 +380,18 @@ export function createFroggyGame(
   const isIgnoredTarget = (e: KeyboardEvent) =>
     IGNORED_TARGETS.includes((e.target as HTMLElement | null)?.tagName ?? "");
 
+  function start() {
+    ready = false;
+    sound.unlock();
+  }
+
   const onKeyDown = (e: KeyboardEvent) => {
     if (isIgnoredTarget(e) || gameOver) return;
     if (GAME_KEYS.includes(e.code)) e.preventDefault();
     if (paused || e.repeat) return;
     if (ready) {
       // The starting key only starts; the hop needs a second press.
-      if (KEY_DIRS[e.code] || e.code === "Space") ready = false;
+      if (KEY_DIRS[e.code] || e.code === "Space") start();
       return;
     }
     const dir = KEY_DIRS[e.code];
@@ -371,7 +399,7 @@ export function createFroggyGame(
   };
 
   const onCanvasClick = () => {
-    if (ready && !paused && !gameOver) ready = false;
+    if (ready && !paused && !gameOver) start();
   };
 
   document.addEventListener("keydown", onKeyDown);
@@ -385,6 +413,7 @@ export function createFroggyGame(
     lives = START_LIVES;
     roundsCleared = 0;
     playMs = 0;
+    warnSeen = [];
     flyClock = 0;
     fly = null;
     snake = { x: -SNAKE_W, dir: 1, delay: SNAKE_DELAY_MS };
@@ -411,12 +440,20 @@ export function createFroggyGame(
     setPaused(next) {
       if (next === paused || gameOver) return;
       paused = next;
-      if (!paused) lastTime = performance.now();
+      if (paused) sound.suspend();
+      else {
+        lastTime = performance.now();
+        sound.resume();
+      }
+    },
+    setMuted(next) {
+      sound.setMuted(next);
     },
     end: endGame,
     reset: init,
     destroy() {
       cancelAnimationFrame(rafId);
+      sound.destroy();
       document.removeEventListener("keydown", onKeyDown);
       canvas.removeEventListener("click", onCanvasClick);
     },
