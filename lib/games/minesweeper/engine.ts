@@ -11,6 +11,7 @@ import {
   type Cell,
 } from "./board";
 import { CELL, H, W, drawFrame, layoutFor, type Phase } from "./draw";
+import { createSound } from "./sound";
 
 const STEP_MS = 1000 / 60;
 const MAX_FRAME_MS = 100;
@@ -42,16 +43,22 @@ interface Press {
   fired: boolean; // long press already flagged
 }
 
+export interface MinesweeperEngine extends GameEngine {
+  setMuted(muted: boolean): void;
+}
+
 export function createMinesweeperGame(
   canvas: HTMLCanvasElement,
   callbacks: GameCallbacks,
-): GameEngine {
+): MinesweeperEngine {
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("2D canvas context unavailable");
 
   // Canvas can't read CSS vars directly; resolve the platform pixel font once.
   const fontFamily =
     getComputedStyle(canvas).getPropertyValue("--pixel").trim() || "monospace";
+
+  const sound = createSound();
 
   let level = 1;
   let spec: BoardSpec = boardForLevel(1);
@@ -120,10 +127,21 @@ export function createMinesweeperGame(
     phaseMs = CLEAR_BANNER_MS;
   }
 
-  function applyResult(res: { opened: number; hitMine: boolean }) {
+  function applyResult(
+    res: { opened: number; hitMine: boolean },
+    chorded = false,
+  ) {
     score = clamp(score + res.opened * 10 * level);
-    if (res.hitMine) lose();
-    else checkClear();
+    if (res.hitMine) {
+      lose();
+      sound.play("lose");
+      return;
+    }
+    checkClear();
+    if (phase === "clear") sound.play("clear");
+    else if (chorded) {
+      if (res.opened > 0) sound.play("chord");
+    } else sound.play(res.opened > 1 ? "flood" : "reveal");
   }
 
   const interactive = () =>
@@ -133,7 +151,7 @@ export function createMinesweeperGame(
     if (!interactive()) return;
     const cell = cells[index];
     if (cell.revealed) {
-      if (phase === "playing") applyResult(chord(cells, spec, index));
+      if (phase === "playing") applyResult(chord(cells, spec, index), true);
       return;
     }
     if (cell.flagged) return;
@@ -152,12 +170,17 @@ export function createMinesweeperGame(
     if (cell.revealed) return;
     cell.flagged = !cell.flagged;
     hintShown = false;
+    sound.play(cell.flagged ? "flag" : "unflag");
   }
 
   function update(dt: number) {
     if (paused || finished) return;
-    if (phase === "playing") boardMs += dt;
-    else if (phase === "clear") {
+    if (phase === "playing") {
+      const before = Math.floor(boardMs / 1000);
+      boardMs += dt;
+      const after = Math.floor(boardMs / 1000);
+      if (after > before && after >= 290 && after <= 299) sound.play("tick");
+    } else if (phase === "clear") {
       phaseMs -= dt;
       if (phaseMs <= 0) {
         level++;
@@ -226,6 +249,7 @@ export function createMinesweeperGame(
 
   const onKeyDown = (e: KeyboardEvent) => {
     if (isIgnoredTarget(e) || finished) return;
+    if (GAME_KEYS.includes(e.code)) sound.unlock();
     if (GAME_KEYS.includes(e.code)) e.preventDefault();
     if (!interactive()) return;
     const move = KEY_MOVES[e.code];
@@ -259,6 +283,7 @@ export function createMinesweeperGame(
 
   const onPointerDown = (e: PointerEvent) => {
     e.preventDefault();
+    sound.unlock();
     if (!interactive()) return;
     const index = cellAt(e);
     if (index === null) return;
@@ -355,9 +380,13 @@ export function createMinesweeperGame(
       if (phase !== "gameover") lose();
       finish();
     },
+    setMuted(muted) {
+      sound.setMuted(muted);
+    },
     reset: init,
     destroy() {
       cancelAnimationFrame(rafId);
+      sound.destroy();
       cancelPress();
       document.removeEventListener("keydown", onKeyDown);
       window.removeEventListener("blur", onBlur);

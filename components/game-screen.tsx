@@ -8,6 +8,7 @@ import type {
   AsteroidsSkin,
 } from "@/lib/games/asteroids/engine";
 import type { FroggyEngine, FroggySkin } from "@/lib/games/froggy/engine";
+import type { MinesweeperEngine } from "@/lib/games/minesweeper/engine";
 import type { SnakeEngine, SnakeSkin } from "@/lib/games/snake/engine";
 import type { TetrisEngine } from "@/lib/games/tetris/engine";
 import type { TetrisAppearance } from "@/components/tetris-toolbar";
@@ -22,7 +23,7 @@ interface GameScreenProps extends GameCallbacks {
   endSignal: number;
   /** Skin/theme for engines that support it (tetris). */
   appearance?: TetrisAppearance;
-  /** Sound mute for engines that support it (arkanoid, froggy). */
+  /** Sound mute for engines that support it (arkanoid, froggy, minesweeper). */
   muted?: boolean;
   /** Canvas skin for arkanoid. */
   arkanoidSkin?: ArkanoidSkin;
@@ -102,7 +103,7 @@ export function GameScreen({
   useEffect(() => {
     if (muted === undefined) return;
     const game = gameRef.current as Partial<
-      ArkanoidEngine & FroggyEngine
+      ArkanoidEngine & FroggyEngine & MinesweeperEngine
     > | null;
     game?.setMuted?.(muted);
   }, [muted, entry]);

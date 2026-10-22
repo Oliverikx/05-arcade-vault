@@ -1,6 +1,6 @@
 # SPEC MINESWEEPER-02 — MINESWEEPER sound fx
 
-> **Status:** Draft
+> **Status:** Implemented
 > **Depends on:** MINESWEEPER-01 (`specs/game-core/minesweeper/01-minesweeper-core-game.md`)
 > **Date:** 2026-10-22
 > **Objective:** Add synthesized sound effects (Web Audio, no asset files) and a SOUND ON/OFF toolbar to Minesweeper.
