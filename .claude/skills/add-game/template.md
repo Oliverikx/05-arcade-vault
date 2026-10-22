@@ -62,7 +62,7 @@ export function create<Name>Game(
 ): GameEngine;
 
 // lib/games/registry.ts
-// id -> { create, width, height, lives: number | null, keyboardRequired: boolean }
+// id -> { create, width, height, lives: number | null, touch: TouchLayout }
 ```
 
 Then:

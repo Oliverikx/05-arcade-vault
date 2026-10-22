@@ -45,6 +45,7 @@ export function GameScreen({
   onLives,
   onLevel,
   onGameOver,
+  onAbilityMenu,
 }: GameScreenProps) {
   const entry = getEngine(gameId);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -56,9 +57,16 @@ export function GameScreen({
     onLives,
     onLevel,
     onGameOver,
+    onAbilityMenu,
   });
   useEffect(() => {
-    callbacksRef.current = { onScore, onLives, onLevel, onGameOver };
+    callbacksRef.current = {
+      onScore,
+      onLives,
+      onLevel,
+      onGameOver,
+      onAbilityMenu,
+    };
   });
 
   // Prop values already applied to the engine; new engines start in sync.
@@ -72,6 +80,7 @@ export function GameScreen({
       onLives: (l) => callbacksRef.current.onLives(l),
       onLevel: (l) => callbacksRef.current.onLevel(l),
       onGameOver: (s) => callbacksRef.current.onGameOver(s),
+      onAbilityMenu: (o) => callbacksRef.current.onAbilityMenu?.(o),
     });
     gameRef.current = game;
     return () => {

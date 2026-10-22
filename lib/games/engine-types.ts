@@ -3,6 +3,8 @@ export interface GameCallbacks {
   onLives(lives: number): void;
   onLevel(level: number): void;
   onGameOver(finalScore: number): void;
+  /** Tetris only: ability menu opened/closed. Fires only on change. */
+  onAbilityMenu?(open: boolean): void;
 }
 
 export interface GameEngine {
