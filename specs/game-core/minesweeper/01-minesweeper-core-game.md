@@ -1,6 +1,6 @@
 # SPEC MINESWEEPER-01 — MINESWEEPER core game
 
-> **Status:** Draft
+> **Status:** Implemented
 > **Depends on:** SPEC 05, SPEC 06
 > **Date:** 2026-10-22
 > **Objective:** Build a new typed Minesweeper engine (no source game, no assets) playable at `/games/minesweeper/play` with progressive boards and a real Supabase leaderboard.

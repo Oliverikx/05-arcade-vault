@@ -63,6 +63,16 @@ export const GAMES: Game[] = [
     color: "green",
     plays: "7.3K",
   },
+  {
+    id: "minesweeper",
+    title: "MINESWEEPER",
+    short: "Read the numbers. Flag the mines. Don't blink.",
+    long: "A hidden field of neon mines and only the numbers to guide you. Reveal safe cells, flag the danger and clear the board before the clock runs away. Every cleared board unlocks a bigger, deadlier one. One mine ends the run.",
+    cat: "PUZZLE",
+    cover: "cover-minesweeper",
+    color: "yellow",
+    plays: "5.2K",
+  },
 ];
 
 export const CATS: ("ALL" | Category)[] = [
