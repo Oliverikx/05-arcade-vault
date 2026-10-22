@@ -1,6 +1,6 @@
 # SPEC PAD-01 — FROGGY gamepad
 
-> **Status:** Draft
+> **Status:** Implemented
 > **Depends on:** `specs/game-core/froggy/01-froggy-core-game.md`, SPEC 10, SPEC 11
 > **Date:** 2026-10-22
 > **Objective:** Make Froggy fully playable on touch devices with the shared MK-II `TouchPad`: a 4-way D-pad and no action buttons, registered through the `touch` field of its registry entry.
