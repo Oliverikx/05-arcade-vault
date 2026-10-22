@@ -53,6 +53,16 @@ export const GAMES: Game[] = [
     color: "yellow",
     plays: "15.6K",
   },
+  {
+    id: "froggy",
+    title: "FROGGY",
+    short: "Cross the road. Ride the logs. Reach home.",
+    long: "Hop through five lanes of neon traffic, then leap across a river on drifting logs to fill every lily pad. The clock is always running and every level is faster. Get squashed or drown and you lose a life; three lives and the run is over.",
+    cat: "ARCADE",
+    cover: "cover-froggy",
+    color: "green",
+    plays: "7.3K",
+  },
 ];
 
 export const CATS: ("ALL" | Category)[] = [
