@@ -2,6 +2,7 @@ import { createArkanoidGame } from "@/lib/games/arkanoid/engine";
 import { createAsteroidsGame } from "@/lib/games/asteroids/engine";
 import type { GameCallbacks, GameEngine } from "@/lib/games/engine-types";
 import { createFroggyGame } from "@/lib/games/froggy/engine";
+import { createMinesweeperGame } from "@/lib/games/minesweeper/engine";
 import { createSnakeGame } from "@/lib/games/snake/engine";
 import { createTetrisGame } from "@/lib/games/tetris/engine";
 
@@ -57,6 +58,21 @@ const ENGINES: Record<string, EngineEntry> = {
     touch: {
       dpad: ["ArrowLeft", "ArrowUp", "ArrowRight", "ArrowDown"],
       buttons: [],
+    },
+  },
+  minesweeper: {
+    create: createMinesweeperGame,
+    width: 640,
+    height: 480,
+    lives: null,
+    touch: {
+      dpad: ["ArrowLeft", "ArrowUp", "ArrowRight", "ArrowDown"],
+      buttons: [
+        { label: "REVEAL", code: "Space" },
+        { label: "FLAG", code: "KeyF" },
+        { label: "HINT", code: "KeyH" },
+      ],
+      repeat: ["ArrowLeft", "ArrowUp", "ArrowRight", "ArrowDown"],
     },
   },
   snake: {

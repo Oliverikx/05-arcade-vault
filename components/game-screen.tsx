@@ -8,6 +8,10 @@ import type {
   AsteroidsSkin,
 } from "@/lib/games/asteroids/engine";
 import type { FroggyEngine, FroggySkin } from "@/lib/games/froggy/engine";
+import type {
+  MinesweeperEngine,
+  MinesweeperSkin,
+} from "@/lib/games/minesweeper/engine";
 import type { SnakeEngine, SnakeSkin } from "@/lib/games/snake/engine";
 import type { TetrisEngine } from "@/lib/games/tetris/engine";
 import type { TetrisAppearance } from "@/components/tetris-toolbar";
@@ -20,9 +24,11 @@ interface GameScreenProps extends GameCallbacks {
   runId: number;
   /** Changing this value ends the current run (fires onGameOver). */
   endSignal: number;
+  /** Changing this value asks a minesweeper engine for a hint. */
+  hintSignal?: number;
   /** Skin/theme for engines that support it (tetris). */
   appearance?: TetrisAppearance;
-  /** Sound mute for engines that support it (arkanoid, froggy). */
+  /** Sound mute for engines that support it (arkanoid, froggy, minesweeper). */
   muted?: boolean;
   /** Canvas skin for arkanoid. */
   arkanoidSkin?: ArkanoidSkin;
@@ -32,6 +38,8 @@ interface GameScreenProps extends GameCallbacks {
   snakeSkin?: SnakeSkin;
   /** Skin for froggy. */
   froggySkin?: FroggySkin;
+  /** Skin for minesweeper. */
+  minesweeperSkin?: MinesweeperSkin;
 }
 
 export function GameScreen({
@@ -39,17 +47,20 @@ export function GameScreen({
   paused,
   runId,
   endSignal,
+  hintSignal,
   appearance,
   muted,
   arkanoidSkin,
   asteroidsSkin,
   snakeSkin,
   froggySkin,
+  minesweeperSkin,
   onScore,
   onLives,
   onLevel,
   onGameOver,
   onAbilityMenu,
+  onHints,
 }: GameScreenProps) {
   const entry = getEngine(gameId);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -62,6 +73,7 @@ export function GameScreen({
     onLevel,
     onGameOver,
     onAbilityMenu,
+    onHints,
   });
   useEffect(() => {
     callbacksRef.current = {
@@ -70,11 +82,12 @@ export function GameScreen({
       onLevel,
       onGameOver,
       onAbilityMenu,
+      onHints,
     };
   });
 
   // Prop values already applied to the engine; new engines start in sync.
-  const appliedRef = useRef({ runId, endSignal });
+  const appliedRef = useRef({ runId, endSignal, hintSignal });
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -85,6 +98,7 @@ export function GameScreen({
       onLevel: (l) => callbacksRef.current.onLevel(l),
       onGameOver: (s) => callbacksRef.current.onGameOver(s),
       onAbilityMenu: (o) => callbacksRef.current.onAbilityMenu?.(o),
+      onHints: (n, a) => callbacksRef.current.onHints?.(n, a),
     });
     gameRef.current = game;
     return () => {
@@ -102,7 +116,7 @@ export function GameScreen({
   useEffect(() => {
     if (muted === undefined) return;
     const game = gameRef.current as Partial<
-      ArkanoidEngine & FroggyEngine
+      ArkanoidEngine & FroggyEngine & MinesweeperEngine
     > | null;
     game?.setMuted?.(muted);
   }, [muted, entry]);
@@ -132,6 +146,12 @@ export function GameScreen({
   }, [froggySkin, entry]);
 
   useEffect(() => {
+    if (minesweeperSkin === undefined) return;
+    const game = gameRef.current as Partial<MinesweeperEngine> | null;
+    game?.setAppearance?.(minesweeperSkin);
+  }, [minesweeperSkin, entry]);
+
+  useEffect(() => {
     gameRef.current?.setPaused(paused);
   }, [paused]);
 
@@ -146,6 +166,12 @@ export function GameScreen({
     appliedRef.current.endSignal = endSignal;
     gameRef.current?.end();
   }, [endSignal]);
+
+  useEffect(() => {
+    if (appliedRef.current.hintSignal === hintSignal) return;
+    appliedRef.current.hintSignal = hintSignal;
+    (gameRef.current as Partial<MinesweeperEngine> | null)?.hint?.();
+  }, [hintSignal]);
 
   if (!entry) return null;
 

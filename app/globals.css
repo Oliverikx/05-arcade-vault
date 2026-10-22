@@ -727,6 +727,29 @@ a {
   filter: drop-shadow(0 0 6px rgba(0, 255, 136, 0.6));
 }
 
+.cover-minesweeper {
+  background: linear-gradient(135deg, #1a1a00, #0a0a18);
+}
+.cover-minesweeper::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 72% 62%, var(--magenta) 0 9px, transparent 10px),
+    linear-gradient(var(--cyan), var(--cyan)) 30% 36% / 6px 18px no-repeat,
+    linear-gradient(var(--green), var(--green)) 46% 36% / 18px 6px no-repeat,
+    linear-gradient(var(--green), var(--green)) 46% 46% / 18px 6px no-repeat,
+    linear-gradient(var(--magenta), var(--magenta)) 60% 36% / 16px 6px
+      no-repeat,
+    linear-gradient(#15151f, #15151f) 20% 30% / 22px 22px no-repeat,
+    linear-gradient(#15151f, #15151f) 38% 30% / 22px 22px no-repeat,
+    linear-gradient(#15151f, #15151f) 56% 30% / 22px 22px no-repeat,
+    linear-gradient(#15151f, #15151f) 20% 52% / 22px 22px no-repeat,
+    linear-gradient(#15151f, #15151f) 38% 52% / 22px 22px no-repeat,
+    linear-gradient(#15151f, #15151f) 56% 52% / 22px 22px no-repeat;
+  filter: drop-shadow(0 0 6px rgba(245, 255, 0, 0.35));
+}
+
 .cover-froggy {
   background:
     linear-gradient(#003a2a, #003a2a) 0 0 / 100% 22% no-repeat,
@@ -2981,4 +3004,15 @@ a.mini-card {
   border-color: var(--cyan);
   box-shadow: 0 0 10px rgba(0, 245, 255, 0.35);
   position: relative;
+}
+
+.tetris-toolbar .tt-toggle button:disabled {
+  color: #4a4f70;
+  border-color: #4a4f70;
+  cursor: not-allowed;
+}
+.ms-toolbar .tt-toggle button.active {
+  color: var(--yellow);
+  border-color: var(--yellow);
+  box-shadow: 0 0 8px rgba(245, 255, 0, 0.35);
 }

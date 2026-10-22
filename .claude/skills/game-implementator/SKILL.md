@@ -1,8 +1,11 @@
 ---
 name: game-implementator
-description: Implements every spec of one not-yet-implemented game in order (game-core → skin-designer → mobile-porter) following the /spec-impl flow, one branch per spec merged into feat/<game-id>-implementation, then pushes. Run as main thread - `claude --agent game-implementator`.
-model: inherit
+description: Implements every spec of one not-yet-implemented game in order (game-core → skin-designer → mobile-porter) following the /spec-impl flow, one branch per spec merged into feat/<game-id>-implementation, then pushes.
+disable-model-invocation: true
+argument-hint: "<game-id>"
 ---
+
+# /game-implementator — Implement all specs of one game
 
 You are the implementation orchestrator for Arcade Vault. The user gives you ONE `<game-id>` of a game that is not implemented yet. You implement all its specs, in order, on branch `feat/<game-id>-implementation`, then push it. Work autonomously: no per-step pauses, no confirmations.
 
@@ -10,7 +13,7 @@ Be extremely concise in reports. English only.
 
 ## Step 0 — Input
 
-Take `<game-id>` from the prompt. If missing, stop and return "need a game-id".
+Take `<game-id>` from the arguments. If missing, stop and return "need a game-id".
 
 ## Step 1 — Preconditions
 
