@@ -96,6 +96,7 @@ export function createMinesweeperGame(
   let accum = 0;
   let lastTime = 0;
   let rafId = 0;
+  let dirty = true; // redraw only when something visible changed
 
   let press: Press | null = null;
   let pressTimer = 0;
@@ -119,6 +120,7 @@ export function createMinesweeperGame(
   }
 
   function newBoard() {
+    dirty = true;
     spec = boardForLevel(level);
     cells = createCells(spec);
     phase = "ready";
@@ -140,6 +142,7 @@ export function createMinesweeperGame(
   }
 
   function lose() {
+    dirty = true;
     phase = "gameover";
     phaseMs = LOSS_DELAY_MS;
     hitIndex = cells.findIndex((c) => c.mine && c.revealed);
@@ -147,6 +150,7 @@ export function createMinesweeperGame(
   }
 
   function checkClear() {
+    dirty = true;
     const safe = cells.length - spec.mines;
     if (cells.filter((c) => c.revealed).length < safe) return;
     score = clamp(score + 500 * level + 2 * Math.max(0, 300 - seconds()));
@@ -176,6 +180,7 @@ export function createMinesweeperGame(
 
   function revealAt(index: number) {
     if (!interactive()) return;
+    dirty = true;
     const cell = cells[index];
     if (cell.revealed) {
       if (phase === "playing") applyResult(chord(cells, spec, index), true);
@@ -193,6 +198,7 @@ export function createMinesweeperGame(
 
   function flagAt(index: number) {
     if (!interactive()) return;
+    dirty = true;
     const cell = cells[index];
     if (cell.revealed) return;
     cell.flagged = !cell.flagged;
@@ -206,6 +212,7 @@ export function createMinesweeperGame(
     }
     const index = pickHintCell(cells, spec, Math.random);
     if (index === null) return;
+    dirty = true;
     score -= HINT_COST;
     hintsLeft--;
     cells[index].flagged = false; // a wrong flag on a safe cell gives way
@@ -224,6 +231,7 @@ export function createMinesweeperGame(
   function update(dt: number) {
     if (paused || finished) return;
     if (pulse) {
+      dirty = true;
       pulse.ms -= dt;
       if (pulse.ms <= 0) pulse = null;
     }
@@ -231,6 +239,7 @@ export function createMinesweeperGame(
       const before = Math.floor(boardMs / 1000);
       boardMs += dt;
       const after = Math.floor(boardMs / 1000);
+      if (after > before) dirty = true;
       if (after > before && after >= 290 && after <= 299) sound.play("tick");
     } else if (phase === "clear") {
       phaseMs -= dt;
@@ -246,6 +255,7 @@ export function createMinesweeperGame(
 
   // ── Loop ──────────────────────────────────────────────────────────────────
   function render() {
+    dirty = false;
     syncCallbacks();
     const flags = cells.filter((c) => c.flagged).length;
     drawFrame(ctx!, {
@@ -277,7 +287,7 @@ export function createMinesweeperGame(
       update(STEP_MS);
       accum -= STEP_MS;
     }
-    render();
+    if (dirty) render();
     rafId = requestAnimationFrame(loop);
   }
 
@@ -325,6 +335,7 @@ export function createMinesweeperGame(
       cursor = r * spec.cols + c;
       kbUsed = true;
       hintShown = false;
+      dirty = true;
       return;
     }
     if (e.code === "KeyH") {
@@ -337,6 +348,7 @@ export function createMinesweeperGame(
         Math.floor(spec.rows / 2) * spec.cols + Math.floor(spec.cols / 2);
     }
     kbUsed = true;
+    dirty = true;
     if (e.code === "Space") revealAt(cursor);
     else flagAt(cursor);
   };
@@ -349,6 +361,7 @@ export function createMinesweeperGame(
     if (index === null) return;
     cursor = index;
     hover = e.pointerType === "mouse" ? index : null;
+    dirty = true;
     if (e.pointerType === "mouse" && e.button === 2) {
       flagAt(index);
       return;
@@ -378,7 +391,11 @@ export function createMinesweeperGame(
   };
 
   const onPointerMove = (e: PointerEvent) => {
-    if (e.pointerType === "mouse") hover = cellAt(e);
+    if (e.pointerType === "mouse") {
+      const h = cellAt(e);
+      if (h !== hover) dirty = true;
+      hover = h;
+    }
     if (
       press &&
       press.pointerId === e.pointerId &&
@@ -389,6 +406,7 @@ export function createMinesweeperGame(
   };
 
   const onPointerLeave = () => {
+    if (hover !== null) dirty = true;
     hover = null;
     cancelPress();
   };

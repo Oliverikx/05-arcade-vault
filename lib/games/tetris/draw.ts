@@ -124,6 +124,31 @@ type BlockDrawer = (
   color: string,
 ) => void;
 
+// Neon glow blocks are pre-rendered once per (color, size); shadowBlur is
+// never set in the per-frame block path.
+const GLOW_MARGIN = 16;
+const neonSprites = new Map<string, HTMLCanvasElement>();
+
+function neonSprite(color: string, s: number): HTMLCanvasElement {
+  const key = `${color}|${s}`;
+  let spr = neonSprites.get(key);
+  if (spr) return spr;
+  spr = document.createElement("canvas");
+  spr.width = s + GLOW_MARGIN * 2;
+  spr.height = s + GLOW_MARGIN * 2;
+  const c = spr.getContext("2d")!;
+  const o = GLOW_MARGIN;
+  c.shadowColor = color;
+  c.shadowBlur = 8;
+  c.fillStyle = color;
+  c.fillRect(o + 1, o + 1, s - 2, s - 2);
+  c.shadowBlur = 0;
+  c.fillStyle = "rgba(255,255,255,0.35)";
+  c.fillRect(o + 3, o + 3, s - 6, 2);
+  neonSprites.set(key, spr);
+  return spr;
+}
+
 const BLOCK_DRAWERS: Record<TetrisSkin, BlockDrawer> = {
   retro(ctx, px, py, s, color) {
     ctx.fillStyle = color;
@@ -132,13 +157,8 @@ const BLOCK_DRAWERS: Record<TetrisSkin, BlockDrawer> = {
     ctx.fillRect(px, py, s, 4);
   },
   neon(ctx, px, py, s, color) {
-    ctx.shadowColor = color;
-    ctx.shadowBlur = 8;
-    ctx.fillStyle = color;
-    ctx.fillRect(px + 1, py + 1, s - 2, s - 2);
-    ctx.shadowBlur = 0;
-    ctx.fillStyle = "rgba(255,255,255,0.35)";
-    ctx.fillRect(px + 3, py + 3, s - 6, 2);
+    const spr = neonSprite(color, s);
+    ctx.drawImage(spr, px - GLOW_MARGIN, py - GLOW_MARGIN);
   },
   pastel(ctx, px, py, s, color) {
     const r = Math.max(2, s * 0.3);

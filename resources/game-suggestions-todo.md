@@ -1,6 +1,6 @@
 # Game suggestions — to-do
 
-Last updated: 2026-10-21 by game-planner
+Last updated: 2026-10-22
 
 ## Next up (ranked)
 
@@ -19,11 +19,6 @@ Last updated: 2026-10-21 by game-planner
   - Category: PUZZLE
   - Description: Slide numbered tiles on a 4x4 grid; merge equal tiles to reach 2048.
   - Run: `/add-game id: 2048 — 2048 — 4x4 grid, arrows/WASD slide all tiles, equal tiles merge, new 2/4 tile spawns each move; score = sum of merged values; lives null; level = highest tile tier; game over when no moves remain`
-- [ ] **MINESWEEPER**
-  - ID: `minesweeper`
-  - Category: PUZZLE
-  - Description: Reveal safe cells on a hidden mine field using number clues; flag mines and clear the board.
-  - Run: `/add-game id: minesweeper — MINESWEEPER — 9x9, 12x12, 16x16 boards, arrows move cursor, Space/Enter reveal, F flag, first click safe; score = cells revealed + time bonus per cleared board; 3 lives (a mine costs a life and flags it); level = board size`
 - [ ] **GEM MATCH**
   - ID: `gem-match`
   - Category: PUZZLE
@@ -64,11 +59,6 @@ Last updated: 2026-10-21 by game-planner
   - Category: VERSUS
   - Description: Steer a light trail around the arena and trap the CPU rider into crashing.
   - Run: `/add-game id: light-cycles — LIGHT CYCLES — Tron-style grid duel, arrows or WASD turn 90 degrees, trails are walls, last rider alive wins the round; 500 per round win + survival ticks; 3 lives (crash = lose a life); levels = faster cycles and smarter CPU`
-- [ ] **FROGGY**
-  - ID: `froggy`
-  - Category: ARCADE
-  - Description: Hop across traffic lanes and river logs to fill all lily pads before time runs out.
-  - Run: `/add-game id: froggy — FROGGY — arrows hop one tile across road lanes (cars) and river lanes (logs/turtles) to reach 5 lily pads; timer per run; +10 per forward row, +50 per pad, time bonus on level clear; 3 lives; level up when all pads filled (faster lanes)`
 - [ ] **DINO RUN**
   - ID: `dino-run`
   - Category: ARCADE
@@ -111,3 +101,5 @@ Last updated: 2026-10-21 by game-planner
 - [x] ARKANOID — implemented
 - [x] SNAKE — implemented
 - [x] ASTEROIDS — implemented
+- [x] FROGGY — implemented
+- [x] MINESWEEPER — implemented

@@ -72,6 +72,17 @@ const PALETTES: Record<AsteroidsSkin, Palette> = {
 
 // Read at draw time; swapped by setAppearance
 let palette: Palette = PALETTES.neon;
+let particleStyle = `rgb(${palette.particleRgb})`;
+// Bumped on skin change so cached asteroid sprites rebuild
+let skinVersion = 0;
+const SPRITE_SCALE = 2;
+const SPRITE_PAD = 12;
+
+function applyPalette(p: Palette) {
+  palette = p;
+  particleStyle = `rgb(${p.particleRgb})`;
+  skinVersion++;
+}
 
 function setGlow(ctx: CanvasRenderingContext2D, color: string) {
   if (palette.glow === 0) return;
@@ -170,19 +181,55 @@ class Asteroid {
     ];
   }
 
-  draw(ctx: CanvasRenderingContext2D) {
-    ctx.save();
-    ctx.translate(this.x, this.y);
-    ctx.rotate(this.rot);
-    ctx.strokeStyle = palette.asteroid;
-    setGlow(ctx, palette.asteroid);
-    ctx.lineWidth = 1.5;
-    ctx.lineJoin = "round";
+  private sprite: HTMLCanvasElement | null = null;
+  private spriteVersion = -1;
+
+  // Glow skins: render outline + blur once into an offscreen sprite, then blit rotated.
+  private buildSprite() {
+    const half = Math.ceil(this.radius + SPRITE_PAD);
+    const c = document.createElement("canvas");
+    c.width = c.height = half * 2 * SPRITE_SCALE;
+    const g = c.getContext("2d");
+    if (!g) return;
+    g.scale(SPRITE_SCALE, SPRITE_SCALE);
+    g.translate(half, half);
+    g.strokeStyle = palette.asteroid;
+    g.shadowColor = palette.asteroid;
+    g.shadowBlur = palette.glow * SPRITE_SCALE;
+    g.lineWidth = 1.5;
+    g.lineJoin = "round";
+    this.tracePath(g);
+    g.stroke();
+    this.sprite = c;
+    this.spriteVersion = skinVersion;
+  }
+
+  private tracePath(ctx: CanvasRenderingContext2D) {
     ctx.beginPath();
     ctx.moveTo(this.verts[0][0], this.verts[0][1]);
     for (let i = 1; i < this.verts.length; i++)
       ctx.lineTo(this.verts[i][0], this.verts[i][1]);
     ctx.closePath();
+  }
+
+  draw(ctx: CanvasRenderingContext2D) {
+    ctx.save();
+    ctx.translate(this.x, this.y);
+    ctx.rotate(this.rot);
+    if (palette.glow > 0) {
+      if (!this.sprite || this.spriteVersion !== skinVersion)
+        this.buildSprite();
+      if (this.sprite) {
+        const s = this.sprite.width / SPRITE_SCALE;
+        ctx.drawImage(this.sprite, -s / 2, -s / 2, s, s);
+        ctx.restore();
+        return;
+      }
+    }
+    ctx.strokeStyle = palette.asteroid;
+    ctx.lineWidth = 1.5;
+    ctx.lineJoin = "round";
+    this.tracePath(ctx);
     ctx.stroke();
     ctx.restore();
   }
@@ -315,13 +362,14 @@ class Particle {
   }
 
   draw(ctx: CanvasRenderingContext2D) {
-    const alpha = this.ttl / this.life;
-    ctx.strokeStyle = `rgba(${palette.particleRgb},${alpha.toFixed(2)})`;
+    ctx.globalAlpha = this.ttl / this.life;
+    ctx.strokeStyle = particleStyle;
     ctx.lineWidth = 1;
     ctx.beginPath();
     ctx.moveTo(this.x, this.y);
     ctx.lineTo(this.x - this.vx * 0.05, this.y - this.vy * 0.05);
     ctx.stroke();
+    ctx.globalAlpha = 1;
   }
 }
 
@@ -386,7 +434,7 @@ export function createAsteroidsGame(
 ): AsteroidsEngine {
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("2D canvas context unavailable");
-  palette = PALETTES.neon; // module-level: don't inherit a previous engine's skin
+  applyPalette(PALETTES.neon); // module-level: don't inherit a previous engine's skin
 
   // Canvas can't read CSS vars directly; resolve the platform pixel font once.
   const fontFamily =
@@ -412,6 +460,7 @@ export function createAsteroidsGame(
   let deadTimer = 0;
   let lastTime: number | null = null;
   let rafId = 0;
+  let dirty = true; // one forced redraw on state changes while idle
 
   // Last values sent to callbacks, so they fire only on change
   let sentScore = -1;
@@ -458,6 +507,7 @@ export function createAsteroidsGame(
   function finishRun() {
     if (state === "gameover") return;
     state = "gameover";
+    dirty = true;
     tripleShotTimer = 0;
     shieldTimer = 0;
     syncCallbacks();
@@ -501,6 +551,7 @@ export function createAsteroidsGame(
     lives = START_LIVES;
     level = 1;
     state = "ready";
+    dirty = true;
     ship.invincible = 0; // visible (no respawn blink) while waiting to start
     deadTimer = 0;
     for (const k of Object.keys(keys)) keys[k] = false;
@@ -686,11 +737,16 @@ export function createAsteroidsGame(
   function loop(ts: number) {
     const dt = lastTime === null ? 0 : Math.min((ts - lastTime) / 1000, MAX_DT);
     lastTime = ts;
+    // Idle (paused, or game over with no particles left): skip update + render
+    const animating = !paused && (state !== "gameover" || particles.length > 0);
     if (!paused) {
       update(dt);
       syncCallbacks();
     }
-    draw();
+    if (animating || dirty) {
+      draw();
+      dirty = false;
+    }
     rafId = requestAnimationFrame(loop);
   }
 
@@ -703,6 +759,7 @@ export function createAsteroidsGame(
   return {
     setPaused(value) {
       paused = value;
+      dirty = true;
       // Drop input queued/held during the pause so nothing fires on resume
       for (const k of Object.keys(keys)) keys[k] = false;
       for (const k of Object.keys(justPressed)) justPressed[k] = false;
@@ -715,7 +772,7 @@ export function createAsteroidsGame(
       initGame();
     },
     setAppearance(skin) {
-      palette = PALETTES[skin];
+      applyPalette(PALETTES[skin]);
       draw();
     },
     destroy() {
