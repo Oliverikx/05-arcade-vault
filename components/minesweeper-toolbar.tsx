@@ -1,8 +1,42 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import type { MinesweeperSkin } from "@/lib/games/minesweeper/engine";
 
 export const MINESWEEPER_SOUND_KEY = "av_minesweeper_sound";
+export const MINESWEEPER_SKIN_KEY = "av_minesweeper_skin";
+const SKINS: MinesweeperSkin[] = ["neon", "retro", "classic"];
+const DEFAULT_SKIN: MinesweeperSkin = "neon";
+
+function readSkin(): MinesweeperSkin {
+  try {
+    const raw = localStorage.getItem(MINESWEEPER_SKIN_KEY);
+    return SKINS.find((s) => s === raw) ?? DEFAULT_SKIN;
+  } catch {
+    return DEFAULT_SKIN;
+  }
+}
+
+/** Skin persisted per browser; read after mount to keep SSR markup stable. */
+export function useMinesweeperSkin() {
+  const [skin, setSkin] = useState<MinesweeperSkin>(DEFAULT_SKIN);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- localStorage is client-only
+    setSkin(readSkin());
+  }, []);
+
+  const update = (next: MinesweeperSkin) => {
+    setSkin(next);
+    try {
+      localStorage.setItem(MINESWEEPER_SKIN_KEY, next);
+    } catch {
+      // private mode: keep the choice for this visit only
+    }
+  };
+
+  return [skin, update] as const;
+}
 
 function readMuted(): boolean {
   try {
@@ -34,6 +68,8 @@ export function useMinesweeperSound() {
 }
 
 interface Props {
+  skin: MinesweeperSkin;
+  onSkinChange(next: MinesweeperSkin): void;
   muted: boolean;
   onChange(next: boolean): void;
   hintsLeft: number;
@@ -42,6 +78,8 @@ interface Props {
 }
 
 export function MinesweeperToolbar({
+  skin,
+  onSkinChange,
   muted,
   onChange,
   hintsLeft,
@@ -50,6 +88,22 @@ export function MinesweeperToolbar({
 }: Props) {
   return (
     <div className="tetris-toolbar ms-toolbar">
+      <label className="tt-field">
+        <span>SKIN</span>
+        <select
+          value={skin}
+          onChange={(e) => {
+            onSkinChange(e.target.value as MinesweeperSkin);
+            e.currentTarget.blur();
+          }}
+        >
+          {SKINS.map((s) => (
+            <option key={s} value={s}>
+              {s.toUpperCase()}
+            </option>
+          ))}
+        </select>
+      </label>
       <div className="tt-toggle" role="group" aria-label="Hint">
         <button
           type="button"

@@ -1,6 +1,6 @@
 # SPEC SKIN-06 — MINESWEEPER skin selector
 
-> **Status:** Draft
+> **Status:** Implemented
 > **Depends on:** `specs/game-core/minesweeper/01-minesweeper-core-game.md`; `specs/game-core/minesweeper/02-minesweeper-sound-fx.md` (shares `components/minesweeper-toolbar.tsx`); `specs/game-core/minesweeper/03-minesweeper-hint-assist.md` (shares the toolbar, hint pulse color); SPEC 07 (tetris toolbar pattern); `specs/skin-designer/05-froggy-skin-selector.md` (wiring precedent)
 > **Date:** 2026-10-22
 > **Objective:** Add a canvas-only `SKIN` selector (`neon` / `retro` / `classic`) under the CRT at `/games/minesweeper/play`, persisted per browser, redrawing immediately.

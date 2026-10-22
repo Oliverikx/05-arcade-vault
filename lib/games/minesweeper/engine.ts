@@ -11,7 +11,15 @@ import {
   type BoardSpec,
   type Cell,
 } from "./board";
-import { CELL, H, W, drawFrame, layoutFor, type Phase } from "./draw";
+import {
+  CELL,
+  H,
+  W,
+  drawFrame,
+  layoutFor,
+  type MinesweeperSkin,
+  type Phase,
+} from "./draw";
 import { createSound } from "./sound";
 
 const STEP_MS = 1000 / 60;
@@ -47,7 +55,10 @@ interface Press {
   fired: boolean; // long press already flagged
 }
 
+export type { MinesweeperSkin };
+
 export interface MinesweeperEngine extends GameEngine {
+  setAppearance(skin: MinesweeperSkin): void; // redraws now
   hint(): void;
   setMuted(muted: boolean): void;
 }
@@ -79,6 +90,7 @@ export function createMinesweeperGame(
   let cursor: number | null = null;
   let kbUsed = false;
   let hover: number | null = null;
+  let skin: MinesweeperSkin = "neon";
   let paused = false;
   let finished = false; // onGameOver already fired
   let accum = 0;
@@ -238,6 +250,7 @@ export function createMinesweeperGame(
     const flags = cells.filter((c) => c.flagged).length;
     drawFrame(ctx!, {
       fontFamily,
+      skin,
       spec,
       cells,
       phase,
@@ -429,6 +442,10 @@ export function createMinesweeperGame(
       finish();
     },
     hint,
+    setAppearance(next) {
+      skin = next;
+      render();
+    },
     setMuted(muted) {
       sound.setMuted(muted);
     },
