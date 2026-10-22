@@ -11,7 +11,11 @@ import {
   AsteroidsToolbar,
   useAsteroidsSkin,
 } from "@/components/asteroids-toolbar";
-import { FroggyToolbar, useFroggyMuted } from "@/components/froggy-toolbar";
+import {
+  FroggyToolbar,
+  useFroggyMuted,
+  useFroggySkin,
+} from "@/components/froggy-toolbar";
 import { GameScreen } from "@/components/game-screen";
 import { TouchPad } from "@/components/touch-pad";
 import { SnakeToolbar, useSnakeSkin } from "@/components/snake-toolbar";
@@ -40,6 +44,7 @@ export function GamePlayer({ game }: { game: Game }) {
   const [snakeSkin, setSnakeSkin] = useSnakeSkin();
   const [muted, setMuted] = useArkanoidMuted();
   const [froggyMuted, setFroggyMuted] = useFroggyMuted();
+  const [froggySkin, setFroggySkin] = useFroggySkin();
   const [arkanoidSkin, setArkanoidSkin] = useArkanoidSkin();
   const initialLives = entry ? entry.lives : PRACTICE_LIVES;
   const [score, setScore] = useState(0);
@@ -186,6 +191,7 @@ export function GamePlayer({ game }: { game: Game }) {
               arkanoidSkin={isArkanoid ? arkanoidSkin : undefined}
               asteroidsSkin={isAsteroids ? asteroidsSkin : undefined}
               snakeSkin={isSnake ? snakeSkin : undefined}
+              froggySkin={isFroggy ? froggySkin : undefined}
               onScore={setScore}
               onLives={setLives}
               onLevel={setEngineLevel}
@@ -261,7 +267,12 @@ export function GamePlayer({ game }: { game: Game }) {
       )}
 
       {isFroggy && (
-        <FroggyToolbar muted={froggyMuted} onChange={setFroggyMuted} />
+        <FroggyToolbar
+          skin={froggySkin}
+          onSkinChange={setFroggySkin}
+          muted={froggyMuted}
+          onMutedChange={setFroggyMuted}
+        />
       )}
 
       {isSnake && <SnakeToolbar skin={snakeSkin} onChange={setSnakeSkin} />}

@@ -1,6 +1,6 @@
 # SPEC SKIN-05 — FROGGY skin selector
 
-> **Status:** Draft
+> **Status:** Implemented
 > **Depends on:** `specs/game-core/froggy/01-froggy-core-game.md`; `specs/game-core/froggy/02-froggy-hazards-bonus.md` (turtle, fly, snake colors; skip those rows if 02 is not implemented); `specs/game-core/froggy/03-froggy-sound-mute.md` (shares `components/froggy-toolbar.tsx`); SPEC 07 (tetris toolbar pattern)
 > **Date:** 2026-10-22
 > **Objective:** Add a canvas-only `SKIN` selector (`neon` / `retro` / `classic`) under the CRT at `/games/froggy/play`, persisted per browser, redrawing immediately.
