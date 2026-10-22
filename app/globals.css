@@ -1037,6 +1037,27 @@ a {
   );
   pointer-events: none;
 }
+/* ── Cheaper page layers while a real game is open (body.game-play) ───────
+   Same look, no per-frame compositing: static grid, normal blending, no blur. */
+body.game-play .av-bg::before {
+  animation: none;
+}
+body.game-play .av-bg::after {
+  mix-blend-mode: normal;
+  opacity: 0.2;
+}
+body.game-play .crt-screen::after {
+  /* multiply with black == plain black at the same alpha */
+  mix-blend-mode: normal;
+}
+body.game-play .av-nav {
+  backdrop-filter: none;
+  background: linear-gradient(
+    180deg,
+    rgba(10, 10, 15, 0.97),
+    rgba(10, 10, 15, 0.92)
+  );
+}
 /* ── Touch pad (coarse pointers only) ─────────────────────────────────── */
 .touch-pad {
   display: none;
