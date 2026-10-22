@@ -17,6 +17,10 @@ import {
   useFroggySkin,
 } from "@/components/froggy-toolbar";
 import { GameScreen } from "@/components/game-screen";
+import {
+  MinesweeperToolbar,
+  useMinesweeperSound,
+} from "@/components/minesweeper-toolbar";
 import { TouchPad } from "@/components/touch-pad";
 import { SnakeToolbar, useSnakeSkin } from "@/components/snake-toolbar";
 import {
@@ -39,11 +43,13 @@ export function GamePlayer({ game }: { game: Game }) {
   const isAsteroids = game.id === "asteroids";
   const isSnake = game.id === "snake";
   const isFroggy = game.id === "froggy";
+  const isMinesweeper = game.id === "minesweeper";
   const [appearance, setAppearance] = useTetrisAppearance();
   const [asteroidsSkin, setAsteroidsSkin] = useAsteroidsSkin();
   const [snakeSkin, setSnakeSkin] = useSnakeSkin();
   const [muted, setMuted] = useArkanoidMuted();
   const [froggyMuted, setFroggyMuted] = useFroggyMuted();
+  const [minesweeperMuted, setMinesweeperMuted] = useMinesweeperSound();
   const [froggySkin, setFroggySkin] = useFroggySkin();
   const [arkanoidSkin, setArkanoidSkin] = useArkanoidSkin();
   const initialLives = entry ? entry.lives : PRACTICE_LIVES;
@@ -187,7 +193,15 @@ export function GamePlayer({ game }: { game: Game }) {
               runId={runId}
               endSignal={endSignal}
               appearance={isTetris ? appearance : undefined}
-              muted={isArkanoid ? muted : isFroggy ? froggyMuted : undefined}
+              muted={
+                isArkanoid
+                  ? muted
+                  : isFroggy
+                    ? froggyMuted
+                    : isMinesweeper
+                      ? minesweeperMuted
+                      : undefined
+              }
               arkanoidSkin={isArkanoid ? arkanoidSkin : undefined}
               asteroidsSkin={isAsteroids ? asteroidsSkin : undefined}
               snakeSkin={isSnake ? snakeSkin : undefined}
@@ -272,6 +286,13 @@ export function GamePlayer({ game }: { game: Game }) {
           onSkinChange={setFroggySkin}
           muted={froggyMuted}
           onMutedChange={setFroggyMuted}
+        />
+      )}
+
+      {isMinesweeper && (
+        <MinesweeperToolbar
+          muted={minesweeperMuted}
+          onChange={setMinesweeperMuted}
         />
       )}
 
