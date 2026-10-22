@@ -64,6 +64,8 @@ Resend (`resend` package), `app/about/actions.ts`. Env: `RESEND_API_KEY`, `CONTA
 - `skin-designer` (`.claude/agents/skin-designer.md`) — give it one or more game ids; checks each has a skin selector with neon/retro/classic (tetris = reference). Writes Draft specs `specs/skin-designer/NN-<game-id>-skin-selector.md` (no selector) or `NN-<game-id>-missing-skins.md` (some skins missing). Spec only.
 - `mobile-porter` (`.claude/agents/mobile-porter.md`) — give it one or more game ids; checks each has working touch controls (shared `TouchPad` + registry `touch` layout, spec 10 = reference). Writes Draft specs `specs/mobile-porter/NN-<game-id>-gamepad.md` (no touch controls) or `NN-<game-id>-gamepad-fix.md` (present but broken). Spec only.
 
+- `game-performance` (`.claude/agents/game-performance.md`) — give it one or more game ids; audits perf like spec 12 (glow sprite cache, idle render skip, allocations), edits code directly, measures FPS before/after via Playwright (logs in `.playwright-mcp/logs/`). ONE game per run, no commits; returns `remaining` ids — ask the user before running the next.
+
 ## Hooks
 
 `.claude/settings.json` — PostToolUse hook runs `.claude/hooks/format-file.mjs` (Prettier) after every Write/Edit.
