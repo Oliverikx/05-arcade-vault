@@ -1,6 +1,6 @@
 # SPEC FROGGY-02 — FROGGY hazards and bonus
 
-> **Status:** Draft
+> **Status:** Implemented
 > **Depends on:** 01 of this game (`01-froggy-core-game.md`)
 > **Date:** 2026-10-22
 > **Objective:** Add diving turtles, a bonus fly on the lily pads and a median snake that raise difficulty and score variety from level 2 onward.

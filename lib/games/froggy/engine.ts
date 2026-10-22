@@ -7,6 +7,7 @@ import {
   H,
   LANES,
   W,
+  diveState,
   entityXs,
   modulusOf,
   speedMult,
@@ -28,6 +29,17 @@ const PTS_ROW = 10;
 const PTS_PAD = 50;
 const PTS_SECOND = 10;
 const PTS_LEVEL = 1000;
+const PTS_FLY = 200;
+
+const FLY_EVERY_MS = 10000;
+const FLY_VISIBLE_MS = 5000;
+const FLY_FROM_LEVEL = 2;
+const SNAKE_FROM_LEVEL = 3;
+const SNAKE_SPEED = 80;
+const SNAKE_W = 2 * CELL;
+const SNAKE_HIT_W = 72;
+const SNAKE_DELAY_MS = 1500;
+const SNAKE_ROW = 5;
 
 type Dir = "up" | "down" | "left" | "right";
 const KEY_DIRS: Record<string, Dir> = {
@@ -70,6 +82,10 @@ export function createFroggyGame(
   let timeLeft = TIME_LIMIT;
   let dyingT = -1; // >= 0 while dying (ms elapsed)
   let pads: boolean[] = PAD_COLS.map(() => false);
+  let playMs = 0; // playing time, drives the turtle dive cycle
+  let flyClock = 0;
+  let fly: { pad: number; ms: number } | null = null;
+  let snake = { x: -SNAKE_W, dir: 1 as 1 | -1, delay: SNAKE_DELAY_MS };
   let score = 0;
   let lives = START_LIVES;
   let roundsCleared = 0;
@@ -134,10 +150,13 @@ export function createFroggyGame(
   function fillPad(i: number) {
     pads[i] = true;
     addScore(PTS_PAD + PTS_SECOND * Math.floor(timeLeft));
+    if (fly && fly.pad === i) addScore(PTS_FLY);
+    fly = null;
     if (pads.every(Boolean)) {
       addScore(PTS_LEVEL);
       roundsCleared++;
       pads = PAD_COLS.map(() => false);
+      flyClock = 0;
     }
     respawn();
   }
@@ -152,8 +171,58 @@ export function createFroggyGame(
     if (!lane || lane.kind !== "log") return false;
     const w = lane.w * CELL;
     return entityXs(lane, phases[laneIndex(frogRow)]).some(
-      (x) => frogX >= x && frogX <= x + w,
+      (x, idx) =>
+        frogX >= x &&
+        frogX <= x + w &&
+        !(lane.dive && diveState(idx, playMs) === "under"),
     );
+  }
+
+  function hitsSnake(): boolean {
+    if (frogRow !== SNAKE_ROW || level() < SNAKE_FROM_LEVEL) return false;
+    if (snake.delay > 0) return false;
+    const left = snake.x + (SNAKE_W - SNAKE_HIT_W) / 2;
+    return frogX + FROG_HALF > left && frogX - FROG_HALF < left + SNAKE_HIT_W;
+  }
+
+  function updateFly(dt: number) {
+    if (level() < FLY_FROM_LEVEL) return;
+    if (fly) {
+      fly.ms -= dt;
+      if (fly.ms <= 0) fly = null;
+      return;
+    }
+    flyClock += dt;
+    if (flyClock >= FLY_EVERY_MS) {
+      const empty = PAD_COLS.map((_, i) => i).filter((i) => !pads[i]);
+      if (empty.length) {
+        fly = {
+          pad: empty[Math.floor(Math.random() * empty.length)],
+          ms: FLY_VISIBLE_MS,
+        };
+      }
+      flyClock = 0;
+    }
+  }
+
+  function updateSnake(dt: number, sec: number, mult: number) {
+    if (level() < SNAKE_FROM_LEVEL) return;
+    if (snake.delay > 0) {
+      snake.delay = Math.max(0, snake.delay - dt);
+      if (snake.delay > 0) return;
+    }
+    // Re-entry is skipped while the frog stands near the entry point.
+    const entering = snake.dir === 1 ? snake.x <= -SNAKE_W : snake.x >= W;
+    if (entering && frogRow === SNAKE_ROW) {
+      const edgeX = snake.dir === 1 ? 0 : W;
+      if (Math.abs(frogX - edgeX) < 80 + SNAKE_W) return;
+    }
+    snake.x += snake.dir * SNAKE_SPEED * mult * sec;
+    if (snake.dir === 1 && snake.x > W) {
+      snake = { x: W, dir: -1, delay: SNAKE_DELAY_MS };
+    } else if (snake.dir === -1 && snake.x < -SNAKE_W) {
+      snake = { x: -SNAKE_W, dir: 1, delay: SNAKE_DELAY_MS };
+    }
   }
 
   function hitsVehicle(): boolean {
@@ -179,7 +248,7 @@ export function createFroggyGame(
       return;
     }
     frogX = Math.min(620, Math.max(20, frogX));
-    if (isRoad(frogRow) && hitsVehicle()) die();
+    if ((isRoad(frogRow) && hitsVehicle()) || hitsSnake()) die();
   }
 
   function hop(dir: Dir) {
@@ -208,6 +277,7 @@ export function createFroggyGame(
     if (ready || paused || gameOver) return;
     const mult = speedMult(level());
     const sec = dt / 1000;
+    playMs += dt;
 
     LANES.forEach((lane, i) => {
       const m = modulusOf(lane);
@@ -220,6 +290,9 @@ export function createFroggyGame(
       return;
     }
 
+    updateFly(dt);
+    updateSnake(dt, sec, mult);
+
     if (hopT < HOP_MS) hopT += dt;
 
     // Ride the log
@@ -230,7 +303,7 @@ export function createFroggyGame(
         die();
         return;
       }
-    } else if (isRoad(frogRow) && hitsVehicle()) {
+    } else if ((isRoad(frogRow) && hitsVehicle()) || hitsSnake()) {
       die();
       return;
     }
@@ -258,6 +331,12 @@ export function createFroggyGame(
       frog,
       pads,
       timeFrac: timeLeft / TIME_LIMIT,
+      playMs,
+      flyPad: fly ? fly.pad : null,
+      snake:
+        level() >= SNAKE_FROM_LEVEL && snake.delay <= 0
+          ? { x: snake.x, dir: snake.dir }
+          : null,
       hint: ready && !gameOver ? "PRESS ARROW KEY OR SPACE TO START" : null,
     });
   }
@@ -305,6 +384,10 @@ export function createFroggyGame(
     score = 0;
     lives = START_LIVES;
     roundsCleared = 0;
+    playMs = 0;
+    flyClock = 0;
+    fly = null;
+    snake = { x: -SNAKE_W, dir: 1, delay: SNAKE_DELAY_MS };
     ready = true;
     paused = false;
     gameOver = false;
