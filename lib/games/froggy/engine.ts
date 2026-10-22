@@ -105,6 +105,7 @@ export function createFroggyGame(
   let ready = true;
   let paused = false;
   let gameOver = false;
+  let dirty = true; // one more render needed while idle (ready/paused/over)
   let accum = 0;
   let lastTime = 0;
   let rafId = 0;
@@ -130,6 +131,7 @@ export function createFroggyGame(
   function endGame() {
     if (gameOver) return;
     gameOver = true;
+    dirty = true;
     sound.play("gameOver");
     syncCallbacks();
     callbacks.onGameOver(score);
@@ -377,7 +379,11 @@ export function createFroggyGame(
       update(STEP_MS);
       accum -= STEP_MS;
     }
-    render();
+    // Idle states draw nothing new: render once after each state change.
+    if (!(ready || paused || gameOver) || dirty) {
+      render();
+      dirty = false;
+    }
     rafId = requestAnimationFrame(loop);
   }
 
@@ -425,6 +431,7 @@ export function createFroggyGame(
     ready = true;
     paused = false;
     gameOver = false;
+    dirty = true;
     accum = 0;
     sentScore = -1;
     sentLives = -1;
@@ -445,6 +452,7 @@ export function createFroggyGame(
     setPaused(next) {
       if (next === paused || gameOver) return;
       paused = next;
+      dirty = true;
       if (paused) sound.suspend();
       else {
         lastTime = performance.now();

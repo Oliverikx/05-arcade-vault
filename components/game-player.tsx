@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import {
   ArkanoidToolbar,
   useArkanoidMuted,
@@ -55,9 +55,15 @@ export function GamePlayer({ game }: { game: Game }) {
   const [froggySkin, setFroggySkin] = useFroggySkin();
   const [arkanoidSkin, setArkanoidSkin] = useArkanoidSkin();
   const initialLives = entry ? entry.lives : PRACTICE_LIVES;
-  const [score, setScore] = useState(0);
-  const [lives, setLives] = useState(initialLives ?? 0);
-  const [engineLevel, setEngineLevel] = useState(1);
+  // Live HUD values: refs + direct DOM writes, so score ticks don't re-render.
+  const scoreRef = useRef(0);
+  const livesRef = useRef(initialLives ?? 0);
+  const levelRef = useRef(1);
+  const scoreElRef = useRef<HTMLDivElement>(null);
+  const livesElRef = useRef<HTMLDivElement>(null);
+  const levelElRef = useRef<HTMLDivElement>(null);
+  const [finalScore, setFinalScore] = useState(0);
+  const [scoreOver100, setScoreOver100] = useState(false);
   const [runId, setRunId] = useState(0);
   const [endSignal, setEndSignal] = useState(0);
   const [hintSignal, setHintSignal] = useState(0);
@@ -73,16 +79,45 @@ export function GamePlayer({ game }: { game: Game }) {
   const [saving, startSaving] = useTransition();
 
   const name = typedName ?? user?.name ?? "GUEST";
-  const level = entry ? engineLevel : 1 + Math.floor(score / 2500);
+
+  const paintHud = () => {
+    const level = entry
+      ? levelRef.current
+      : 1 + Math.floor(scoreRef.current / 2500);
+    if (scoreElRef.current)
+      scoreElRef.current.textContent = scoreRef.current.toLocaleString("en-US");
+    if (livesElRef.current)
+      livesElRef.current.textContent =
+        initialLives === null
+          ? "—"
+          : "♥ ".repeat(livesRef.current).trim() || "—";
+    if (levelElRef.current)
+      levelElRef.current.textContent = String(level).padStart(2, "0");
+  };
+
+  const onScore = (v: number) => {
+    scoreRef.current = v;
+    paintHud();
+    setScoreOver100(v >= 100);
+  };
+  const onLives = (v: number) => {
+    livesRef.current = v;
+    paintHud();
+  };
+  const onLevel = (v: number) => {
+    levelRef.current = v;
+    paintHud();
+  };
 
   // Fake score ticker: runs only in the client after mount.
   useEffect(() => {
     if (entry || over || paused) return;
-    const t = setInterval(
-      () => setScore((s) => s + Math.floor(10 + Math.random() * 90)),
-      220,
-    );
+    const t = setInterval(() => {
+      scoreRef.current += Math.floor(10 + Math.random() * 90);
+      paintHud();
+    }, 220);
     return () => clearInterval(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [entry, over, paused]);
 
   // Engine game pause controls: P / Esc toggle, tab hidden auto-pauses.
@@ -113,23 +148,30 @@ export function GamePlayer({ game }: { game: Game }) {
     };
   }, [entry, over]);
 
-  // Lets CSS hide the navbar on touch devices while a real game is open.
+  // Lets CSS hide the navbar on touch devices (touch-play) and cheapen page
+  // effects (game-play) while a real game is open.
   // Effect cleanup also runs when the cached page is hidden on navigation.
   useEffect(() => {
     if (!entry) return;
-    document.body.classList.add("touch-play");
-    return () => document.body.classList.remove("touch-play");
+    document.body.classList.add("touch-play", "game-play");
+    return () => document.body.classList.remove("touch-play", "game-play");
   }, [entry]);
 
   const endRun = () => {
     if (entry) setEndSignal((n) => n + 1);
-    else setOver(true);
+    else {
+      setFinalScore(scoreRef.current);
+      setOver(true);
+    }
   };
 
   const restart = () => {
-    setScore(0);
-    setLives(initialLives ?? 0);
-    setEngineLevel(1);
+    scoreRef.current = 0;
+    livesRef.current = initialLives ?? 0;
+    levelRef.current = 1;
+    paintHud();
+    setFinalScore(0);
+    setScoreOver100(false);
     setRunId((r) => r + 1);
     setPaused(false);
     setOver(false);
@@ -144,7 +186,11 @@ export function GamePlayer({ game }: { game: Game }) {
     setSaveError(false);
     startSaving(async () => {
       try {
-        const result = await saveScore({ gameId: game.id, name, score });
+        const result = await saveScore({
+          gameId: game.id,
+          name,
+          score: finalScore,
+        });
         if (result.ok) setSaved(true);
         else setSaveError(true);
       } catch {
@@ -165,17 +211,23 @@ export function GamePlayer({ game }: { game: Game }) {
           </div>
           <div className="hud-stat">
             <div className="l">Score</div>
-            <div className="v">{score.toLocaleString("en-US")}</div>
+            <div className="v" ref={scoreElRef}>
+              0
+            </div>
           </div>
           <div className="hud-stat lives">
             <div className="l">Lives</div>
-            <div className="v">
-              {initialLives === null ? "—" : "♥ ".repeat(lives).trim() || "—"}
+            <div className="v" ref={livesElRef}>
+              {initialLives === null
+                ? "—"
+                : "♥ ".repeat(initialLives).trim() || "—"}
             </div>
           </div>
           <div className="hud-stat level">
             <div className="l">Level</div>
-            <div className="v">{String(level).padStart(2, "0")}</div>
+            <div className="v" ref={levelElRef}>
+              01
+            </div>
           </div>
         </div>
         <div className="hud-actions">
@@ -215,16 +267,18 @@ export function GamePlayer({ game }: { game: Game }) {
               asteroidsSkin={isAsteroids ? asteroidsSkin : undefined}
               snakeSkin={isSnake ? snakeSkin : undefined}
               froggySkin={isFroggy ? froggySkin : undefined}
-              onScore={setScore}
-              onLives={setLives}
-              onLevel={setEngineLevel}
+              onScore={onScore}
+              onLives={onLives}
+              onLevel={onLevel}
               onAbilityMenu={setAbilityMenu}
               onHints={(left, active) => {
                 setHintsLeft(left);
                 setHintsActive(active);
               }}
-              onGameOver={(finalScore) => {
-                setScore(finalScore);
+              onGameOver={(final) => {
+                scoreRef.current = final;
+                paintHud();
+                setFinalScore(final);
                 setOver(true);
               }}
             />
@@ -310,7 +364,7 @@ export function GamePlayer({ game }: { game: Game }) {
           onChange={setMinesweeperMuted}
           hintsLeft={hintsLeft}
           canHint={
-            hintsActive && hintsLeft > 0 && score >= 100 && !paused && !over
+            hintsActive && hintsLeft > 0 && scoreOver100 && !paused && !over
           }
           onHint={() => setHintSignal((n) => n + 1)}
         />
@@ -323,7 +377,7 @@ export function GamePlayer({ game }: { game: Game }) {
           <div className="modal">
             <h2>GAME OVER</h2>
             <div className="final-label">FINAL SCORE</div>
-            <div className="final">{score.toLocaleString("en-US")}</div>
+            <div className="final">{finalScore.toLocaleString("en-US")}</div>
             {!entry ? (
               <div className="practice-note">
                 PRACTICE RUN — SCORE NOT RECORDED

@@ -10,6 +10,7 @@ import {
   entityXs,
   type Lane,
 } from "./lanes";
+import { blit, getSprites, type FroggySprites } from "./sprites";
 
 export const PAD_COLS = [1, 4, 7, 10, 13];
 
@@ -172,12 +173,6 @@ function laneColor(p: Palette, kind: Lane["kind"]): string {
   }
 }
 
-function glow(ctx: CanvasRenderingContext2D, color: string, blur: number) {
-  if (blur <= 0) return;
-  ctx.shadowColor = color;
-  ctx.shadowBlur = blur;
-}
-
 export function drawFrogShape(
   ctx: CanvasRenderingContext2D,
   x: number,
@@ -200,6 +195,7 @@ export function drawFrogShape(
 function drawBackground(
   ctx: CanvasRenderingContext2D,
   p: Palette,
+  sprites: FroggySprites,
   pads: boolean[],
 ) {
   ctx.fillStyle = p.background;
@@ -244,12 +240,7 @@ function drawBackground(
     ctx.strokeStyle = p.padLine;
     ctx.lineWidth = 2;
     ctx.strokeRect(col * CELL + 2, 2, CELL - 4, CELL - 4);
-    if (pads[i]) {
-      ctx.save();
-      glow(ctx, p.padIcon, p.bigGlow);
-      drawFrogShape(ctx, col * CELL + CELL / 2, CELL / 2, 22, p.padIcon);
-      ctx.restore();
-    }
+    if (pads[i]) blit(ctx, sprites.padIcon, col * CELL + CELL / 2, CELL / 2);
   });
 }
 
@@ -291,6 +282,7 @@ function drawTurtle(
 function drawEntities(
   ctx: CanvasRenderingContext2D,
   p: Palette,
+  sprites: FroggySprites,
   phases: number[],
   playMs: number,
 ) {
@@ -309,53 +301,27 @@ function drawEntities(
         ctx.lineWidth = 1;
         ctx.strokeRect(x + 0.5, y + 6.5, w - 1, CELL - 13);
       } else {
-        ctx.save();
-        glow(ctx, color, p.smallGlow);
-        ctx.fillStyle = color;
-        ctx.fillRect(x + 2, y + 8, w - 4, CELL - 16);
-        ctx.restore();
-        ctx.fillStyle = "rgba(0,0,0,0.55)"; // windshield on the leading end
-        const wx = lane.dir === 1 ? x + w - 10 : x + 5;
-        ctx.fillRect(wx, y + 12, 5, CELL - 24);
+        blit(ctx, sprites.vehicle[lane.kind][lane.dir], x, y);
       }
     });
   });
 }
 
-function drawFly(ctx: CanvasRenderingContext2D, p: Palette, pad: number) {
-  const cx = PAD_COLS[pad] * CELL + CELL / 2;
-  const cy = CELL / 2;
-  ctx.save();
-  glow(ctx, p.fly, p.smallGlow);
-  ctx.fillStyle = p.fly;
-  ctx.fillRect(cx - 3, cy - 3, 6, 6);
-  ctx.strokeStyle = p.fly;
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  ctx.moveTo(cx - 2, cy - 3);
-  ctx.lineTo(cx - 9, cy - 9);
-  ctx.moveTo(cx + 2, cy - 3);
-  ctx.lineTo(cx + 9, cy - 9);
-  ctx.stroke();
-  ctx.restore();
+function drawFly(
+  ctx: CanvasRenderingContext2D,
+  sprites: FroggySprites,
+  pad: number,
+) {
+  blit(ctx, sprites.fly, PAD_COLS[pad] * CELL + CELL / 2, CELL / 2);
 }
 
 function drawSnake(
   ctx: CanvasRenderingContext2D,
-  p: Palette,
+  sprites: FroggySprites,
   x: number,
   dir: 1 | -1,
 ) {
-  const y = 5 * CELL + CELL / 2;
-  ctx.save();
-  glow(ctx, p.snake, p.smallGlow);
-  ctx.fillStyle = p.snake;
-  for (let k = 0; k < 5; k++) {
-    ctx.fillRect(x + 4 + k * 14, y - 6 + (k % 2 === 0 ? -2 : 2), 12, 12);
-  }
-  ctx.restore();
-  ctx.fillStyle = "#000"; // eye on the head end
-  ctx.fillRect(dir === 1 ? x + 4 + 4 * 14 + 6 : x + 6, y - 6, 3, 3);
+  blit(ctx, sprites.snake[dir], x, 5 * CELL + CELL / 2);
 }
 
 function drawTimer(ctx: CanvasRenderingContext2D, p: Palette, frac: number) {
@@ -366,19 +332,18 @@ function drawTimer(ctx: CanvasRenderingContext2D, p: Palette, frac: number) {
 
 export function drawFrame(ctx: CanvasRenderingContext2D, v: FrameView) {
   const p = PALETTES[v.skin];
-  drawBackground(ctx, p, v.pads);
-  drawEntities(ctx, p, v.phases, v.playMs);
-  if (v.flyPad !== null) drawFly(ctx, p, v.flyPad);
-  if (v.snake) drawSnake(ctx, p, v.snake.x, v.snake.dir);
+  const sprites = getSprites(v.skin, p, drawFrogShape);
+  drawBackground(ctx, p, sprites, v.pads);
+  drawEntities(ctx, p, sprites, v.phases, v.playMs);
+  if (v.flyPad !== null) drawFly(ctx, sprites, v.flyPad);
+  if (v.snake) drawSnake(ctx, sprites, v.snake.x, v.snake.dir);
 
   if (v.frog) {
     const f = v.frog;
     const dim = f.dying && Math.floor(f.dyingT * 8) % 2 === 1;
-    const color = f.dying ? p.frogDying : p.frog;
     ctx.save();
     ctx.globalAlpha = dim ? 0.35 : 1;
-    glow(ctx, color, p.bigGlow);
-    drawFrogShape(ctx, f.x, f.y, 28, color);
+    blit(ctx, f.dying ? sprites.frogDying : sprites.frog, f.x, f.y);
     ctx.restore();
   }
 

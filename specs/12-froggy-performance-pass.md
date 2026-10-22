@@ -1,6 +1,6 @@
 # SPEC 12 — Froggy performance pass
 
-> **Status:** Approved
+> **Status:** Implemented
 > **Depends on:** game-core/froggy/01-froggy-core-game, skin-designer/05-froggy-skin-selector
 > **Date:** 2026-10-22
 > **Objective:** Make Froggy run at a steady ~60 fps on desktop by cutting per-frame page compositing cost on the play page and per-frame canvas glow cost in the Froggy renderer, without visible change to the look, and by stopping per-score React re-renders of the game player.
