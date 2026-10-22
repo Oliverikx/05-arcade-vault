@@ -118,30 +118,27 @@ export function TouchPad({
   return (
     <div className="touch-pad" aria-label="Touch controls">
       <div className="tp-dpad">
-        {DIRS.map(({ dir, rotate, cls }) => {
-          const enabled = layout.dpad.includes(dir);
-          return (
+        {DIRS.filter(({ dir }) => layout.dpad.includes(dir)).map(
+          ({ dir, rotate, cls }) => (
             <button
               key={dir}
               type="button"
               className={`tp-key tp-dir ${cls}`}
               aria-label={DIR_NAMES[dir]}
-              aria-disabled={!enabled}
-              disabled={!enabled}
               {...bind(dir, !!layout.repeat?.includes(dir))}
             >
               <svg
                 viewBox="0 0 24 24"
-                width="20"
-                height="20"
+                width="22"
+                height="22"
                 aria-hidden="true"
                 style={{ transform: `rotate(${rotate}deg)` }}
               >
                 <path d="M12 4 L21 19 H3 Z" fill="currentColor" />
               </svg>
             </button>
-          );
-        })}
+          ),
+        )}
         <span className="tp-hub" aria-hidden="true" />
       </div>
 
@@ -151,7 +148,7 @@ export function TouchPad({
             <button
               key={`${abilityMenu}-${b.code}`}
               type="button"
-              className={`tp-key tp-act a${i % 3}`}
+              className={`tp-key tp-act a${Math.min(i, 2)}`}
               {...bind(b.code, false)}
             >
               {b.label}
