@@ -1,6 +1,6 @@
 # SPEC FROGGY-01 — FROGGY core game
 
-> **Status:** Draft
+> **Status:** Implemented
 > **Depends on:** SPEC 05, SPEC 06
 > **Date:** 2026-10-22
 > **Objective:** Build a new typed Froggy engine (hop across traffic and river to fill 5 lily pads before the timer runs out), playable at `/games/froggy/play` with a real Supabase leaderboard.

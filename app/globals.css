@@ -727,6 +727,28 @@ a {
   filter: drop-shadow(0 0 6px rgba(0, 255, 136, 0.6));
 }
 
+.cover-froggy {
+  background:
+    linear-gradient(#003a2a, #003a2a) 0 0 / 100% 22% no-repeat,
+    linear-gradient(rgba(0, 245, 255, 0.18), rgba(0, 245, 255, 0.18)) 0 22% /
+      100% 34% no-repeat,
+    linear-gradient(#15151f, #15151f) 0 66% / 100% 34% no-repeat,
+    #0a0a18;
+}
+.cover-froggy::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(var(--green), var(--green)) 46% 80% / 28px 28px no-repeat,
+    linear-gradient(#d97a3a, #d97a3a) 18% 36% / 90px 14px no-repeat,
+    linear-gradient(#d97a3a, #d97a3a) 72% 46% / 70px 14px no-repeat,
+    linear-gradient(var(--magenta), var(--magenta)) 20% 68% / 34px 16px
+      no-repeat,
+    linear-gradient(var(--yellow), var(--yellow)) 78% 90% / 50px 16px no-repeat;
+  filter: drop-shadow(0 0 6px rgba(0, 255, 136, 0.6));
+}
+
 .cover-asteroids {
   background: radial-gradient(circle at 50% 50%, #0a0a30, #000);
 }
