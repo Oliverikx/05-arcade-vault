@@ -5,6 +5,8 @@ export interface GameCallbacks {
   onGameOver(finalScore: number): void;
   /** Tetris only: ability menu opened/closed. Fires only on change. */
   onAbilityMenu?(open: boolean): void;
+  /** Minesweeper only: hints left on the current board and whether one can be used now. Fires only on change. */
+  onHints?(left: number, active: boolean): void;
 }
 
 export interface GameEngine {

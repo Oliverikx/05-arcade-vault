@@ -70,6 +70,7 @@ const ENGINES: Record<string, EngineEntry> = {
       buttons: [
         { label: "REVEAL", code: "Space" },
         { label: "FLAG", code: "KeyF" },
+        { label: "HINT", code: "KeyH" },
       ],
       repeat: ["ArrowLeft", "ArrowUp", "ArrowRight", "ArrowDown"],
     },

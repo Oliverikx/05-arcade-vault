@@ -1,6 +1,6 @@
 # SPEC MINESWEEPER-03 — MINESWEEPER hint assist
 
-> **Status:** Draft
+> **Status:** Implemented
 > **Depends on:** MINESWEEPER-01 (`specs/game-core/minesweeper/01-minesweeper-core-game.md`); toolbar file from 02 is not required (this spec creates it if absent)
 > **Date:** 2026-10-22
 > **Objective:** Add a limited, score-priced HINT that safely reveals one cell, with a toolbar button and touch button.
