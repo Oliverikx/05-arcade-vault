@@ -1006,8 +1006,10 @@ a {
     padding: 16px 18px;
     border: 1px solid var(--line);
     border-radius: 22px;
-    background: #0d0d14;
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+    background: linear-gradient(180deg, #1c1c28, #0c0c14);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.06),
+      inset 0 -2px 0 rgba(0, 0, 0, 0.6);
     touch-action: none;
     user-select: none;
     -webkit-user-select: none;
@@ -1021,106 +1023,157 @@ a {
 .tp-dpad {
   position: relative;
   display: grid;
-  grid-template-columns: repeat(3, 56px);
-  grid-template-rows: repeat(3, 56px);
+  grid-template-columns: repeat(3, 52px);
+  grid-template-rows: repeat(3, 52px);
+  place-items: center;
   flex: none;
 }
 .tp-hub {
   grid-area: 2 / 2;
-  background: #14141d;
+  width: 50px;
+  height: 50px;
+  background: radial-gradient(circle at 50% 50%, #181822 0%, #08080d 80%);
+  border: 1px solid rgba(0, 245, 255, 0.15);
+  border-radius: 6px;
+  box-shadow:
+    inset 0 0 8px rgba(0, 0, 0, 0.8),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
   pointer-events: none;
 }
 .tp-key {
-  min-width: 48px;
-  min-height: 48px;
   margin: 0;
   padding: 0;
   font-family: var(--pixel);
-  color: var(--ink);
-  background: #14141d;
-  border: 1px solid var(--cyan);
   touch-action: none;
   user-select: none;
   -webkit-user-select: none;
   -webkit-touch-callout: none;
   cursor: pointer;
   transition:
-    background 0.06s,
-    box-shadow 0.06s,
-    transform 0.06s;
-}
-.tp-key:active {
-  background: rgba(0, 245, 255, 0.22);
-  box-shadow: 0 0 8px var(--cyan);
-  transform: scale(0.94);
-}
-.tp-key:disabled {
-  opacity: 0.25;
-  border-color: var(--ink-faint);
-  box-shadow: none;
-  cursor: default;
+    transform 80ms,
+    box-shadow 140ms,
+    color 140ms,
+    border-color 140ms,
+    background 140ms;
 }
 .tp-dir {
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 50px;
+  height: 50px;
+  color: var(--ink-dim);
+  background: linear-gradient(180deg, #1a1a25, #0a0a12);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  box-shadow:
+    0 4px 0 #050507,
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.6);
+}
+.tp-dir:active {
+  transform: translateY(3px);
+  color: var(--cyan);
+  background: linear-gradient(180deg, #08161e, #030a0e);
+  border-color: var(--cyan);
+  box-shadow:
+    0 1px 0 #050507,
+    inset 0 0 8px rgba(0, 245, 255, 0.45),
+    0 0 8px rgba(0, 245, 255, 0.5);
 }
 .tp-dir svg {
   display: block;
 }
 .tp-dir.up {
   grid-area: 1 / 2;
-  border-radius: 12px 12px 0 0;
 }
 .tp-dir.left {
   grid-area: 2 / 1;
-  border-radius: 12px 0 0 12px;
 }
 .tp-dir.right {
   grid-area: 2 / 3;
-  border-radius: 0 12px 12px 0;
 }
 .tp-dir.down {
   grid-area: 3 / 2;
-  border-radius: 0 0 12px 12px;
 }
 .tp-actions {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 10px;
+  gap: 14px;
   flex: 1;
   min-width: 0;
 }
 .tp-act {
-  min-height: 56px;
+  min-width: 64px;
+  min-height: 64px;
+  padding: 0 16px;
   border-radius: 999px;
-  min-width: 56px;
-  padding: 0 14px;
+  border: 2px solid currentColor;
   font-size: 9px;
   letter-spacing: 0.08em;
   white-space: nowrap;
+  color: var(--magenta);
+  --ab-mid: rgba(255, 0, 110, 0.7);
+  --ab-deep: rgba(110, 0, 40, 0.95);
+  --ab-glow: rgba(255, 0, 110, 0.4);
+  background:
+    radial-gradient(
+      circle at 32% 26%,
+      rgba(255, 255, 255, 0.25),
+      transparent 50%
+    ),
+    radial-gradient(circle at 50% 55%, var(--ab-mid), var(--ab-deep) 75%);
+  box-shadow:
+    0 6px 0 #050507,
+    0 0 8px var(--ab-glow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    inset 0 -4px 8px rgba(0, 0, 0, 0.4);
+  text-shadow:
+    0 0 8px currentColor,
+    0 1px 0 rgba(0, 0, 0, 0.6);
+  -webkit-text-fill-color: #fff;
 }
-.tp-act.a0 {
-  border-color: var(--magenta);
-}
-.tp-act.a0:active {
-  background: rgba(255, 0, 110, 0.25);
-  box-shadow: 0 0 8px var(--magenta);
+.tp-act:active {
+  transform: translateY(4px) scale(0.97);
+  box-shadow:
+    0 1px 0 #050507,
+    0 0 8px var(--ab-glow),
+    inset 0 0 8px rgba(0, 0, 0, 0.5);
 }
 .tp-act.a1 {
-  border-color: var(--yellow);
-}
-.tp-act.a1:active {
-  background: rgba(245, 255, 0, 0.2);
-  box-shadow: 0 0 8px var(--yellow);
+  color: var(--cyan);
+  --ab-mid: rgba(0, 200, 230, 0.7);
+  --ab-deep: rgba(0, 50, 70, 0.95);
+  --ab-glow: rgba(0, 245, 255, 0.4);
 }
 .tp-act.a2 {
-  border-color: var(--green);
+  color: var(--yellow);
+  --ab-mid: rgba(245, 255, 0, 0.7);
+  --ab-deep: rgba(80, 85, 0, 0.95);
+  --ab-glow: rgba(245, 255, 0, 0.4);
 }
-.tp-act.a2:active {
-  background: rgba(0, 255, 136, 0.2);
-  box-shadow: 0 0 8px var(--green);
+@media (max-width: 620px) {
+  .touch-pad {
+    padding: 14px;
+    gap: 12px;
+  }
+  .tp-dpad {
+    grid-template-columns: repeat(3, 48px);
+    grid-template-rows: repeat(3, 48px);
+  }
+  .tp-dir,
+  .tp-hub {
+    width: 48px;
+    height: 48px;
+  }
+  .tp-actions {
+    gap: 12px;
+  }
+  .tp-act {
+    min-width: 64px;
+    min-height: 64px;
+  }
 }
 .crt-content {
   position: absolute;

@@ -1,6 +1,6 @@
 # SPEC 11 — Gamepad MK-II restyle
 
-> **Status:** Approved
+> **Status:** Implemented
 > **Depends on:** SPEC 10
 > **Date:** 2026-10-22
 > **Objective:** Restyle the shared touch pad of every game to match the MK-II gamepad reference in `resources/gamepad-assets/`, without changing its input behavior.
@@ -69,19 +69,19 @@ Each step leaves the app runnable and is commitable alone.
 
 ## Acceptance criteria
 
-- [ ] `npm run build` and `npm run lint` pass.
-- [ ] Touch emulation (Playwright `hasTouch: true, isMobile: true`, 390×844), every real game: pad shell, D-pad and buttons match `gamepad-neon.png` look (dark beveled shell, 3D keys, glossy round buttons).
-- [ ] Arkanoid: only ◀ ▶ rendered; ▲ ▼ slots empty; hub centered; `LAUNCH` is a magenta glossy pill, single line.
-- [ ] Asteroids: ▼ not rendered; `FIRE` magenta circle.
-- [ ] Snake: full cross; no action buttons.
-- [ ] Tetris: `DROP` magenta, `ABILITY` cyan pill; ability menu `1` magenta, `2` cyan, `3 4 5 BACK` yellow; row wraps without horizontal scroll.
-- [ ] Pressed D-pad key shifts down and turns cyan; pressed button shifts down; released → idle look.
-- [ ] D-pad keys and buttons ≥ 48×48 px at 390 px width.
-- [ ] No `box-shadow` / `text-shadow` / `drop-shadow` blur > 8 px in pad rules.
+- [x] `npm run build` and `npm run lint` pass.
+- [x] Touch emulation (Playwright `hasTouch: true, isMobile: true`, 390×844), every real game: pad shell, D-pad and buttons match `gamepad-neon.png` look (dark beveled shell, 3D keys, glossy round buttons).
+- [x] Arkanoid: only ◀ ▶ rendered; ▲ ▼ slots empty; hub centered; `LAUNCH` is a magenta glossy pill, single line.
+- [x] Asteroids: ▼ not rendered; `FIRE` magenta circle.
+- [x] Snake: full cross; no action buttons.
+- [x] Tetris: `DROP` magenta, `ABILITY` cyan pill; ability menu `1` magenta, `2` cyan, `3 4 5 BACK` yellow; row wraps without horizontal scroll.
+- [x] Pressed D-pad key shifts down and turns cyan; pressed button shifts down; released → idle look.
+- [x] D-pad keys and buttons ≥ 48×48 px at 390 px width.
+- [x] No `box-shadow` / `text-shadow` / `drop-shadow` blur > 8 px in pad rules.
 - [ ] Input behavior unchanged: all SPEC 10 play checks still pass (start, move, hold, multi-touch, release on pause/over, ability menu).
-- [ ] Desktop (fine pointer): no pad visible.
+- [x] Desktop (fine pointer): no pad visible.
 - [ ] No console errors / hydration warnings on `/games/<id>/play`.
-- [ ] Screenshots (touch emulation, one per game + Tetris ability mode) in `.playwright-mcp/screenshots`.
+- [x] Screenshots (touch emulation, one per game + Tetris ability mode) in `.playwright-mcp/screenshots`.
 
 ## Decisions
 
