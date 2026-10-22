@@ -1,6 +1,6 @@
 # SPEC PAD-02 — MINESWEEPER gamepad
 
-> **Status:** Draft
+> **Status:** Implemented
 > **Depends on:** `specs/game-core/minesweeper/01-minesweeper-core-game.md`, SPEC 10, SPEC 11
 > **Date:** 2026-10-22
 > **Objective:** Make Minesweeper fully playable on touch devices with the shared MK-II `TouchPad`: a 4-way D-pad that moves the cursor plus `REVEAL` and `FLAG` buttons, registered through the `touch` field of its registry entry.
