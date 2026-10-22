@@ -63,6 +63,7 @@ Resend (`resend` package), `app/about/actions.ts`. Env: `RESEND_API_KEY`, `CONTA
 - `mobile-porter` (`.claude/agents/mobile-porter.md`) — give it one or more game ids; checks each has working touch controls (shared `TouchPad` + registry `touch` layout, spec 10 = reference). Writes Draft specs `specs/mobile-porter/NN-<game-id>-gamepad.md` (no touch controls) or `NN-<game-id>-gamepad-fix.md` (present but broken). Spec only.
 
 - `game-spec-creator` (`.claude/agents/game-spec-creator.md`) — give it a game proposal; runs `game-core` → `skin-designer` → `mobile-porter` sequentially (spec-only mode for unbuilt games). Main-thread only (subagents can't spawn subagents): `claude --agent game-spec-creator`. Spec only.
+- `game-implementator` (`.claude/agents/game-implementator.md`) — give it a game id with Draft/Approved specs; creates `feat/<game-id>-implementation`, implements specs in order (game-core → skin-designer → mobile-porter) via the `/spec-impl` flow (branch per spec, auto-approves, marks `Implemented`, commits, merges back), then pushes. Main-thread only: `claude --agent game-implementator`.
 
 ## Hooks
 
