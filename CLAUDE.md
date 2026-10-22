@@ -54,6 +54,7 @@ Resend (`resend` package), `app/about/actions.ts`. Env: `RESEND_API_KEY`, `CONTA
   - `/spec` — design a spec section by section (questions first; never writes code). Saves `specs/NN-slug.md` as `Draft`.
   - `/spec-impl NN-slug` — implement an **Approved** spec. Creates/switches to branch `spec-NN-slug` (per `specs/.spec-config.yml` `AutoCreateBranch: true`), implements step by step, never auto-commits.
   - `/add-game <starter folder | idea>` — writes ONE spec integrating a new game engine + leaderboard. Reads `.claude/skills/add-game/integration-checklist.md` (platform touchpoints) and `template.md` first. Starter sources in `resources/started-games/`.
+  - `/game-implementator <game-id>` (`.claude/skills/game-implementator/`) — game id with Draft/Approved specs; creates `feat/<game-id>-implementation`, implements specs in order (game-core → skin-designer → mobile-porter) via the `/spec-impl` flow (branch per spec, auto-approves, marks `Implemented`, commits, merges back), then pushes.
   - `/game-spec-creator <proposal>` (`.claude/skills/game-spec-creator/`) — runs `game-core` → `skin-designer` → `mobile-porter` sequentially (spec-only mode for unbuilt games). Draft specs only, no code.
 
 ## Agents
@@ -62,8 +63,6 @@ Resend (`resend` package), `app/about/actions.ts`. Env: `RESEND_API_KEY`, `CONTA
 - `game-core` (`.claude/agents/game-core.md`) — give it a game proposal; writes 3 Draft specs (same shape as 07–09) in `specs/game-core/<game-id>/NN-<game-id>-<feature>.md`. Refuses if that game id already exists there.
 - `skin-designer` (`.claude/agents/skin-designer.md`) — give it one or more game ids; checks each has a skin selector with neon/retro/classic (tetris = reference). Writes Draft specs `specs/skin-designer/NN-<game-id>-skin-selector.md` (no selector) or `NN-<game-id>-missing-skins.md` (some skins missing). Spec only.
 - `mobile-porter` (`.claude/agents/mobile-porter.md`) — give it one or more game ids; checks each has working touch controls (shared `TouchPad` + registry `touch` layout, spec 10 = reference). Writes Draft specs `specs/mobile-porter/NN-<game-id>-gamepad.md` (no touch controls) or `NN-<game-id>-gamepad-fix.md` (present but broken). Spec only.
-
-- `game-implementator` (`.claude/agents/game-implementator.md`) — give it a game id with Draft/Approved specs; creates `feat/<game-id>-implementation`, implements specs in order (game-core → skin-designer → mobile-porter) via the `/spec-impl` flow (branch per spec, auto-approves, marks `Implemented`, commits, merges back), then pushes. Main-thread only: `claude --agent game-implementator`.
 
 ## Hooks
 
