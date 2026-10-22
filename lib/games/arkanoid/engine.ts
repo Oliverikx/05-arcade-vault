@@ -64,6 +64,9 @@ export function createArkanoidGame(
   };
   const ball: Ball = { x: 0, y: 0, vx: 0, vy: 0, size: BALL_SIZE };
 
+  // Redraw only when something changed (idle ready / paused / game over skip)
+  let dirty = true;
+
   let lastTime = 0;
   let accumulator = 0;
   let rafId = 0;
@@ -123,6 +126,7 @@ export function createArkanoidGame(
   function endGame() {
     if (phase === "gameover") return;
     phase = "gameover";
+    dirty = true;
     serve = false;
     winSteps = 0;
     syncCallbacks();
@@ -137,6 +141,7 @@ export function createArkanoidGame(
     ball.vy = -levelSpeed(level) * Math.cos(rad);
     phase = "playing";
     serve = false;
+    dirty = true;
   }
 
   // ── Simulation (fixed step) ───────────────────────────────────────────────
@@ -144,9 +149,11 @@ export function createArkanoidGame(
     if (keys.left) paddle.x -= PADDLE_SPEED;
     if (keys.right) paddle.x += PADDLE_SPEED;
     clampPaddle();
+    if (keys.left || keys.right || phase === "playing") dirty = true;
 
     for (const block of blocks) {
       if (block.breakElapsed === null) continue;
+      dirty = true;
       block.breakElapsed += STEP_MS;
       if (block.breakElapsed >= EXPLOSION_DURATION) block.breakElapsed = null;
     }
@@ -262,6 +269,7 @@ export function createArkanoidGame(
   }
 
   function render() {
+    dirty = false;
     syncCallbacks();
     drawFrame(ctx!, {
       blocks,
@@ -286,7 +294,7 @@ export function createArkanoidGame(
       }
     }
     lastTime = ts;
-    render();
+    if (dirty) render();
     rafId = requestAnimationFrame(loop);
   }
 
@@ -326,6 +334,7 @@ export function createArkanoidGame(
     const mouseX = (e.clientX - rect.left) * (canvas.width / rect.width);
     paddle.x = mouseX - paddle.w / 2;
     clampPaddle();
+    dirty = true;
   };
 
   const onMouseDown = () => {
@@ -368,6 +377,7 @@ export function createArkanoidGame(
     setPaused(next) {
       if (phase === "gameover") return;
       paused = next;
+      dirty = true;
     },
     end: endGame,
     reset: init,

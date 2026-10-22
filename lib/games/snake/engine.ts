@@ -90,6 +90,7 @@ export function createSnakeGame(
   let lastTime = 0;
   let rafId = 0;
   let skin: SnakeSkin = "neon";
+  let dirty = true; // redraw only when state changed
 
   // Last values sent to callbacks, so they fire only on change
   let sentScore = -1;
@@ -100,6 +101,7 @@ export function createSnakeGame(
   const img = new Image();
   img.onload = () => {
     sheet = img;
+    dirty = true;
   };
   img.src = FRUIT_SHEET;
 
@@ -137,6 +139,7 @@ export function createSnakeGame(
   function endGame() {
     if (gameOver) return;
     gameOver = true;
+    dirty = true;
     syncCallbacks();
     callbacks.onGameOver(score);
   }
@@ -159,6 +162,7 @@ export function createSnakeGame(
   }
 
   function tick() {
+    dirty = true;
     const next = queue.shift();
     if (next) dir = next;
     const v = VECTORS[dir];
@@ -199,6 +203,7 @@ export function createSnakeGame(
 
   // ── Loop ──────────────────────────────────────────────────────────────────
   function render() {
+    dirty = false;
     syncCallbacks();
     drawFrame(ctx!, {
       fontFamily,
@@ -225,13 +230,14 @@ export function createSnakeGame(
       update(STEP_MS);
       accum -= STEP_MS;
     }
-    render();
+    if (dirty) render();
     rafId = requestAnimationFrame(loop);
   }
 
   function start() {
     ready = false;
     serve = false;
+    dirty = true;
   }
 
   // ── Input ─────────────────────────────────────────────────────────────────

@@ -158,11 +158,35 @@ function drawHint(
   ctx.restore();
 }
 
+// Background + grid pre-rendered once per skin.
+const backgrounds = new Map<SnakeSkin, HTMLCanvasElement>();
+
+function backgroundFor(skin: SnakeSkin): HTMLCanvasElement | null {
+  let bg = backgrounds.get(skin);
+  if (bg) return bg;
+  if (typeof document === "undefined") return null;
+  bg = document.createElement("canvas");
+  bg.width = W;
+  bg.height = H;
+  const bctx = bg.getContext("2d");
+  if (!bctx) return null;
+  const palette = PALETTES[skin];
+  bctx.fillStyle = palette.background;
+  bctx.fillRect(0, 0, W, H);
+  if (palette.grid) drawGrid(bctx, palette.grid);
+  backgrounds.set(skin, bg);
+  return bg;
+}
+
 export function drawFrame(ctx: CanvasRenderingContext2D, view: FrameView) {
   const palette = PALETTES[view.skin];
-  ctx.fillStyle = palette.background;
-  ctx.fillRect(0, 0, W, H);
-  if (palette.grid) drawGrid(ctx, palette.grid);
+  const bg = backgroundFor(view.skin);
+  if (bg) ctx.drawImage(bg, 0, 0);
+  else {
+    ctx.fillStyle = palette.background;
+    ctx.fillRect(0, 0, W, H);
+    if (palette.grid) drawGrid(ctx, palette.grid);
+  }
   if (view.fruit)
     drawFruit(ctx, view.fruit, view.fruitName, view.sheet, palette.fruit);
   drawSnake(ctx, view.snake, palette);
