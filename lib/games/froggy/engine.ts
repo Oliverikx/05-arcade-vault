@@ -1,7 +1,7 @@
 // Froggy engine — framework-free, new game (no source port).
 
 import type { GameCallbacks, GameEngine } from "@/lib/games/engine-types";
-import { PAD_COLS, drawFrame } from "./draw";
+import { PAD_COLS, drawFrame, type FroggySkin } from "./draw";
 import { createFroggySound } from "./sound";
 import {
   CELL,
@@ -62,8 +62,11 @@ const isRoad = (row: number) => row >= 6 && row <= 10;
 const laneOf = (row: number): Lane | undefined =>
   LANES.find((l) => l.row === row);
 
+export type { FroggySkin };
+
 export interface FroggyEngine extends GameEngine {
   setMuted(muted: boolean): void;
+  setAppearance(skin: FroggySkin): void; // redraws now
 }
 
 type DeathKind = "splash" | "squash" | "timeout";
@@ -90,6 +93,7 @@ export function createFroggyGame(
   let dyingT = -1; // >= 0 while dying (ms elapsed)
   let pads: boolean[] = PAD_COLS.map(() => false);
   const sound = createFroggySound();
+  let skin: FroggySkin = "neon";
   let warnSeen: boolean[] = [];
   let playMs = 0; // playing time, drives the turtle dive cycle
   let flyClock = 0;
@@ -350,6 +354,7 @@ export function createFroggyGame(
     };
     drawFrame(ctx!, {
       fontFamily,
+      skin,
       phases,
       frog,
       pads,
@@ -448,6 +453,10 @@ export function createFroggyGame(
     },
     setMuted(next) {
       sound.setMuted(next);
+    },
+    setAppearance(next) {
+      skin = next;
+      render();
     },
     end: endGame,
     reset: init,
