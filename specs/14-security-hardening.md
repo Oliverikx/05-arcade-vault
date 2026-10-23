@@ -1,6 +1,6 @@
 # SPEC 14 — Security hardening (RLS check, password policy, rate limit, headers)
 
-> **Status:** Approved
+> **Status:** Implemented
 > **Depends on:** SPEC 06, SPEC 13
 > **Date:** 2026-10-23
 > **Objective:** Apply the basic security checklist — verify RLS on `games`/`scores`, enforce a strong password policy (Supabase + mirrored client checklist), cap sign-ups/sign-ins at 10 per 5 min per IP, and send three security headers on every route.

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { useSession } from "@/components/session-provider";
+import { PASSWORD_RULES, authErrorMessage, passwordOk } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/client";
 
 export default function ResetPage() {
@@ -27,7 +28,7 @@ export default function ResetPage() {
     setBusy(false);
     if (err) {
       console.error("updateUser(password) failed", err);
-      setError(err.message.toUpperCase());
+      setError((authErrorMessage(err) ?? err.message).toUpperCase());
       return;
     }
     router.push("/");
@@ -67,6 +68,13 @@ export default function ResetPage() {
                 autoComplete="new-password"
                 required
               />
+              <ul className="pw-rules" aria-label="Password rules">
+                {PASSWORD_RULES.map((r) => (
+                  <li key={r.id} className={r.test(pass) ? "ok" : ""}>
+                    {r.label}
+                  </li>
+                ))}
+              </ul>
             </div>
             <div className="field">
               <label>Repeat password</label>
@@ -87,7 +95,7 @@ export default function ResetPage() {
             <button
               className="btn lg"
               type="submit"
-              disabled={busy}
+              disabled={busy || !passwordOk(pass)}
               style={{ width: "100%", marginTop: 8 }}
             >
               {busy ? "SAVING..." : "SAVE PASSWORD"}

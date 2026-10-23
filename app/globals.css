@@ -748,8 +748,7 @@ a {
     linear-gradient(var(--cyan), var(--cyan)) 30% 36% / 6px 18px no-repeat,
     linear-gradient(var(--green), var(--green)) 46% 36% / 18px 6px no-repeat,
     linear-gradient(var(--green), var(--green)) 46% 46% / 18px 6px no-repeat,
-    linear-gradient(var(--magenta), var(--magenta)) 60% 36% / 16px 6px
-      no-repeat,
+    linear-gradient(var(--magenta), var(--magenta)) 60% 36% / 16px 6px no-repeat,
     linear-gradient(#15151f, #15151f) 20% 30% / 22px 22px no-repeat,
     linear-gradient(#15151f, #15151f) 38% 30% / 22px 22px no-repeat,
     linear-gradient(#15151f, #15151f) 56% 30% / 22px 22px no-repeat,
@@ -3110,6 +3109,29 @@ a.mini-card {
   font-size: 11px;
   letter-spacing: 0.1em;
   color: var(--magenta);
+}
+.pw-rules {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  margin-top: 6px;
+  padding: 0;
+  list-style: none;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+}
+.pw-rules li {
+  color: var(--ink-faint);
+}
+.pw-rules li::before {
+  content: "○ ";
+}
+.pw-rules li.ok {
+  color: var(--cyan);
+}
+.pw-rules li.ok::before {
+  content: "● ";
 }
 .auth-link {
   background: transparent;

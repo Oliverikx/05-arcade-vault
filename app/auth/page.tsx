@@ -4,7 +4,14 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useState, type FormEvent } from "react";
 import type { Provider } from "@supabase/supabase-js";
 import { useSession } from "@/components/session-provider";
-import { USERNAME_RE, normalizeUsername, safeNext } from "@/lib/auth";
+import {
+  PASSWORD_RULES,
+  USERNAME_RE,
+  authErrorMessage,
+  normalizeUsername,
+  passwordOk,
+  safeNext,
+} from "@/lib/auth";
 import { createClient } from "@/lib/supabase/client";
 
 type Mode = "in" | "up" | "forgot";
@@ -75,7 +82,7 @@ function AuthView() {
     });
     if (err) {
       console.error("signUp failed", err);
-      fail(err.message);
+      fail(authErrorMessage(err) ?? err.message);
       return;
     }
     setSent({ kind: "signup", email });
@@ -91,7 +98,7 @@ function AuthView() {
       if (err.code === "email_not_confirmed") {
         setUnconfirmed(true);
         setError("CONFIRM YOUR EMAIL BEFORE SIGNING IN");
-      } else fail(err.message);
+      } else fail(authErrorMessage(err) ?? err.message);
       return;
     }
     router.push(next);
@@ -104,7 +111,7 @@ function AuthView() {
     });
     if (err) {
       console.error("resetPasswordForEmail failed", err);
-      fail(err.message);
+      fail(authErrorMessage(err) ?? err.message);
       return;
     }
     setSent({ kind: "recovery", email });
@@ -382,6 +389,15 @@ function AuthView() {
                 }
                 required
               />
+              {mode === "up" && (
+                <ul className="pw-rules" aria-label="Password rules">
+                  {PASSWORD_RULES.map((r) => (
+                    <li key={r.id} className={r.test(pass) ? "ok" : ""}>
+                      {r.label}
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           )}
 
@@ -402,7 +418,7 @@ function AuthView() {
           <button
             className="btn lg"
             type="submit"
-            disabled={busy}
+            disabled={busy || (mode === "up" && !passwordOk(pass))}
             style={{ width: "100%", marginTop: 8 }}
           >
             {mode === "in"
