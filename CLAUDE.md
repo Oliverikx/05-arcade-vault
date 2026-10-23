@@ -4,9 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-Arcade Vault: online videogames platform to play and compete for the highest score. Working app, built spec-driven: each feature is a spec in `specs/` (`01..09`, all Implemented) authored with the repo's own `/spec` → `/spec-impl` skills; new games via `/add-game`.
+Arcade Vault: online videogames platform to play and compete for the highest score. Working app, built spec-driven: each feature is a spec in `specs/` (`01..12`, plus `specs/game-core/<id>/`, `specs/skin-designer/`, `specs/mobile-porter/`) authored with the repo's own `/spec` → `/spec-impl` skills; new games via `/add-game`. Status lives in each spec header.
 
-Live features: playable games (see `resources/implemented-games.md` for the current list), Supabase leaderboards (per-game + global), a Resend contact form, and a lightweight browser-only name identity (not real auth).
+Live features: 6 playable games (arkanoid, asteroids, froggy, minesweeper, snake, tetris), per-game skin selector (neon/retro/classic), touch gamepad (MK-II style), Supabase leaderboards (per-game + global), a Resend contact form, and a lightweight browser-only name identity (not real auth).
 
 ## Stack / Architecture
 
@@ -24,11 +24,11 @@ Server Actions: `app/actions/scores.ts` (`saveScore`, `getMyBests`), `app/about/
 
 ## Games architecture
 
-- **Catalog**: `lib/games.ts` — 8 entries (`Game`, `Category`, `Accent`). Some are real/playable (see `resources/implemented-games.md` for the current list); the rest are placeholder/practice entries.
-- **Engines**: framework-free TS in `lib/games/<id>/` (`engine.ts` + `draw.ts`/`levels.ts`/`pieces.ts`/`sprites.ts`). `createXGame(canvas, callbacks)` returns a `GameEngine`.
-- **Contract** (`lib/games/engine-types.ts`): `GameEngine` = `setPaused`/`end`/`reset`/`destroy`; `GameCallbacks` = `onScore`/`onLives`/`onLevel`/`onGameOver`.
-- **Registry** (`lib/games/registry.ts`): `id → { create, width, height, lives: number|null, touch: TouchLayout }`. One entry per real game.
-- **Rendering**: `components/game-screen.tsx` (generic canvas wrapper), `components/game-player.tsx` (React HUD, GAME OVER modal, PAUSE via `P`/`Esc` + tab-hidden auto-pause; branches on registry lookup, not `game.id`). Per-game toolbars: `tetris-toolbar.tsx`, `arkanoid-toolbar.tsx`.
+- **Catalog**: `lib/games.ts` — 6 entries (`Game`, `Category`, `Accent`), all real/playable and matching the registry.
+- **Engines**: framework-free TS in `lib/games/<id>/` (`engine.ts` + helpers like `draw.ts`/`levels.ts`/`pieces.ts`/`sprites.ts`/`lanes.ts`/`board.ts`/`sound.ts`). `createXGame(canvas, callbacks)` returns a `GameEngine`.
+- **Contract** (`lib/games/engine-types.ts`): `GameEngine` = `setPaused`/`end`/`reset`/`destroy`; `GameCallbacks` = `onScore`/`onLives`/`onLevel`/`onGameOver`, plus optional `onAbilityMenu` (tetris) and `onHints` (minesweeper).
+- **Registry** (`lib/games/registry.ts`): `id → { create, width, height, lives: number|null, touch: TouchLayout }`; `TouchLayout` = `dpad`, `buttons`, `repeat?`, `abilityButtons?`. One entry per real game.
+- **Rendering**: `components/game-screen.tsx` (generic canvas wrapper), `components/game-player.tsx` (React HUD, GAME OVER modal, PAUSE via `P`/`Esc` + tab-hidden auto-pause; branches on registry lookup, not `game.id`), `components/touch-pad.tsx` (shared touch gamepad). Per-game toolbars: `components/<id>-toolbar.tsx` (skin selector etc.) for all 6 games.
 - **Presentation**: canvas CSS-scaled inside `.crt-screen` (4:3). Neon palette in `app/globals.css` (`.cover-<id>` classes too). Assets in `public/games/<id>/`.
 - **Conventions**: callbacks fire only on change; engine created in `useEffect`, Strict-Mode safe; ignore game keys when target is an input; `shadowBlur` ≤ 8.
 
@@ -50,7 +50,7 @@ Resend (`resend` package), `app/about/actions.ts`. Env: `RESEND_API_KEY`, `CONTA
 ## Skills
 
 - Use always `/frontend-design` to design the user interface.
-- **Spec workflow** (repo skills in `.claude/skills/`, mirrored in `.agents/skills/`):
+- **Spec workflow** (repo skills in `.claude/skills/`; `spec`/`spec-impl` also mirrored in `.agents/skills/`, which additionally holds `frontend-design`):
   - `/spec` — design a spec section by section (questions first; never writes code). Saves `specs/NN-slug.md` as `Draft`.
   - `/spec-impl NN-slug` — implement an **Approved** spec. Creates/switches to branch `spec-NN-slug` (per `specs/.spec-config.yml` `AutoCreateBranch: true`), implements step by step, never auto-commits.
   - `/add-game <starter folder | idea>` — writes ONE spec integrating a new game engine + leaderboard. Reads `.claude/skills/add-game/integration-checklist.md` (platform touchpoints) and `template.md` first. Starter sources in `resources/started-games/`.
@@ -59,16 +59,17 @@ Resend (`resend` package), `app/about/actions.ts`. Env: `RESEND_API_KEY`, `CONTA
 
 ## Agents
 
-- `game-planner` (`.claude/agents/game-planner.md`) — picks which game fits the platform next, then feed its pick to `/add-game`. Keeps all past suggestions in `.claude/agent-memory/game-planner/MEMORY.md`. Writes ranked to-do to `resources/game-suggestions-todo.md`.
-- `game-core` (`.claude/agents/game-core.md`) — give it a game proposal; writes 3 Draft specs (same shape as 07–09) in `specs/game-core/<game-id>/NN-<game-id>-<feature>.md`. Refuses if that game id already exists there.
-- `skin-designer` (`.claude/agents/skin-designer.md`) — give it one or more game ids; checks each has a skin selector with neon/retro/classic (tetris = reference). Writes Draft specs `specs/skin-designer/NN-<game-id>-skin-selector.md` (no selector) or `NN-<game-id>-missing-skins.md` (some skins missing). Spec only.
-- `mobile-porter` (`.claude/agents/mobile-porter.md`) — give it one or more game ids; checks each has working touch controls (shared `TouchPad` + registry `touch` layout, spec 10 = reference). Writes Draft specs `specs/mobile-porter/NN-<game-id>-gamepad.md` (no touch controls) or `NN-<game-id>-gamepad-fix.md` (present but broken). Spec only.
+Definitions in `.claude/agents/<name>.md` (see there for details).
 
-- `game-performance` (`.claude/agents/game-performance.md`) — give it one or more game ids; audits perf like spec 12 (glow sprite cache, idle render skip, allocations), edits code directly, measures FPS before/after via Playwright (logs in `.playwright-mcp/logs/`). ONE game per run, no commits; returns `remaining` ids — ask the user before running the next.
+- `game-planner` — picks which game to add next (feeds `/add-game`); keeps ranked to-do in `resources/game-suggestions-todo.md`.
+- `game-core` — game proposal → 3 Draft specs in `specs/game-core/<game-id>/`.
+- `skin-designer` — game ids → Draft specs for missing skin selector / neon-retro-classic skins. Spec only.
+- `mobile-porter` — game ids → Draft specs for missing/broken touch controls (specs 10–11 = reference). Spec only.
+- `game-performance` — game id(s) → perf fixes like spec 12, FPS measured via Playwright. One game per run, no commits; ask user before next.
 
 ## Hooks
 
-`.claude/settings.json` — PostToolUse hook runs `.claude/hooks/format-file.mjs` (Prettier) after every Write/Edit.
+`.claude/settings.json` — PostToolUse hook runs `.claude/hooks/format-file.mjs` (Prettier) after every Write/Edit/MultiEdit.
 
 ## MCPs
 
@@ -80,7 +81,7 @@ Remote MCP wired in `.mcp.json` (project `usxriuqyklrqvetggzdu`). Use for migrat
 
 When playwright is executed, always follow these instructions:
 
--Save .log files in .playwright-mcp/logs
--Save .png files or other image files in .playwright-mcp/screenshots
--Save .yml files in .playwright-mcp/accessibility
--If app is running in port 3000 use it for testing. Otherwise follow default settings.
+- Save .log files in .playwright-mcp/logs
+- Save .png files or other image files in .playwright-mcp/screenshots
+- Save .yml files in .playwright-mcp/accessibility
+- If app is running in port 3000 use it for testing. Otherwise follow default settings.
