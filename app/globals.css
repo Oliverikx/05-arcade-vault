@@ -324,12 +324,21 @@ a {
 .av-mobile-panel.open {
   transform: translateX(0);
 }
-.av-mobile-panel a {
+.av-mobile-panel a,
+.av-mobile-panel > button {
   padding: 14px 12px;
   font-family: var(--pixel);
   font-size: 11px;
   color: var(--ink-dim);
   border-bottom: 1px dashed var(--line-2);
+}
+.av-mobile-panel > button {
+  background: transparent;
+  border-top: 0;
+  border-left: 0;
+  border-right: 0;
+  text-align: left;
+  cursor: pointer;
 }
 .av-mobile-panel a.active {
   color: var(--cyan);
@@ -3036,4 +3045,98 @@ a.mini-card {
   color: var(--yellow);
   border-color: var(--yellow);
   box-shadow: 0 0 8px rgba(245, 255, 0, 0.35);
+}
+
+/* ---- Account dropdown (nav) ---- */
+.av-nav .account {
+  position: relative;
+  margin-left: 16px;
+}
+.av-nav .account .auth-btn {
+  margin-left: 0;
+}
+.account-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 160px;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  box-shadow: 0 0 14px rgba(0, 245, 255, 0.2);
+  z-index: 60;
+}
+.account-menu a,
+.account-menu button {
+  padding: 12px 14px;
+  text-align: left;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  text-decoration: none;
+}
+.account-menu a:hover,
+.account-menu button:hover {
+  color: var(--cyan);
+  text-shadow: 0 0 8px var(--cyan);
+}
+
+/* ---- Auth messages / banners ---- */
+.auth-banner,
+.auth-msg {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  margin: 12px 0;
+  text-align: center;
+}
+.auth-banner,
+.auth-msg.error {
+  color: var(--magenta);
+  text-shadow: 0 0 8px var(--magenta);
+}
+.auth-msg.info {
+  color: var(--cyan);
+}
+.field .field-error {
+  margin-top: 6px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: var(--magenta);
+}
+.auth-link {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  color: var(--cyan);
+  text-decoration: none;
+}
+.auth-link:hover {
+  text-shadow: 0 0 8px var(--cyan);
+}
+.modal .name-readonly {
+  flex: 1;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  font-family: var(--mono);
+  color: var(--ink);
+}
+.modal .sign-in-link {
+  display: inline-block;
+  margin: 22px 0 6px;
 }

@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Arcade Vault: online videogames platform to play and compete for the highest score. Working app, built spec-driven: each feature is a spec in `specs/` (`01..12`, plus `specs/game-core/<id>/`, `specs/skin-designer/`, `specs/mobile-porter/`) authored with the repo's own `/spec` → `/spec-impl` skills; new games via `/add-game`. Status lives in each spec header.
 
-Live features: 6 playable games (arkanoid, asteroids, froggy, minesweeper, snake, tetris), per-game skin selector (neon/retro/classic), touch gamepad (MK-II style), Supabase leaderboards (per-game + global), a Resend contact form, and a lightweight browser-only name identity (not real auth).
+Live features: 6 playable games (arkanoid, asteroids, froggy, minesweeper, snake, tetris), per-game skin selector (neon/retro/classic), touch gamepad (MK-II style), Supabase leaderboards (per-game + global), a Resend contact form, and and Supabase Auth (email/password + Google/GitHub, username in `user_metadata`).
 
 ## Stack / Architecture
 
@@ -18,7 +18,7 @@ Live features: 6 playable games (arkanoid, asteroids, froggy, minesweeper, snake
 
 ## App structure
 
-Routes (`app/`): `page.tsx` (home), `games/` (catalog), `games/[id]/` (detail), `games/[id]/play/`, `hall-of-fame/`, `about/`, `auth/` (name picker), `api/health/supabase/route.ts`.
+Routes (`app/`): `page.tsx` (home), `games/` (catalog), `games/[id]/` (detail), `games/[id]/play/`, `hall-of-fame/`, `about/`, `auth/` (sign in/up, recovery, pick username), `auth/reset/`, `auth/confirm` + `auth/callback` (route handlers), `api/health/supabase/route.ts`.
 
 Server Actions: `app/actions/scores.ts` (`saveScore`, `getMyBests`), `app/about/actions.ts` (contact form).
 
@@ -36,12 +36,18 @@ Server Actions: `app/actions/scores.ts` (`saveScore`, `getMyBests`), `app/about/
 
 - Supabase tables/views: `scores`, `games`, `player_bests`. Clients in `lib/supabase/{client,server,env,database.types}.ts`.
 - Reads in `lib/leaderboard.ts`: game board, global totals, today's top players, latest scores, player bests.
-- `saveScore` validates: name `^[A-Z0-9_]{1,12}$`, integer score `0..10_000_000`, and that `game_id` exists in `games`.
+- `saveScore({ gameId, score })` requires a signed-in user with a valid username (else `UNAUTHENTICATED`); validates integer score `0..10_000_000` and that `game_id` exists in `games`. Inserts `user_id` + `player_name = username` server-side. `scores.user_id` is NOT NULL (FK `auth.users`); RLS insert only for `authenticated` with `user_id = auth.uid()`. Boards still group by `player_name`.
 - **A game goes "real" by inserting a `public.games` row** (migration `add_<id>_leaderboard`). Boards, library card best score, detail TOP SCORES, Hall of Fame tab, and GAME OVER SAVE SCORE then light up automatically. No fake data.
 
 ## Identity
 
-Browser-only, not real auth. `lib/session.ts` (`USER_KEY = "av_user"`, `{ name }`) + `components/session-provider.tsx` (localStorage, read after mount to avoid hydration mismatch). The signed-in name only exists in the browser.
+Supabase Auth (SPEC 13). Email + password (confirm email ON), Google, GitHub, password recovery. Username lives in `user_metadata.username` (`^[A-Z0-9_]{1,12}$`, not unique; OAuth users pick it once at `/auth?step=username`). Guests can play but not save scores.
+
+- `lib/auth.ts`: `USERNAME_RE`, `normalizeUsername`, `usernameOf`, `safeNext` (open-redirect guard for `?next=`).
+- `lib/session.ts`: `User { id, email, name }`; `components/session-provider.tsx`: `getUser()` after mount + `onAuthStateChange`, exposes `user`, `ready`, `signOut()`. Render signed-out shell until `ready`.
+- `proxy.ts`: refreshes session cookies on every request; no route protection.
+- `app/auth/confirm` (`verifyOtp`, email links), `app/auth/callback` (OAuth code exchange), `app/auth/reset` (new password). Email templates use `{{ .RedirectTo }}&token_hash={{ .TokenHash }}&type=email|recovery` (set in the Supabase dashboard).
+- Browser code never imports `lib/supabase/server.ts`.
 
 ## Contact / email
 

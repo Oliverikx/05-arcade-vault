@@ -1,6 +1,6 @@
 # SPEC 13 — Supabase auth (email/password, Google, GitHub, recovery)
 
-> **Status:** Approved
+> **Status:** Implemented
 > **Depends on:** SPEC 04, SPEC 06
 > **Date:** 2026-10-23
 > **Objective:** Replace the fake browser-only name identity with Supabase Auth on the existing `/auth` page — email + password sign up (double opt-in, `username` in `user_metadata`), sign in, Google and GitHub OAuth, sign out, email password recovery — and tie every saved score to the signed-in user's id.
@@ -22,8 +22,9 @@ Today identity is fake: `SessionProvider` stores `{ name }` in localStorage (`av
   - **Pick username** step (`/auth?step=username`): shown when signed in but `user_metadata.username` missing (first OAuth login) → `updateUser({ data: { username } })`.
   - **Signed-in view** (visiting `/auth` while signed in with username): name, email, SIGN OUT button.
   - Error banner from `?error=link` → "LINK EXPIRED OR INVALID".
+  - Switching tab/mode (SIGN IN / CREATE ACCOUNT / FORGOT) or returning from the "CHECK YOUR EMAIL" panel clears username, email and password fields.
   - PLAY AS GUEST stays (just navigates to `next` / `/`, no sign-out side effect unless signed in → no-op).
-- `GET /auth/confirm` route handler: `verifyOtp({ token_hash, type })` for `type=email|recovery` → redirect `next` (safe) or `/auth?error=link`.
+- `GET /auth/confirm` route handler: `verifyOtp({ token_hash, type })` for `type=email|signup|recovery|magiclink|email_change` → redirect `next` (safe) or `/auth?error=link`.
 - `GET /auth/callback` route handler: `exchangeCodeForSession(code)` (OAuth) → if no username → `/auth?step=username&next=…`, else `next`; failure → `/auth?error=link`.
 - `/auth/reset` page: new password + repeat → `updateUser({ password })` → redirect `/`. No session → "LINK EXPIRED" + link back to forgot mode.
 - `proxy.ts` (repo root): refresh Supabase session cookies on every request (official `@supabase/ssr` pattern, adapted to Next 16 proxy docs). No route protection.
@@ -31,6 +32,7 @@ Today identity is fake: `SessionProvider` stores `{ name }` in localStorage (`av
 - Nav: name button opens small dropdown (ACCOUNT → `/auth`, SIGN OUT); closes on outside click / `Esc` / route change. Mobile panel: add SIGN OUT item when signed in.
 - GAME OVER modal (`components/game-player.tsx`):
   - Signed in with username → name shown read-only + SAVE SCORE (name = username).
+  - SAVE SCORE retries once on `SAVE FAILED`; `UNAUTHENTICATED` shows "SESSION EXPIRED — SIGN IN AGAIN", other failures "SAVE FAILED — TRY AGAIN".
   - Guest → "SIGN IN TO SAVE" link to `/auth?next=<current path>`; no name input.
   - Signed in without username → "PICK A USERNAME TO SAVE" link to `/auth?step=username&next=…`.
 - **Scores tied to users** (migration `add_scores_user_id`):
