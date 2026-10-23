@@ -73,6 +73,7 @@ Definitions in `.claude/agents/<name>.md` (see there for details).
 - `skin-designer` — game ids → Draft specs for missing skin selector / neon-retro-classic skins. Spec only.
 - `mobile-porter` — game ids → Draft specs for missing/broken touch controls (specs 10–11 = reference). Spec only.
 - `game-performance` — game id(s) → perf fixes like spec 12, FPS measured via Playwright. One game per run, no commits; ask user before next.
+- `security-auditor` — read-only audit of DB (Supabase MCP SELECTs, advisors, RLS/policies/grants) + app (auth, server actions, headers, secrets) vs SPEC 13/14. Writes `resources/security/security-audit-YYYY-MM-DD.log`. No code/DB changes.
 
 ## Hooks
 
