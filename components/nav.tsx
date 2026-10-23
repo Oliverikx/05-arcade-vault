@@ -2,13 +2,15 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSession } from "@/components/session-provider";
 
 export function Nav() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
-  const { user, signOut } = useSession();
+  const { user, ready, signOut } = useSession();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const accountRef = useRef<HTMLDivElement>(null);
 
   const homeActive = pathname === "/";
   const libraryActive = pathname.startsWith("/games");
@@ -16,6 +18,31 @@ export function Nav() {
   const aboutActive = pathname === "/about";
   const authActive = pathname === "/auth";
   const close = () => setOpen(false);
+  const showUser = ready && user;
+
+  // Dropdown closes on route change (adjust state during render, not in an effect).
+  const [menuPath, setMenuPath] = useState(pathname);
+  if (menuPath !== pathname) {
+    setMenuPath(pathname);
+    setMenuOpen(false);
+  }
+
+  // Dropdown closes on outside click / Esc.
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onDown = (e: MouseEvent) => {
+      if (!accountRef.current?.contains(e.target as Node)) setMenuOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMenuOpen(false);
+    };
+    document.addEventListener("mousedown", onDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [menuOpen]);
 
   return (
     <>
@@ -45,10 +72,33 @@ export function Nav() {
           <span className="coin"></span>
           <span>CREDITS · 03</span>
         </div>
-        {user ? (
-          <button className="btn ghost auth-btn" onClick={signOut}>
-            {user.name} ▾
-          </button>
+        {showUser ? (
+          <div className="account" ref={accountRef}>
+            <button
+              className="btn ghost auth-btn"
+              onClick={() => setMenuOpen((o) => !o)}
+              aria-haspopup="menu"
+              aria-expanded={menuOpen}
+            >
+              {user.name ?? "ACCOUNT"} ▾
+            </button>
+            {menuOpen && (
+              <div className="account-menu" role="menu">
+                <Link href="/auth" role="menuitem">
+                  Account
+                </Link>
+                <button
+                  role="menuitem"
+                  onClick={() => {
+                    setMenuOpen(false);
+                    void signOut();
+                  }}
+                >
+                  Sign Out
+                </button>
+              </div>
+            )}
+          </div>
         ) : (
           <Link href="/auth" className="btn auth-btn">
             Sign In
@@ -103,8 +153,19 @@ export function Nav() {
           className={authActive ? "active" : ""}
           onClick={close}
         >
-          {user ? "Account" : "Sign In"}
+          {showUser ? "Account" : "Sign In"}
         </Link>
+        {showUser && (
+          <button
+            type="button"
+            onClick={() => {
+              close();
+              void signOut();
+            }}
+          >
+            Sign Out
+          </button>
+        )}
         <div style={{ flex: 1 }}></div>
         <div
           className="pixel"

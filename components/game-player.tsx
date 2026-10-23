@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
 import {
   ArkanoidToolbar,
@@ -37,7 +38,8 @@ import { getEngine } from "@/lib/games/registry";
 const PRACTICE_LIVES = 3;
 
 export function GamePlayer({ game }: { game: Game }) {
-  const { user } = useSession();
+  const { user, ready } = useSession();
+  const pathname = usePathname();
   const entry = getEngine(game.id);
   const isTetris = game.id === "tetris";
   const isArkanoid = game.id === "arkanoid";
@@ -73,12 +75,12 @@ export function GamePlayer({ game }: { game: Game }) {
   const [over, setOver] = useState(false);
   const [abilityMenu, setAbilityMenu] = useState(false);
 
-  const [typedName, setTypedName] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
-  const [saveError, setSaveError] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [saving, startSaving] = useTransition();
 
-  const name = typedName ?? user?.name ?? "GUEST";
+  const name = user?.name ?? "GUEST";
+  const nextParam = encodeURIComponent(pathname);
 
   const paintHud = () => {
     const level = entry
@@ -179,22 +181,30 @@ export function GamePlayer({ game }: { game: Game }) {
     setHintsLeft(2);
     setHintsActive(false);
     setSaved(false);
-    setSaveError(false);
+    setSaveError(null);
   };
 
   const save = () => {
-    setSaveError(false);
+    setSaveError(null);
     startSaving(async () => {
+      const failMsg = "SAVE FAILED — TRY AGAIN";
       try {
-        const result = await saveScore({
+        let result = await saveScore({
           gameId: game.id,
-          name,
           score: finalScore,
         });
+        // One retry for transient failures (stale session refresh, network).
+        if (!result.ok && result.error === "SAVE FAILED")
+          result = await saveScore({ gameId: game.id, score: finalScore });
         if (result.ok) setSaved(true);
-        else setSaveError(true);
+        else
+          setSaveError(
+            result.error === "UNAUTHENTICATED"
+              ? "SESSION EXPIRED — SIGN IN AGAIN"
+              : failMsg,
+          );
       } catch {
-        setSaveError(true);
+        setSaveError(failMsg);
       }
     });
   };
@@ -384,25 +394,35 @@ export function GamePlayer({ game }: { game: Game }) {
               </div>
             ) : !saved ? (
               <>
-                <div className="input-row">
-                  <input
-                    value={name}
-                    onChange={(e) =>
-                      setTypedName(e.target.value.toUpperCase().slice(0, 10))
-                    }
-                    placeholder="YOUR INITIALS"
-                  />
-                  <button
-                    className="btn yellow"
-                    onClick={save}
-                    disabled={saving}
+                {!ready ? null : user?.name ? (
+                  <div className="input-row">
+                    <div className="name-readonly">{user.name}</div>
+                    <button
+                      className="btn yellow"
+                      onClick={save}
+                      disabled={saving}
+                    >
+                      {saving ? "SAVING..." : "SAVE SCORE"}
+                    </button>
+                  </div>
+                ) : user ? (
+                  <Link
+                    href={`/auth?step=username&next=${nextParam}`}
+                    className="btn yellow sign-in-link"
                   >
-                    {saving ? "SAVING..." : "SAVE SCORE"}
-                  </button>
-                </div>
+                    PICK A USERNAME TO SAVE
+                  </Link>
+                ) : (
+                  <Link
+                    href={`/auth?next=${nextParam}`}
+                    className="btn yellow sign-in-link"
+                  >
+                    SIGN IN TO SAVE
+                  </Link>
+                )}
                 {saveError && (
                   <div className="save-error" role="alert">
-                    SAVE FAILED — TRY AGAIN
+                    {saveError}
                   </div>
                 )}
               </>

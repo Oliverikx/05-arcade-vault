@@ -81,7 +81,7 @@ export function HallOfFameBoard({ tabs, global, boards }: Props) {
     null,
   );
 
-  // The signed-in name lives in localStorage, so YOUR BEST is fetched once
+  // The session is only known client-side, so YOUR BEST is fetched once
   // after mount (all tabs together); switching tabs never refetches.
   const userName = user?.name;
   useEffect(() => {

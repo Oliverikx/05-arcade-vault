@@ -6,27 +6,25 @@ import {
   getPlayerGlobal,
   getRealGameIds,
 } from "@/lib/leaderboard";
+import { USERNAME_RE, usernameOf } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 
 export type SaveScoreResult =
-  { ok: true } | { ok: false; error: "INVALID" | "SAVE FAILED" };
+  | { ok: true }
+  | { ok: false; error: "INVALID" | "UNAUTHENTICATED" | "SAVE FAILED" };
 
-const NAME_RE = /^[A-Z0-9_]{1,12}$/;
+const NAME_RE = USERNAME_RE;
 const MAX_SCORE = 10_000_000;
 
 export async function saveScore(input: {
   gameId: string;
-  name: string;
   score: number;
 }): Promise<SaveScoreResult> {
   const gameId = typeof input?.gameId === "string" ? input.gameId : "";
-  const name =
-    typeof input?.name === "string" ? input.name.trim().toUpperCase() : "";
   const score = input?.score;
 
   if (
     !gameId ||
-    !NAME_RE.test(name) ||
     typeof score !== "number" ||
     !Number.isInteger(score) ||
     score < 0 ||
@@ -37,6 +35,12 @@ export async function saveScore(input: {
 
   try {
     const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    const name = usernameOf(user);
+    if (!user || !name) return { ok: false, error: "UNAUTHENTICATED" };
+
     const { data: game, error: gameError } = await supabase
       .from("games")
       .select("id")
@@ -45,9 +49,12 @@ export async function saveScore(input: {
     if (gameError) throw gameError;
     if (!game) return { ok: false, error: "INVALID" };
 
-    const { error } = await supabase
-      .from("scores")
-      .insert({ game_id: gameId, player_name: name, score });
+    const { error } = await supabase.from("scores").insert({
+      game_id: gameId,
+      player_name: name,
+      score,
+      user_id: user.id,
+    });
     if (error) throw error;
   } catch (error) {
     console.error("[saveScore] failed:", error);
@@ -66,8 +73,8 @@ export type MyBests = {
   games: Record<string, { rank: number; score: number; date: string }>;
 };
 
-// YOUR BEST data for the Hall of Fame. The signed-in name only exists in the
-// browser (localStorage), so the client asks for it once after mount.
+// YOUR BEST data for the Hall of Fame. The signed-in name is known client-side
+// after mount (session), so the client asks for it once then.
 export async function getMyBests(name: string): Promise<MyBests> {
   const normalized = typeof name === "string" ? name.trim().toUpperCase() : "";
   const empty: MyBests = { global: null, games: {} };
