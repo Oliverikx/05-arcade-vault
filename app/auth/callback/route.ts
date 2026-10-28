@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
       if (!usernameOf(data.user)) {
         return NextResponse.redirect(
           new URL(
-            `/auth?step=usernamew&next=${encodeURIComponent(next)}`,
+            `/auth?step=username&next=${encodeURIComponent(next)}`,
             origin,
           ),
         );
