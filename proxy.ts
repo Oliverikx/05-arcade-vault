@@ -1,8 +1,12 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { getSupabaseEnv } from "@/lib/supabase/env";
+import { usernameOf } from "@/lib/auth";
 
-// Refreshes Supabase session cookies on every request. No route protection.
+const PLAY_ROUTE_RE = /^\/games\/[^/]+\/play\/?$/;
+
+// Refreshes Supabase session cookies on every request; gates
+// /games/[id]/play to signed-in users with a username.
 export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request });
   const { url, key } = getSupabaseEnv();
@@ -25,9 +29,37 @@ export async function proxy(request: NextRequest) {
   });
 
   // Validates the JWT and triggers a refresh when expired.
-  await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const { pathname, search } = request.nextUrl;
+  if (PLAY_ROUTE_RE.test(pathname)) {
+    const next = encodeURIComponent(pathname + search);
+    if (!user) {
+      return redirectWithCookies(request, response, `/auth?next=${next}`);
+    }
+    if (!usernameOf(user)) {
+      return redirectWithCookies(
+        request,
+        response,
+        `/auth?step=username&next=${next}`,
+      );
+    }
+  }
 
   return response;
+}
+
+// Keeps refreshed session cookies on the redirect response.
+function redirectWithCookies(
+  request: NextRequest,
+  from: NextResponse,
+  path: string,
+) {
+  const redirect = NextResponse.redirect(new URL(path, request.url));
+  from.cookies.getAll().forEach((cookie) => redirect.cookies.set(cookie));
+  return redirect;
 }
 
 export const config = {

@@ -41,11 +41,11 @@ Server Actions: `app/actions/scores.ts` (`saveScore`, `getMyBests`), `app/about/
 
 ## Identity
 
-Supabase Auth (SPEC 13). Email + password (confirm email ON), Google, GitHub, password recovery. Username lives in `user_metadata.username` (`^[A-Z0-9_]{1,12}$`, not unique; OAuth users pick it once at `/auth?step=username`). Guests can play but not save scores.
+Supabase Auth (SPEC 13). Email + password (confirm email ON), Google, GitHub, password recovery. Username lives in `user_metadata.username` (`^[A-Z0-9_]{1,12}$`, not unique; OAuth users pick it once at `/auth?step=username`). Guests can browse but must sign in (with username) to play; enforced in `proxy.ts`.
 
 - `lib/auth.ts`: `USERNAME_RE`, `normalizeUsername`, `usernameOf`, `safeNext` (open-redirect guard for `?next=`).
 - `lib/session.ts`: `User { id, email, name }`; `components/session-provider.tsx`: `getUser()` after mount + `onAuthStateChange`, exposes `user`, `ready`, `signOut()`. Render signed-out shell until `ready`.
-- `proxy.ts`: refreshes session cookies on every request; no route protection.
+- `proxy.ts`: refreshes session cookies on every request; redirects `/games/[id]/play` to `/auth?next=...` (or `step=username`) when signed out / no username.
 - `app/auth/confirm` (`verifyOtp`, email links), `app/auth/callback` (OAuth code exchange), `app/auth/reset` (new password). Email templates use `{{ .RedirectTo }}&token_hash={{ .TokenHash }}&type=email|recovery` (set in the Supabase dashboard).
 - Browser code never imports `lib/supabase/server.ts`.
 - **Hardening (SPEC 14)**: password min 8 + lower/upper/digit/symbol (Supabase dashboard = truth; mirrored by `PASSWORD_RULES`/`passwordOk` in `lib/auth.ts`, live checklist on CREATE ACCOUNT + `/auth/reset`, none on sign-in). `authErrorMessage` maps `weak_password` / 429. Auth rate limit 10 per 5 min per IP (dashboard). `next.config.ts` `headers()` sends `X-Content-Type-Options`, `X-Frame-Options: DENY`, `Referrer-Policy`. Leaked password protection off (Free plan, accepted advisor warning). No CSP/HSTS yet.
