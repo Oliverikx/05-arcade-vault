@@ -3162,3 +3162,52 @@ a.mini-card {
   display: inline-block;
   margin: 22px 0 6px;
 }
+
+/* Pokemon counter */
+.pokemon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  padding: 48px 16px;
+}
+.pokemon-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  width: min(100%, 320px);
+  padding: 24px;
+  background: var(--bg);
+  border: 2px solid var(--cyan);
+  box-shadow: 0 0 8px var(--cyan);
+  color: inherit;
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+.pokemon-card:hover {
+  transform: scale(1.03);
+}
+.pokemon-card:active {
+  transform: scale(0.97);
+}
+.pokemon-img {
+  display: grid;
+  place-items: center;
+  width: 220px;
+  height: 220px;
+}
+.pokemon-img img {
+  max-width: 100%;
+  max-height: 100%;
+}
+.pokemon-id {
+  color: var(--magenta);
+}
+.pokemon-count {
+  font-size: 40px;
+}
+.pokemon-hint {
+  font-size: 10px;
+  opacity: 0.7;
+}
